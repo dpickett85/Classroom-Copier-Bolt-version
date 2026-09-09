@@ -10,7 +10,9 @@ declare module 'express-serve-static-core' {
 
 export function requireAuth(prisma: PrismaClient) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const token = (req.cookies as Record<string, string> | undefined)?.[SESSION_COOKIE]
+    const cookieToken = (req.cookies as Record<string, string> | undefined)?.[SESSION_COOKIE]
+    const headerToken = extractBearerToken(req.get('authorization'))
+    const token = headerToken ?? cookieToken
     const session = await resolveSession(prisma, token)
     if (!session) {
       res.status(401).json({ error: { code: 'unauthenticated', message: 'Sign in to continue.' } })
@@ -19,4 +21,10 @@ export function requireAuth(prisma: PrismaClient) {
     req.auth = session
     next()
   }
+}
+
+function extractBearerToken(header: string | undefined): string | undefined {
+  if (!header) return undefined
+  const match = /^Bearer\s+(.+)$/i.exec(header)
+  return match ? match[1] : undefined
 }

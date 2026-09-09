@@ -52,14 +52,17 @@ export const OAUTH_STATE_COOKIE = 'cc_oauth_state'
 /** Ten minutes: long enough for a consent screen, short enough to be no use later. */
 export const OAUTH_STATE_MAX_AGE_MS = 10 * 60 * 1000
 
-/** §8.0/S7 — scoped to the auth path, Secure in prod. SameSite=None in prod
- *  because the frontend sets this cookie via a cross-origin fetch (split-origin
- *  Render services); Lax would be silently dropped and the OAuth callback would
- *  never find the state it needs. */
+/** §8.0/S7 — scoped to the auth path, Secure in prod.
+ *
+ * The OAuth state cookie is set and read during top-level navigations: the
+ * browser navigates to /api/auth/google/start (setting the cookie), goes to
+ * Google, and returns to /api/auth/callback (reading the cookie). Both are
+ * same-domain navigations on the backend origin, so SameSite=Lax is correct
+ * and is NOT blocked by incognito mode the way SameSite=None would be. */
 function oauthStateCookieOptions(): CookieOptions {
   return {
     httpOnly: true,
-    sameSite: config.isProductionLike ? ('none' as const) : ('lax' as const),
+    sameSite: 'lax' as const,
     secure: config.isProductionLike,
     path: '/api/auth',
     maxAge: OAUTH_STATE_MAX_AGE_MS,
@@ -75,7 +78,7 @@ type AuthError = SharedAuthError
  * nothing else — there is deliberately no parameter through which a request
  * could contribute to the origin.
  */
-function redirectToFrontend(res: Response, authError: AuthError | null): void {
+function redirectToFrontend(res: Response, authError: AuthError | null, sessionToken?: string): void {
   res.clearCookie(OAUTH_STATE_COOKIE, oauthStateCookieOptions())
   // On success the frontend is told it is on the RETURN LEG, so it can render
   // "Signing you in…" (UX 1d) instead of flashing the landing screen while its
@@ -84,8 +87,17 @@ function redirectToFrontend(res: Response, authError: AuthError | null): void {
   // to a URL carrying a stale sign-in state. Note what is NOT here: the
   // authorization CODE never reaches the frontend URL at all — it is consumed
   // by this handler and nothing downstream ever sees it.
-  const query = authError ? `?authError=${authError}` : '?auth=callback'
-  res.redirect(302, `${config.frontendOrigin}/${query}`)
+  //
+  // The session token is passed as a URL fragment (not a query param) so it
+  // never reaches a server log or the browser's history. The frontend stores
+  // it in sessionStorage and sends it as a Bearer header on every API call —
+  // this works in incognito mode where SameSite=None cookies are blocked.
+  if (authError) {
+    res.redirect(302, `${config.frontendOrigin}/?authError=${authError}`)
+    return
+  }
+  const fragment = sessionToken ? `#token=${sessionToken}` : ''
+  res.redirect(302, `${config.frontendOrigin}/?auth=callback${fragment}`)
 }
 
 /** Injected so tests can drive the flow without a live Google. */
@@ -175,6 +187,10 @@ export function authRouter(prisma: PrismaClient, deps: AuthRouterDeps): Router {
       Buffer.byteLength(query.state) === Buffer.byteLength(state.nonce) &&
       crypto.timingSafeEqual(Buffer.from(query.state), Buffer.from(state.nonce))
     if (!nonceMatches || !query.code) {
+      logger.warn('oauth callback rejected: state cookie missing or nonce mismatch', {
+        hasStateCookie: state != null,
+        hasCode: query.code != null,
+      })
       redirectToFrontend(res, 'expired')
       return
     }
@@ -232,7 +248,7 @@ export function authRouter(prisma: PrismaClient, deps: AuthRouterDeps): Router {
       deps.onReauthenticated?.(paused.id)
     }
 
-    redirectToFrontend(res, null)
+    redirectToFrontend(res, null, token)
   })
 
   router.post('/auth/sign-out', async (req, res) => {

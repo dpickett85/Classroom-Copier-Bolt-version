@@ -55,7 +55,34 @@ export const API_BASE_URL: string =
   (import.meta.env?.VITE_API_BASE_URL as string | undefined) ??
   (import.meta.env?.MODE === 'test' ? 'http://localhost:4000' : '')
 
-/** D4 — pinned by the `coldstart_overlay_timing` quality budget. */
+/** The session token, stored in sessionStorage so it survives navigations within
+ *  the same tab but is dropped when the tab closes. Works in incognito mode where
+ *  SameSite=None cookies are blocked. */
+const SESSION_TOKEN_KEY = 'cc_session_token'
+
+export function getSessionToken(): string | null {
+  try {
+    return sessionStorage.getItem(SESSION_TOKEN_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function setSessionToken(token: string): void {
+  try {
+    sessionStorage.setItem(SESSION_TOKEN_KEY, token)
+  } catch {
+    // sessionStorage may be unavailable in some restricted contexts
+  }
+}
+
+export function clearSessionToken(): void {
+  try {
+    sessionStorage.removeItem(SESSION_TOKEN_KEY)
+  } catch {
+    // ignore
+  }
+}
 export const COLD_START_THRESHOLD_MS = 2000
 export const COLD_START_CEILING_MS = 60_000
 /** §4.4 — "roughly every 1.5s". */
@@ -239,6 +266,8 @@ async function rawRequest(path: string, options: RequestOptions = {}): Promise<R
     const headers: Record<string, string> = {}
     if (options.body !== undefined) headers['content-type'] = 'application/json'
     if (CSRF_PROTECTED_METHODS.has(method)) headers[CSRF_HEADER_NAME] = CSRF_HEADER_VALUE
+    const token = getSessionToken()
+    if (token) headers['authorization'] = `Bearer ${token}`
 
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method,
@@ -341,6 +370,7 @@ export async function confirmSession(signal?: AbortSignal): Promise<SessionRespo
 
 export async function signOut(): Promise<void> {
   const { status, body } = await rawRequest('/api/auth/sign-out', { method: 'POST' })
+  clearSessionToken()
   if (status < 200 || status >= 300) throw apiErrorFrom('/api/auth/sign-out', status, body)
 }
 

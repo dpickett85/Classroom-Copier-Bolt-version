@@ -44,12 +44,14 @@ import { TransferProgress } from './features/transfer/TransferProgress'
 import { CompletionSummary } from './features/summary/CompletionSummary'
 import {
   ApiRequestError,
+  clearSessionToken,
   coldStartStore,
   createTransferJob,
   getActiveJob,
   getJobItems,
   isAbortError,
   me,
+  setSessionToken,
   signOut,
   useColdStart,
 } from './lib/api-client'
@@ -91,6 +93,20 @@ function consumeAuthQuery(): { authError: AuthError | null; isCallback: boolean 
   const raw = params.get('authError')
   const isCallback = params.get('auth') === 'callback'
   if (raw == null && !isCallback) return { authError: null, isCallback: false }
+
+  // Extract the session token from the URL hash (fragment), which never reaches
+  // server logs or browser history. Store it for use as a Bearer header.
+  if (isCallback) {
+    const hash = window.location.hash
+    const tokenMatch = /(?:^|#)token=([^&]+)/.exec(hash)
+    if (tokenMatch) {
+      setSessionToken(decodeURIComponent(tokenMatch[1]))
+    }
+    // Strip the hash so it doesn't linger in the address bar.
+    if (hash) {
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search ? `?${params.toString()}` : ''}`)
+    }
+  }
 
   params.delete('authError')
   params.delete('auth')
@@ -195,6 +211,7 @@ function Wizard() {
    *  takeover and by both mid-transfer interrupt banners. */
   const returnToSignIn = () => {
     clearRun()
+    clearSessionToken()
     setAccount(null)
     setAuthStart('landing')
     setStage('auth')
@@ -202,6 +219,7 @@ function Wizard() {
 
   const switchAccount = () => {
     clearRun()
+    clearSessionToken()
     setAccount(null)
     // "Switch account" re-enters at the landing screen: the account chooser is
     // Google's now, so there is no in-app picker to jump to.
