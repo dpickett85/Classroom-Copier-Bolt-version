@@ -47,7 +47,7 @@ export const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/classroom.courses',
-  'https://www.googleapis.com/auth/classroom.coursework.me',
+  'https://www.googleapis.com/auth/classroom.coursework.students',
   'https://www.googleapis.com/auth/classroom.courseworkmaterials',
   'https://www.googleapis.com/auth/classroom.topics',
   'https://www.googleapis.com/auth/drive.metadata.readonly',
