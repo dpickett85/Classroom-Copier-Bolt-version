@@ -1088,7 +1088,7 @@ export class TransferEngine {
    * "nothing was written" about a post this job knows it created.
    */
   private async recordItemFailure(item: ItemRow, error: unknown): Promise<void> {
-    const detail = error instanceof Error ? error.name : 'Error'
+    const detail = error instanceof Error ? error.message : 'Unknown provider error'
     const current = await this.prisma.transferJobItem.findUnique({
       where: { id: item.id },
       select: {

@@ -152,7 +152,14 @@ export function mapGoogleError(error: unknown): ProviderError {
     return new PermissionError('Google refused access to this resource.')
   }
   if (status === 404) return new NotFoundError('Google could not find this resource.')
-  return new ProviderError('Google returned an unexpected error.')
+  const detail = [
+    status != null ? `HTTP ${status}` : null,
+    gaxios.response?.data?.error?.status ?? null,
+    gaxios.response?.data?.error?.message ?? null,
+  ]
+    .filter((part): part is string => part != null && part.length > 0)
+    .join(': ')
+  return new ProviderError(detail ? `Google rejected the request (${detail}).` : 'Google returned an unexpected error.')
 }
 
 /** Wraps every outbound call. Nothing else in this file touches a raw error. */
@@ -231,6 +238,8 @@ function fromMaterial(material: Material): classroom_v1.Schema$Material {
  */
 function toWorkType(raw: string | null | undefined): WorkType {
   switch (raw) {
+    case 'QUIZ_ASSIGNMENT':
+      return 'QUIZ_ASSIGNMENT'
     case 'SHORT_ANSWER_QUESTION':
       return 'SHORT_ANSWER_QUESTION'
     case 'MULTIPLE_CHOICE_QUESTION':

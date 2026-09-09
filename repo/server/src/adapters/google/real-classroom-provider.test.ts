@@ -152,10 +152,10 @@ describe('reads', () => {
     expect(item!.scheduledTime).toEqual(new Date('2026-09-01T08:00:00Z'))
   })
 
-  it('resolves QUIZ_ASSIGNMENT to ASSIGNMENT plus the detected Form link', async () => {
+  it('preserves QUIZ_ASSIGNMENT and the detected original Form link', async () => {
     const { provider } = providerWith({ 'courseWork.list': () => ({ courseWork: [WORK] }) })
     const [item] = (await provider.listCourseWork('c1')).items
-    expect(item!.workType).toBe('ASSIGNMENT')
+    expect(item!.workType).toBe('QUIZ_ASSIGNMENT')
     expect(item!.quizFormLink).toBe('https://docs.google.com/forms/d/e/x/viewform')
   })
 
