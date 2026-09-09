@@ -35,6 +35,7 @@ import { google, type classroom_v1, type drive_v3 } from 'googleapis'
 import type { OAuth2Client } from 'google-auth-library'
 import type { ClassroomProvider } from '../classroom-provider.interface.js'
 import {
+  AttachmentNotVisibleError,
   AuthExpiredError,
   LicenseBlockedError,
   NotFoundError,
@@ -153,6 +154,9 @@ export function mapGoogleError(error: unknown): ProviderError {
     return new PermissionError('Google refused access to this resource.')
   }
   if (status === 404) return new NotFoundError('Google could not find this resource.')
+  if (reason.includes('attachmentnotvisible')) {
+    return new AttachmentNotVisibleError('One or more attachments are not visible to this Google account.')
+  }
   if (status === 502 || status === 503 || status === 504 || reason.includes('unavailable')) {
     return new TransientError('Google is temporarily unavailable.', retryAfterMs(gaxios))
   }

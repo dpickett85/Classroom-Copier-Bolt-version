@@ -51,6 +51,7 @@ import type { ClassroomProvider } from '../adapters/classroom-provider.interface
 import { runForAccount } from '../adapters/acting-account.js'
 import { config } from '../config.js'
 import {
+  AttachmentNotVisibleError,
   AuthExpiredError,
   LicenseBlockedError,
   RateLimitError,
@@ -64,6 +65,7 @@ import { DEFAULT_BACKOFF, MAX_ATTEMPTS, backoffDelayMs, type BackoffPolicy } fro
 import {
   OVERFLOW_LINKS_HEADER,
   attachmentFallbackNote,
+  attachmentNotVisibleNote,
   attachmentOverflowNote,
   cancelledByUserNote,
   duplicateSkipNote,
@@ -1146,6 +1148,8 @@ export class TransferEngine {
     overflow: ProviderAttachment[]
     /** APPLY-A — driveFiles whose shareMode could not be read. */
     unlinkable: ProviderAttachment[]
+    /** Google's create endpoint rejects Form attachments. */
+    formsDropped: ProviderAttachment[]
   } {
     // D22 — ordered by sortOrder, so WHICH 20 survive the cap is a total order.
     const usable = [...attachments]
@@ -1157,6 +1161,7 @@ export class TransferEngine {
 
     const materials: Material[] = []
     const unlinkable: ProviderAttachment[] = []
+    const formsDropped: ProviderAttachment[] = []
     for (const a of linked) {
       switch (a.kind) {
         case 'driveFile': {
@@ -1189,13 +1194,13 @@ export class TransferEngine {
           })
           break
         case 'form':
-          materials.push({ kind: 'form', formUrl: a.url ?? '', title: a.title })
+          formsDropped.push(a)
           break
         default:
           materials.push({ kind: 'link', url: a.url ?? '', title: a.title })
       }
     }
-    return { materials, overflow, unlinkable }
+    return { materials, overflow, unlinkable, formsDropped }
   }
 
   private composeDescription(
@@ -1243,7 +1248,7 @@ export class TransferEngine {
       copiedDriveFileIds.set(attachmentId, newDriveFileId)
     }
 
-    const { materials, overflow, unlinkable } = this.buildMaterials(
+    const { materials, overflow, unlinkable, formsDropped } = this.buildMaterials(
       post.attachments,
       drop,
       copiedDriveFileIds,
@@ -1255,6 +1260,9 @@ export class TransferEngine {
     }
     for (const attachment of unlinkable) {
       notes.push(shareModeUnknownNote(attachment.title))
+    }
+    for (const attachment of formsDropped) {
+      notes.push(formNotSupportedNote(attachment.title))
     }
     const overflowNote = overflow.length > 0 ? attachmentOverflowNote(overflow.length) : null
     if (overflowNote) notes.push(overflowNote)
@@ -1335,7 +1343,7 @@ export class TransferEngine {
 
     const baseNote =
       created.kind === 'shell'
-        ? rateLimitExhaustionNote(MAX_ATTEMPTS)
+        ? created.note ?? rateLimitExhaustionNote(MAX_ATTEMPTS)
         : notes.length > 0
           ? notes.join(' ')
           : null
@@ -1366,7 +1374,11 @@ export class TransferEngine {
     item: ItemRow,
     post: EnumeratedPost,
     ctx: CreateContext,
-  ): Promise<{ kind: 'created' | 'shell'; id: string; attempts: number } | { kind: 'exhausted' }> {
+  ): Promise<
+    | { kind: 'created'; id: string; attempts: number }
+    | { kind: 'shell'; id: string; attempts: number; note?: string }
+    | { kind: 'exhausted' }
+  > {
     let attempt = 0
     let lastRetryable: RateLimitError | TransientError | null = null
 
@@ -1390,6 +1402,28 @@ export class TransferEngine {
         await this.clearPause(lease)
         return { kind: 'created', id, attempts: attempt }
       } catch (error) {
+        if (error instanceof AttachmentNotVisibleError) {
+          const note = attachmentNotVisibleNote()
+          try {
+            const id = await this.issueCreate(post, {
+              ...ctx,
+              description: this.composeDescription(ctx.baseDescription, {
+                overflow: ctx.overflow,
+                notes: [...ctx.notes, note],
+              }),
+              materials: [],
+            })
+            await this.claimTargetPost(item.id, id)
+            return { kind: 'shell', id, attempts: attempt, note }
+          } catch (shellError) {
+            logger.error('attachment-invisible fallback shell failed', {
+              itemId: item.id,
+              error: shellError instanceof Error ? shellError.message : String(shellError),
+            })
+            return { kind: 'exhausted' }
+          }
+        }
+
         const isRetryable = error instanceof RateLimitError || error instanceof TransientError
         if (!isRetryable) throw error
         lastRetryable = error as RateLimitError | TransientError

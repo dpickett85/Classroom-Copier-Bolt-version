@@ -276,6 +276,8 @@ export class AuthExpiredError extends ProviderError {
 export class NotFoundError extends ProviderError {}
 export class LicenseBlockedError extends ProviderError {}
 
+export class AttachmentNotVisibleError extends ProviderError {}
+
 /**
  * Google returned 502/503/504 — the service is temporarily unavailable.
  * Retryable, same backoff path as RateLimitError.
