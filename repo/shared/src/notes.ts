@@ -29,9 +29,16 @@ export function attachmentNotVisibleNote(): string {
   return '[Classroom Copier Note: One or more original attachments were not visible to the connected Google account. A draft shell was created; check and re-attach those files before publishing.]'
 }
 
-/** Rubric creation can be refused by licensing, permissions, or the OAuth client used to create the assignment. */
-export function rubricDegradedNote(): string {
-  return '[Classroom Copier Note: The rubric could not be added to this assignment because Google refused rubric creation for the target course or account. The assignment itself transferred; check the target course permissions and rubric availability.]'
+export function rubricDegradedNote(reason: 'license' | 'permission' | 'oauth' | 'unknown' = 'unknown'): string {
+  const detail =
+    reason === 'license'
+      ? 'the Workspace account or target course does not have rubric creation enabled'
+      : reason === 'oauth'
+        ? 'Google requires the same app connection that created the new assignment'
+        : reason === 'permission'
+          ? 'the connected teacher account is not allowed to create rubrics in the target course'
+          : 'Google refused rubric creation for the target course or account'
+  return `[Classroom Copier Note: The rubric could not be added because ${detail}. The assignment itself transferred; check the target course and reconnect Google if needed.]`
 }
 
 /** F5 — attachments beyond the 20-attachment cap, appended as description links. */

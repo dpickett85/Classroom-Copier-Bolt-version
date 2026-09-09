@@ -19,7 +19,7 @@ export declare function attachmentFallbackNote(attachmentName: string): string;
  */
 export declare function rateLimitExhaustionNote(attempts: number): string;
 /** F7 — rubric could not be copied because the mock licence tier blocks it. */
-export declare function rubricDegradedNote(): string;
+export declare function rubricDegradedNote(reason?: 'license' | 'permission' | 'oauth' | 'unknown'): string;
 export declare function attachmentNotVisibleNote(): string;
 /** F5 — attachments beyond the 20-attachment cap, appended as description links. */
 export declare function attachmentOverflowNote(overflowCount: number): string;

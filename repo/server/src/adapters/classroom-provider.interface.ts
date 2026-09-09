@@ -109,6 +109,6 @@ export interface ClassroomProvider {
    *  create. A single boolean-returning `copyRubric` could not decompose into
    *  that without the signature change driver 1 exists to prevent. */
   getRubric(courseWorkId: string): Promise<RubricBody | null>
-  /** Throws LicenseBlockedError when the target course's tier blocks rubrics. */
+  /** May throw a provider error when Google refuses rubric creation for licensing, permissions, or OAuth-client reasons. */
   createRubric(targetCourseWorkId: string, rubric: RubricBody): Promise<{ id: string }>
 }
