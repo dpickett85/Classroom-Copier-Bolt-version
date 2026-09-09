@@ -99,8 +99,9 @@ function consumeAuthQuery(): { authError: AuthError | null; isCallback: boolean 
   if (isCallback) {
     const hash = window.location.hash
     const tokenMatch = /(?:^|#)token=([^&]+)/.exec(hash)
-    if (tokenMatch) {
-      setSessionToken(decodeURIComponent(tokenMatch[1]))
+    const encodedToken = tokenMatch?.[1]
+    if (encodedToken) {
+      setSessionToken(decodeURIComponent(encodedToken))
     }
     // Strip the hash so it doesn't linger in the address bar.
     if (hash) {
