@@ -3,8 +3,9 @@ import type { PrismaClient } from '@prisma/client'
 import { PreflightRequestSchema, type CourseSummary } from '@classroom-copier/shared'
 import type { ClassroomProvider } from '../adapters/classroom-provider.interface.js'
 import { runForAccount } from '../adapters/acting-account.js'
-import type { CourseState } from '../adapters/types.js'
+import { NotFoundError, PermissionError, type CourseState } from '../adapters/types.js'
 import { requireAuth } from '../middleware/auth.js'
+import { logger } from '../logger.js'
 import { PreflightEngine } from '../services/preflight-engine.js'
 
 /**
@@ -32,7 +33,21 @@ export function coursesRouter(prisma: PrismaClient, provider: ClassroomProvider)
       // enumeration (plus an attachment query and a rubric query) per course.
       // This is the FIRST authenticated call the app makes; a 30-course teacher
       // was paying 60+ paginated scans to render a list of names.
-      const counts = await Promise.all(page.items.map((course) => provider.countPosts(course.id)))
+      const counts = await Promise.all(
+        page.items.map(async (course) => {
+          try {
+            return await provider.countPosts(course.id)
+          } catch (error) {
+            if (!(error instanceof PermissionError) && !(error instanceof NotFoundError)) throw error
+            logger.warn('course post count unavailable; returning course without count', {
+              accountId,
+              courseId: course.id,
+              reason: error.name,
+            })
+            return 0
+          }
+        }),
+      )
       page.items.forEach((course, index) => {
         courses.push({
           id: course.id,
