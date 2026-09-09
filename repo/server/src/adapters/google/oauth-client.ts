@@ -121,7 +121,9 @@ export async function exchangeCodeForTokens(code: string, verifier: string): Pro
     if (error instanceof AuthExpiredError) throw error
     // The raw error is never re-thrown or logged: a failed token exchange's
     // error object carries the authorization code and the client secret.
-    throw new AuthExpiredError('Google refused the sign-in. Try connecting again.')
+    // Extract ONLY the message string — never the error object itself.
+    const detail = error instanceof Error ? error.message : String(error)
+    throw new AuthExpiredError(`Google refused the sign-in. Try connecting again. (${detail})`)
   }
 }
 

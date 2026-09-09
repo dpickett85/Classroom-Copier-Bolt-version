@@ -185,10 +185,12 @@ export function authRouter(prisma: PrismaClient, deps: AuthRouterDeps): Router {
       tokens = await oauth.exchangeCodeForTokens(query.code, state.verifier)
       if (!tokens.idToken) throw new Error('no id token')
       identity = await oauth.verifyIdentity(tokens.idToken)
-    } catch {
+    } catch (err) {
       // The caught error is discarded rather than logged: a failed exchange's
       // error object carries the authorization code and the client secret.
-      logger.warn('google oauth callback could not complete a token exchange', { reason: 'exchange_failed' })
+      // Extract ONLY the message string for diagnostics.
+      const detail = err instanceof Error ? err.message : String(err)
+      logger.warn('google oauth callback could not complete a token exchange', { reason: 'exchange_failed', detail })
       redirectToFrontend(res, 'expired')
       return
     }
