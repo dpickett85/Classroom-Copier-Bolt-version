@@ -222,6 +222,8 @@ interface RequestOptions {
    * longer existed.
    */
   signal?: AbortSignal
+  /** Override the 60s ceiling for calls that are known to be heavy (preflight). */
+  timeoutMs?: number
 }
 
 /** True for the DOMException a caller's `AbortController.abort()` produces.
@@ -250,7 +252,7 @@ async function rawRequest(path: string, options: RequestOptions = {}): Promise<R
   const ceilingTimer = setTimeout(() => {
     hitCeiling = true
     controller.abort()
-  }, COLD_START_CEILING_MS)
+  }, options.timeoutMs ?? COLD_START_CEILING_MS)
 
   // APPLY-M — the caller's signal is chained onto the internal controller, so
   // the ceiling and the caller's cleanup both abort the same request and the
@@ -404,7 +406,7 @@ export function runPreflight(
   return request(
     `/api/courses/${encodeURIComponent(sourceId)}/preflight`,
     PreflightResponseSchema,
-    { method: 'POST', body: { targetId }, signal },
+    { method: 'POST', body: { targetId }, signal, timeoutMs: 180_000 },
   )
 }
 

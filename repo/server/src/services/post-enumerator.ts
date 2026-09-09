@@ -121,22 +121,24 @@ export async function enumeratePosts(
   courseId: string,
   options: EnumerateOptions = {},
 ): Promise<EnumerationResult> {
-  const work = await drain(
-    (pageToken) =>
-      provider.listCourseWork(courseId, {
-        courseWorkStates: ALL_COURSE_WORK_STATES,
-        pageToken,
-      }),
-    options.onPage,
-  )
-  const materials = await drain(
-    (pageToken) =>
-      provider.listCourseWorkMaterials(courseId, {
-        courseWorkMaterialStates: ALL_COURSE_WORK_MATERIAL_STATES,
-        pageToken,
-      }),
-    options.onPage,
-  )
+  const [work, materials] = await Promise.all([
+    drain(
+      (pageToken) =>
+        provider.listCourseWork(courseId, {
+          courseWorkStates: ALL_COURSE_WORK_STATES,
+          pageToken,
+        }),
+      options.onPage,
+    ),
+    drain(
+      (pageToken) =>
+        provider.listCourseWorkMaterials(courseId, {
+          courseWorkMaterialStates: ALL_COURSE_WORK_MATERIAL_STATES,
+          pageToken,
+        }),
+      options.onPage,
+    ),
+  ])
 
   const merged: Omit<EnumeratedPost, 'createdOrder'>[] = [
     ...work.items.map((w) => ({
@@ -229,23 +231,25 @@ export async function enumerateDestination(
   courseId: string,
   options: EnumerateOptions = {},
 ): Promise<DestinationScan> {
-  const work = await drain(
-    (pageToken) =>
-      provider.listCourseWork(courseId, { courseWorkStates: ALL_COURSE_WORK_STATES, pageToken }),
-    options.onPage,
-  )
-  const materials = await drain(
-    (pageToken) =>
-      provider.listCourseWorkMaterials(courseId, {
-        courseWorkMaterialStates: ALL_COURSE_WORK_MATERIAL_STATES,
-        pageToken,
-      }),
-    options.onPage,
-  )
-  const topics = await drain(
-    (pageToken) => provider.listTopics(courseId, { pageToken }),
-    options.onPage,
-  )
+  const [work, materials, topics] = await Promise.all([
+    drain(
+      (pageToken) =>
+        provider.listCourseWork(courseId, { courseWorkStates: ALL_COURSE_WORK_STATES, pageToken }),
+      options.onPage,
+    ),
+    drain(
+      (pageToken) =>
+        provider.listCourseWorkMaterials(courseId, {
+          courseWorkMaterialStates: ALL_COURSE_WORK_MATERIAL_STATES,
+          pageToken,
+        }),
+      options.onPage,
+    ),
+    drain(
+      (pageToken) => provider.listTopics(courseId, { pageToken }),
+      options.onPage,
+    ),
+  ])
 
   return {
     posts: [

@@ -616,15 +616,27 @@ export class RealClassroomProvider implements ClassroomProvider {
   async getAttachmentHealth(refs: AttachmentRef[]): Promise<Map<string, HealthState>> {
     const health = new Map<string, HealthState>()
     if (refs.length === 0) return health
+
+    const driveRefs: Array<{ ref: AttachmentRef; fileId: string }> = []
     for (const ref of refs) {
       const driveFileId = this.driveFileOf.get(ref.id)
       if (!driveFileId) {
-        // Non-Drive attachments (links, YouTube, Forms) cannot rot the way a
-        // Drive file can, and are reported healthy rather than unknown.
         health.set(ref.id, 'healthy')
         continue
       }
-      health.set(ref.id, await this.driveFileHealth(driveFileId))
+      driveRefs.push({ ref, fileId: driveFileId })
+    }
+
+    const CONCURRENCY = 10
+    for (let i = 0; i < driveRefs.length; i += CONCURRENCY) {
+      const batch = driveRefs.slice(i, i + CONCURRENCY)
+      const results = await Promise.all(
+        batch.map(async ({ ref, fileId }) => {
+          const state = await this.driveFileHealth(fileId)
+          return [ref.id, state] as const
+        }),
+      )
+      for (const [id, state] of results) health.set(id, state)
     }
     return health
   }
