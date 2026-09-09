@@ -276,6 +276,22 @@ export class AuthExpiredError extends ProviderError {
 export class NotFoundError extends ProviderError {}
 export class LicenseBlockedError extends ProviderError {}
 
+/**
+ * Google returned 502/503/504 — the service is temporarily unavailable.
+ * Retryable, same backoff path as RateLimitError.
+ */
+export class TransientError extends ProviderError {
+  readonly retryAfterMs: number | undefined
+  constructor(message = 'Google is temporarily unavailable.', retryAfterMs?: number) {
+    super(message)
+    this.retryAfterMs = retryAfterMs
+  }
+}
+
 export function isRateLimitError(e: unknown): e is RateLimitError {
   return e instanceof RateLimitError
+}
+
+export function isTransientError(e: unknown): e is TransientError {
+  return e instanceof TransientError
 }

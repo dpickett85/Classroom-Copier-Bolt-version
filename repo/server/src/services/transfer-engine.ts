@@ -54,6 +54,7 @@ import {
   AuthExpiredError,
   LicenseBlockedError,
   RateLimitError,
+  TransientError,
   type CourseWorkPayload,
   type Material,
   type ProviderAttachment,
@@ -1367,7 +1368,7 @@ export class TransferEngine {
     ctx: CreateContext,
   ): Promise<{ kind: 'created' | 'shell'; id: string; attempts: number } | { kind: 'exhausted' }> {
     let attempt = 0
-    let lastRateLimit: RateLimitError | null = null
+    let lastRetryable: RateLimitError | TransientError | null = null
 
     while (attempt < MAX_ATTEMPTS) {
       attempt += 1
@@ -1389,10 +1390,12 @@ export class TransferEngine {
         await this.clearPause(lease)
         return { kind: 'created', id, attempts: attempt }
       } catch (error) {
-        if (!(error instanceof RateLimitError)) throw error
-        lastRateLimit = error
+        const isRetryable = error instanceof RateLimitError || error instanceof TransientError
+        if (!isRetryable) throw error
+        lastRetryable = error as RateLimitError | TransientError
         if (attempt >= MAX_ATTEMPTS) break
-        const waitMs = backoffDelayMs(attempt, error.retryAfterMs, this.backoff)
+        const retryAfter = error instanceof RateLimitError ? error.retryAfterMs : (error as TransientError).retryAfterMs
+        const waitMs = backoffDelayMs(attempt, retryAfter, this.backoff)
         await this.recordPause(lease, item, attempt, waitMs)
         logger.jobEvent('rate_limited_pause', {
           itemId: item.id,
@@ -1429,7 +1432,7 @@ export class TransferEngine {
         itemId: item.id,
         title: item.title,
         attempts: MAX_ATTEMPTS,
-        lastRetryAfterMs: lastRateLimit?.retryAfterMs ?? null,
+        lastRetryAfterMs: lastRetryable?.retryAfterMs ?? null,
       })
       return { kind: 'shell', id, attempts: MAX_ATTEMPTS }
     } catch (shellError) {

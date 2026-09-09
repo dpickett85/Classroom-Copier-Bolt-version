@@ -41,6 +41,7 @@ import {
   PermissionError,
   ProviderError,
   RateLimitError,
+  TransientError,
   type AnswerConfig,
   type AttachmentRef,
   type CourseWorkMaterialPayload,
@@ -152,6 +153,9 @@ export function mapGoogleError(error: unknown): ProviderError {
     return new PermissionError('Google refused access to this resource.')
   }
   if (status === 404) return new NotFoundError('Google could not find this resource.')
+  if (status === 502 || status === 503 || status === 504 || reason.includes('unavailable')) {
+    return new TransientError('Google is temporarily unavailable.', retryAfterMs(gaxios))
+  }
   const detail = [
     status != null ? `HTTP ${status}` : null,
     gaxios.response?.data?.error?.status ?? null,
