@@ -1,0 +1,400 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "pm",
+      "cycle": 1,
+      "model": "fable",
+      "mode": "subagent",
+      "at": "2026-08-14T07:12:18.219Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "pm",
+      "p0Count": 0,
+      "manualVerify": [],
+      "at": "2026-08-14T07:17:50.980Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "critic",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:18:26.111Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "pm",
+      "cycle": 1,
+      "model": "fable",
+      "mode": "subagent",
+      "at": "2026-08-14T07:22:35.617Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "critic",
+      "p0Count": 0,
+      "manualVerify": [],
+      "at": "2026-08-14T07:22:35.647Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "pm",
+      "p0Count": 0,
+      "manualVerify": [],
+      "at": "2026-08-14T07:26:44.319Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ux",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:26:44.350Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "ux",
+      "p0Count": 4,
+      "manualVerify": [],
+      "at": "2026-08-14T07:36:56.548Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ui",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:36:56.578Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "critic",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:36:56.605Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "ux",
+      "p0Count": 4,
+      "manualVerify": [
+        "MANUAL-VERIFY: transfer resumability after tab refresh has no F1-F11 fixture; new fixture F12 mandated at the UX boundary but not yet in the manifest.",
+        "MANUAL-VERIFY: generic unhandled/network-error mid-flow catch-all state is specified but exercised by no fixture; QC cannot certify it.",
+        "MANUAL-VERIFY: per-stage cost reads $0.00 with usageSource=caller-scoped — token analyzer finds no readable session transcript for this project path. Stage spend is real but unmeasured; the run total is not a bill."
+      ],
+      "at": "2026-08-14T07:36:56.632Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "critic",
+      "p0Count": 3,
+      "manualVerify": [
+        "MANUAL-VERIFY: cold-start behavior carries phantom fixture citations (F: cold-start sim in wireframes/00-flow.md; nonexistent Deltas cite in 01-sign-in). No fixture backs it — fabricated coverage, must be corrected not inherited.",
+        "MANUAL-VERIFY: F6 as scoped may exercise only 429 retry-SUCCESS, not the newly-defined retry-EXHAUSTION-to-draft-shell path. Needs F6 extension or companion fixture."
+      ],
+      "at": "2026-08-14T07:41:43.574Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ux",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:44:59.569Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "critic",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:44:59.598Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "ui",
+      "p0Count": 1,
+      "manualVerify": [
+        "MANUAL-VERIFY: WCAG AA contrast audit not run through automated tooling at UI stage — palette is contrast-designed by construction only. Backlog e0147972.",
+        "MANUAL-VERIFY: responsive breakpoint strategy below tablet/Chromebook viewport undefined for the 5-tile stat grid and itemized log table. Backlog c44ac179.",
+        "MANUAL-VERIFY: Claude Design sync declined under Beast Mode repository-boundary override (outward-facing, not undoable unattended). Human must invoke interactively if wanted. Backlog 4c6e9a69."
+      ],
+      "at": "2026-08-14T07:44:59.624Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ui",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T07:51:21.903Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "critic",
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: per-type field differentiation asserted-but-unimplemented has now appeared in THREE consecutive artifacts (PM brief, UX doc, UI direction). Recurring defect class: claimed coverage/behavior with no implementation behind it. Weight architect + engineer technical-critic passes accordingly.",
+        "MANUAL-VERIFY: UI critic could not write pendingFeedback (single slot occupied by concurrent UX revise); findings routed inline to the UI revise dispatch instead. No feedback was lost, but the single-slot design is a real constraint when stages run in parallel."
+      ],
+      "at": "2026-08-14T07:51:21.931Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "architect",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T08:01:31.829Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "ui",
+      "p0Count": 0,
+      "manualVerify": [],
+      "at": "2026-08-14T08:01:31.857Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "estimator",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T08:21:15.188Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "technical-critic",
+      "cycle": 1,
+      "model": "opus",
+      "mode": "subagent",
+      "at": "2026-08-14T08:21:15.218Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "architect",
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: estimate REVIEW round-trip (technical-critic with artifactKind: estimate, then recordReview + estimator revise pass) was SKIPPED this run. Rationale: the project declares no spend cap (budget.declared=false), so the estimate binds nothing and is informational only; the two agents were spent on the architecture review instead. The estimate is therefore unchallenged — treat its range as a first draft, not a reviewed figure.",
+        "MANUAL-VERIFY: SQLite persistence on Render free tier across redeploys/restarts is a P1 Delta from the architect. If transfer-job state does not survive a restart, the resumability guarantee (F12) is not real in production even though it passes locally."
+      ],
+      "at": "2026-08-14T08:21:15.245Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "override",
+      "scope": "run",
+      "capUsd": 20000,
+      "principal": "human",
+      "reason": "operator instruction mid-run",
+      "at": "2026-08-14T08:24:45.483Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "estimator",
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: rigorous estimate rig-2026-08-14T08:25:07.861Z-0f56 is a declared COLD START — no calibration history for this track, and both cross-project ledgers checked (cost-estimation, cfo-dashboard) have empty calibration[] arrays. Figures are reasoned from list pricing x judged token volumes, NOT from measured $/token. Unchallenged: the estimate review round-trip was skipped this run."
+      ],
+      "at": "2026-08-14T08:27:03.435Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "technical-critic",
+      "p0Count": 5,
+      "manualVerify": [
+        "MANUAL-VERIFY: phantom-citation defect recurred a FOURTH time (P0-1: D1-D10 register cited 26x, resolves to nothing, 8 cites inside machine-parsed MDB YAML) — in the artifact explicitly warned about it. Pattern is systemic to this pipeline, not one weak stage.",
+        "MANUAL-VERIFY: critic could not verify Render free-tier disk policy with any instrument and explicitly declined to assert it. APPLY-R is a finding about the DOCUMENT's confidence, not a verified fact about Render. A human must confirm whether free instances persist SQLite across spin-down; if not, resumability is intra-process only.",
+        "MANUAL-VERIFY: critic cost line verbatim: UNCAPPED — $0.00 (no cap declared — recorded, not capped), partial basis, 20 entries only 4 priced, total is a FLOOR not a figure. Note it read the pre-override state."
+      ],
+      "at": "2026-08-14T08:32:33.663Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "engineer",
+      "cycle": 1,
+      "model": "opus",
+      "mode": "subagent",
+      "at": "2026-08-14T08:33:46.673Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "engineer",
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: NO real-browser E2E. 04 specifies Playwright + axe-core/playwright; browser download unavailable, so suite is Vitest + jsdom. jsdom has no layout, so axe color-contrast CANNOT evaluate and reports incomplete. QC MUST NOT read wcag_aa_automated_per_step as browser-verified. Contrast was instead audited arithmetically (stronger for contrast, but not a browser pass).",
+        "MANUAL-VERIFY: nothing deployed; Render free-tier spin-down/filesystem check NOT run. This build asserts nothing about whether SQLite job state survives a spin-down. Resumability (F12) is verified at the HTTP layer only.",
+        "MANUAL-VERIFY: no live Google integration (by constraint). The contract-test suite is the seam, so the adapter port fidelity is ASSERTED, not verified against real Google APIs.",
+        "MANUAL-VERIFY: Prisma enums unavailable on SQLite — closed vocabularies are String columns validated by zod at the application boundary. The load-bearing per-type split (two tables) and single-active-job guard (nullable unique) ARE structural; the rest is application-level.",
+        "MANUAL-VERIFY: TDD held test-first for every behavioural module; for fixture data and the Prisma schema, data was written first and assertions immediately after. Stated rather than claimed otherwise.",
+        "MANUAL-VERIFY: deliberate divergences from 04 — plain CSS with design tokens instead of Tailwind (mockup is the authoritative plain-CSS reference); local dev same-origin via Vite proxy with SameSite=Lax (a Secure cookie cannot travel over http)."
+      ],
+      "at": "2026-08-14T09:26:06.311Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "qa",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T09:27:25.408Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "technical-critic",
+      "cycle": 1,
+      "model": "opus",
+      "mode": "subagent",
+      "at": "2026-08-14T09:27:25.436Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "technical-critic",
+      "p0Count": 5,
+      "manualVerify": [
+        "MANUAL-VERIFY: critic independently re-ran npm test and confirms 327 pass (12+148+167). Engineer suite claims are ACCURATE and not inflated.",
+        "MANUAL-VERIFY: 3 UNDISCLOSED mock/real divergences found beyond the engineer's own 6 disclosed limits — copyAttachmentToMyDrive move-not-copy semantics, SCHEDULED as a mock-invented CourseWorkState, and a type-only port bypass in refreshAttachments. All three are discoverable WITHOUT live Google access, so none is covered by the port-fidelity-asserted disclosure.",
+        "MANUAL-VERIFY: prior-P0 status in code — P0-1 REAL (doc-level), P0-2 STRUCTURALLY REAL, P0-4 STRUCTURALLY REAL, P0-3 HALF REAL (totality holds; reconciler race + terminal-outcome overwrite do not), P0-5 PRESENT BUT NOT REAL (mechanisms present, both unsound)."
+      ],
+      "at": "2026-08-14T09:37:56.457Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "qa",
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: QA verdict PASS WITH FINDINGS (0 blockers) and technical-critic verdict ISSUES REMAIN (5 P0) are BOTH accurate — they checked different layers. QA verified the aggregation + UI binding for skippedByUser/skippedBySystem and correctly found no path to the Skipped-by-you tile. The critic found the falsehood one layer down at transfer-engine.ts:399-415, where a post that WAS created is recorded with the note Nothing was written to the target course. The tile is honest; the ledger entry is not.",
+        "MANUAL-VERIFY: QA-1 — no test exercises JobReconciler.start()s setInterval actually firing. The architecture-mandated composition-root gate (interval reconciler resolves a wedged job WITHOUT a process restart) does not exist, though the interval code is correctly wired.",
+        "MANUAL-VERIFY: QA-3 — 04-architecture.md section 8 and UI-Delta-2 still describe accessibility testing as axe-core/playwright on every wizard step; the same documents Implementation reconciliation section correctly discloses the Vitest+jsdom substitution. The two sections now contradict each other.",
+        "MANUAL-VERIFY: QA-4 — 05-implementation.md claims a scripted grep confirms zero unresolved citations, but no such script is committed. The underlying claim is TRUE (QA re-verified by hand); the claim of a repeatable committed script is not."
+      ],
+      "at": "2026-08-14T09:42:38.507Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "cycle-start",
+      "cycle": 2,
+      "detail": "P0 auto-loop cycle 2: 5 P0 APPLY from engineer technical-critic + 16 APPLY + 4 QA minor",
+      "at": "2026-08-14T09:43:39.852Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "engineer",
+      "cycle": 2,
+      "model": "opus",
+      "mode": "subagent",
+      "at": "2026-08-14T09:43:39.852Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "engineer",
+      "cycle": 2,
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: the executor lease is proved against a synchronously-injected race, NOT two OS processes contending over one SQLite file. Faithful as an ordering test of the conditional writes; SQLite write-lock behaviour under real concurrency is asserted by construction, not measured.",
+        "MANUAL-VERIFY: SCHEDULED is flagged as a mock-invented CourseWorkState but NOT mapped to DRAFT+scheduledTime — real-adapter work, deliberately deferred beside QUIZ_ASSIGNMENT.",
+        "MANUAL-VERIFY: all six of cycle 1s disclosed limits STAND UNCHANGED — no real-browser E2E, nothing deployed, no Render check, no live Google integration, SQLite has no enums, TDD data-first for fixtures/schema.",
+        "MANUAL-VERIFY: engineer fixed an unreported intermittent failure nobody asked about — App.test.tsx selection cases raced the course fetch and failed once under agent-c-verify while npm test passed on the same commit. Now stable across 3 suite runs and 2 verify runs."
+      ],
+      "at": "2026-08-14T10:30:08.243Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "cycle-end",
+      "cycle": 2,
+      "p0Resolved": 5,
+      "at": "2026-08-14T10:30:08.245Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "qa",
+      "cycle": 2,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-14T10:30:50.284Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "qa",
+      "cycle": 2,
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: QA-5 — P0-1s fix has THREE defense layers, not the one the doc names. Reverting only the named evidence-aware catch turned just 1 of 3 cases red; QA had to reconstruct all three layers to reproduce the full defect. Doc-precision finding, not a functional gap — but it is the runs recurring defect class (a claim slightly overstating what the mechanism does) appearing a seventh time.",
+        "MANUAL-VERIFY: QA-6 — the check for FURTHER undisclosed mock/real divergences was a targeted spot-check across the APPLY-D/G/B areas, NOT exhaustive. None found, but absence of evidence here is not evidence of absence. The critic found three undisclosed divergences last cycle by looking harder.",
+        "MANUAL-VERIFY: regression coverage this cycle was spot-checked, not fully re-driven. F2 and F3 were re-driven live; the other 16 UX acceptance scenarios rely on cycle-1 verification plus passing tests.",
+        "MANUAL-VERIFY: backlog.md is hand-authored, NOT tool-owned in this project — the registry tool refused the write and QA appended QA-5/QA-6 by hand. Any future automated backlog sizing or triage pass will refuse this file for the same reason."
+      ],
+      "at": "2026-08-14T10:54:29.395Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "qc",
+      "cycle": 2,
+      "model": "haiku",
+      "mode": "subagent",
+      "at": "2026-08-14T10:55:19.322Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "qc",
+      "cycle": 2,
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: QC verdict is READY WITH CAVEATS, not READY TO SHIP. Six disclosed limits must be understood and accepted by a human before shipping.",
+        "MANUAL-VERIFY: QC counted 260 citations vs QA 259. Immaterial — both report ZERO unresolved — but the two counts do not match and neither was reconciled."
+      ],
+      "at": "2026-08-14T10:59:02.764Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "stage-complete",
+      "stage": "calibration",
+      "p0Count": 0,
+      "manualVerify": [
+        "MANUAL-VERIFY: calibration NOT SCORED — insufficient-sample, and this is the CORRECT outcome. The estimate was made against the architect s 20-module MDB (mdbHash 0ff04f3f). The engineer then rewrote 04-architecture.md and extended the MDB to 23 modules (mdbHash 77cf98dd), so the joinKey no longer matches. Scoring a 20-module estimate against a 23-module build would widen every band from what is genuinely different work. The estimate range $41.40-$100.60 therefore remains UNTESTED against actual spend."
+      ],
+      "at": "2026-08-14T10:59:28.621Z"
+    }
+  ],
+  "updatedAt": "2026-08-14T10:59:28.622Z"
+}

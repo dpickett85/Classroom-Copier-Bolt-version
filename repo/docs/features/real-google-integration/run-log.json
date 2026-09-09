@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "pm",
+      "cycle": 1,
+      "model": "fable",
+      "mode": "subagent",
+      "at": "2026-08-23T22:21:25.873Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "stage-complete",
+      "stage": "pm",
+      "cycle": 1,
+      "p0Count": 0,
+      "manualVerify": [
+        "live-Google E2E excluded from done by kickoff decision — run never claims a real transfer was performed",
+        "Google API facts asserted from model knowledge and load-bearing (default courseWorkStates filter returns PUBLISHED only; classroom.topics scope name; restricted/sensitive classification of drive scopes; OAuth testing-mode test-user cap) — architect must confirm against current Google docs",
+        "B15 (two big icons) remains unreproduced; brief mandates reproduce-first against a statically-served production build"
+      ],
+      "at": "2026-08-23T22:28:56.430Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "critic",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T22:34:21.857Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "pm",
+      "cycle": 1,
+      "model": "fable",
+      "mode": "subagent",
+      "at": "2026-08-23T22:34:21.857Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "stage-complete",
+      "stage": "pm",
+      "cycle": 1,
+      "p0Count": 0,
+      "manualVerify": [
+        "100 test-user cap for OAuth testing mode unverified",
+        "Whether Google Classroom permits duplicate topic names in one course unverified",
+        "QUIZ_ASSIGNMENT has no real workType equivalent (carried from v1 backlog)",
+        "Live-Google E2E excluded from done by kickoff decision",
+        "Render deploy staleness not determinable from here"
+      ],
+      "at": "2026-08-23T22:41:46.341Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "ux",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T22:54:39.401Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "stage-complete",
+      "stage": "ux",
+      "cycle": 1,
+      "p0Count": 3,
+      "manualVerify": [
+        "api-client.ts fetch wrapper can host pre-redirect auth-URL and post-callback session-confirmation calls without new transport — assumed yes",
+        "Whether sign-out should revoke the Google token server-side or only clear the session cookie",
+        "Whether docs/handoff/Connecting-To-Live-Google.docx is the intended delivery surface for the live-OAuth checklist",
+        "Whether browser Back after OAuth callback needs an explicit SPA routing guard"
+      ],
+      "at": "2026-08-23T22:54:39.402Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "critic",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T23:01:49.115Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "ux",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T23:01:49.115Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "stage-complete",
+      "stage": "ux",
+      "cycle": 1,
+      "p0Count": 3,
+      "manualVerify": [
+        "Checklist delivery surface (Connecting-To-Live-Google.docx vs new doc) unresolved"
+      ],
+      "at": "2026-08-23T23:05:01.509Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "ui",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T23:05:01.510Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "stage-complete",
+      "stage": "ui",
+      "cycle": 1,
+      "p0Count": 3,
+      "manualVerify": [
+        "Design-sync to Claude Design declined under Beast Mode repository-boundary override",
+        "Google Sans Medium availability via Google Fonts not confirmed; fallback stack specified",
+        "Inline Google G SVG paths not confirmed pixel-exact to Google brand asset",
+        "U+2261 duplicate-skip glyph rendering in IBM Plex Mono not visually confirmed",
+        "Full palette contrast never run through an automated tool in any UI stage (v1 open P1 carried forward)",
+        "Google branding guidelines fetched live 2026-08-23, not cross-checked against archive"
+      ],
+      "at": "2026-08-23T23:23:48.371Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "critic",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T23:43:23.679Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "dispatch",
+      "stage": "ui",
+      "cycle": 1,
+      "model": "sonnet",
+      "mode": "subagent",
+      "at": "2026-08-23T23:43:23.680Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "stage-complete",
+      "stage": "ui",
+      "cycle": 1,
+      "p0Count": 3,
+      "manualVerify": [
+        "Automated contrast-tool pass still outstanding (v1 P1 carried forward)",
+        "Google Sans Medium build-time font resolution",
+        "U+2261 glyph rendering in real Chromium/IBM Plex Mono",
+        "Google G-mark pixel-exactness vs official brand asset",
+        "Design-system sync declined under Beast Mode repository-boundary override"
+      ],
+      "at": "2026-08-23T23:43:23.680Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "helper-died",
+      "stage": "architect",
+      "cycle": 1,
+      "detail": "Architect subagent killed by a user interrupt at 2026-08-23T23:46:14Z, ~2m45s after dispatch. Transcript ends with [Request interrupted by user]; no 04-architecture.md written, no summary contract returned. Re-dispatching once per the dead-subagent rule.",
+      "at": "2026-08-23T23:55:00.203Z"
+    },
+    {
+      "runId": "run-1787523605325-5fe3",
+      "type": "helper-died",
+      "stage": "engineer",
+      "cycle": 1,
+      "detail": "Engineer and estimator subagents both terminated by an API session limit (resets 19:50 PT). Engineer had completed and committed module 1 of 12 (build-restoration, commit 2f30d89) before dying. Measured post-module-1 state: server typecheck 19 errors -> 5 (all in real-classroom-provider.ts); shared 16/16 pass; server 195/195 pass; client 189 pass / 9 fail (auth.test.tsx, expected - module 6 work). Re-dispatching to resume from module 2.",
+      "at": "2026-08-24T03:40:35.602Z"
+    },
+    {
+      "runId": "run-1787767206036-a5d9",
+      "type": "dispatch",
+      "stage": "engineer",
+      "cycle": 1,
+      "model": "opus",
+      "mode": "subagent",
+      "at": "2026-08-26T18:51:24.321Z"
+    },
+    {
+      "runId": "run-1787767206036-a5d9",
+      "type": "stage-complete",
+      "stage": "engineer",
+      "cycle": 1,
+      "p0Count": 4,
+      "manualVerify": [
+        "No live OAuth round trip performed — all against injected doubles; handoff Part 4.2 (copy an item, then copy it again) is the only real verification of the headline fix and is owed to QA",
+        "axe under jsdom cannot evaluate colour contrast or layout — the not-898px claim rests on asserted width/height attributes, not a measured rendered box; a vite build + preview + axe pass is still owed",
+        "Duplicate glyph U+2261 needs visual confirmation in IBM Plex Mono",
+        "Native <details> Enter/Space toggling unverifiable under jsdom"
+      ],
+      "at": "2026-08-26T18:51:24.323Z"
+    }
+  ],
+  "repairs": [],
+  "updatedAt": "2026-08-26T18:51:24.323Z"
+}

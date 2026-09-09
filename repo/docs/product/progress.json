@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "stages": {
+    "pm": {
+      "planItems": [
+        {
+          "id": "01",
+          "task": "Problem & pain",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.499Z"
+        },
+        {
+          "id": "02",
+          "task": "Target users & jobs-to-be-done",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.500Z"
+        },
+        {
+          "id": "03",
+          "task": "Current alternatives",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.500Z"
+        },
+        {
+          "id": "04",
+          "task": "Value proposition & differentiation",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.501Z"
+        },
+        {
+          "id": "05",
+          "task": "Success metrics",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.501Z"
+        },
+        {
+          "id": "06",
+          "task": "Scope & non-goals",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.501Z"
+        },
+        {
+          "id": "07",
+          "task": "Constraints & risks",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.501Z"
+        },
+        {
+          "id": "08",
+          "task": "Business model & monetization",
+          "estimatedSubtasks": null,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:14:48.502Z"
+        }
+      ],
+      "status": "completed",
+      "plannedItems": 8,
+      "planItemsCompleted": 8,
+      "subtasksCompleted": 0,
+      "lastReportedTask": null,
+      "lastReportedAt": null,
+      "failure": null,
+      "plannedAt": "2026-08-14T07:14:20.887Z"
+    },
+    "ux": {
+      "planItems": [
+        {
+          "id": "01",
+          "task": "Primary user flows",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.335Z"
+        },
+        {
+          "id": "02",
+          "task": "Entry points & structure",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.336Z"
+        },
+        {
+          "id": "03",
+          "task": "Key interaction surfaces & content",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.336Z"
+        },
+        {
+          "id": "04",
+          "task": "In-the-moment feedback & responses",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.336Z"
+        },
+        {
+          "id": "05",
+          "task": "Edge cases & off-happy-path",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.336Z"
+        },
+        {
+          "id": "06",
+          "task": "Workflow constraints",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.337Z"
+        },
+        {
+          "id": "07",
+          "task": "Acceptance scenarios",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.337Z"
+        },
+        {
+          "id": "08",
+          "task": "Optional: Wireframes",
+          "estimatedSubtasks": 1,
+          "status": "completed",
+          "completedAt": "2026-08-14T07:34:07.337Z"
+        }
+      ],
+      "status": "completed",
+      "plannedItems": 8,
+      "planItemsCompleted": 8,
+      "subtasksCompleted": 0,
+      "lastReportedTask": null,
+      "lastReportedAt": null,
+      "failure": null,
+      "plannedAt": "2026-08-14T07:27:45.534Z"
+    }
+  },
+  "updatedAt": "2026-08-14T07:34:07.337Z"
+}

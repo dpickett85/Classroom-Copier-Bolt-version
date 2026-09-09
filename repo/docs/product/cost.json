@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "pm",
+      "model": "fable",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:12:18.219Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "price",
+      "stage": "pm",
+      "model": null,
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "assumedTiers": [],
+      "usageSource": "caller-scoped",
+      "sessionId": null,
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:17:50.982Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "run-total",
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "fallbacks": [],
+      "assumedTiers": [],
+      "usageSource": "metrics-absent",
+      "coveragePct": 100,
+      "attributedUsd": 0,
+      "sessionId": null,
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:17:50.982Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "critic",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:18:26.112Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "pm",
+      "model": "fable",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:22:35.618Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "price",
+      "stage": "pm",
+      "model": null,
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "assumedTiers": [],
+      "usageSource": "caller-scoped",
+      "sessionId": null,
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:26:44.320Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "run-total",
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "fallbacks": [],
+      "assumedTiers": [],
+      "usageSource": "metrics-absent",
+      "coveragePct": 100,
+      "attributedUsd": 0,
+      "sessionId": null,
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:26:44.321Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ux",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:26:44.351Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "price",
+      "stage": "ux",
+      "model": null,
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "assumedTiers": [],
+      "usageSource": "caller-scoped",
+      "sessionId": null,
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:36:56.550Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "run-total",
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "fallbacks": [],
+      "assumedTiers": [],
+      "usageSource": "metrics-absent",
+      "coveragePct": 100,
+      "attributedUsd": 0,
+      "sessionId": null,
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:36:56.551Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ui",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:36:56.579Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "critic",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:36:56.606Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ux",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:44:59.570Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "critic",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:44:59.599Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "ui",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T07:51:21.904Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "architect",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T08:01:31.830Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "estimator",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T08:21:15.189Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "technical-critic",
+      "model": "opus",
+      "principal": "beast-mode",
+      "at": "2026-08-14T08:21:15.219Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "override",
+      "scope": "run",
+      "stage": null,
+      "period": null,
+      "capUsd": 20000,
+      "previousCap": null,
+      "principal": "human",
+      "reason": "operator instruction mid-run: add $20000 to the budget",
+      "at": "2026-08-14T08:24:45.482Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "price",
+      "stage": "estimator",
+      "model": null,
+      "costUsd": 0,
+      "basis": null,
+      "partial": false,
+      "unpricedModels": [],
+      "assumedTiers": [],
+      "usageSource": "caller-scoped",
+      "sessionId": null,
+      "principal": "estimator",
+      "at": "2026-08-14T08:26:01.449Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "engineer",
+      "model": "opus",
+      "principal": "beast-mode",
+      "at": "2026-08-14T08:33:46.674Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "qa",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T09:27:25.409Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "technical-critic",
+      "model": "opus",
+      "principal": "beast-mode",
+      "at": "2026-08-14T09:27:25.437Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "qa",
+      "model": "sonnet",
+      "principal": "beast-mode",
+      "at": "2026-08-14T10:30:50.285Z"
+    },
+    {
+      "runId": "2026-08-14T07:11:30.211Z",
+      "type": "dispatch",
+      "stage": "qc",
+      "model": "haiku",
+      "principal": "beast-mode",
+      "at": "2026-08-14T10:55:19.323Z"
+    }
+  ],
+  "repairedAt": null,
+  "updatedAt": "2026-08-14T10:55:19.323Z"
+}

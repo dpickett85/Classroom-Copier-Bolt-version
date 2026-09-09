@@ -1,0 +1,52 @@
+{
+  "name": "classroom-copier",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Classroom Copier — batch-copy classwork into an existing Google Classroom course (mock-backed v1)",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "npm install && npm run -w server db:push && npm run -w server seed",
+    "dev:server": "npm run -w server dev",
+    "dev:client": "npm run -w client dev",
+    "build": "npm run -w shared build && npm run -w server build && npm run -w client build",
+    "test": "npm run -w shared test --if-present && npm run -w server test && npm run -w client test",
+    "lint": "eslint .",
+    "test:perf": "npm run -w server test:perf",
+    "test:budget:reconciliation": "npm run -w server test:budget:reconciliation",
+    "test:budget:totality": "npm run -w server test:budget:totality",
+    "test:budget:f1": "npm run -w server test:budget:f1",
+    "test:budget:f13": "npm run -w server test:budget:f13",
+    "test:budget:f12": "npm run -w server test:budget:f12",
+    "test:budget:reconcile": "npm run -w server test:budget:reconcile",
+    "test:budget:a11y": "npm run -w client test:budget:a11y",
+    "test:budget:coldstart": "npm run -w client test:budget:coldstart",
+    "check:citations": "node scripts/check-doc-citations.mjs",
+    "test:e2e": "playwright test --config=e2e/playwright.config.ts",
+    "test:budget:lease": "npm run -w server test:budget:lease",
+    "test:budget:courses": "npm run -w server test:budget:courses",
+    "test:lease-mp": "npm run -w server test:lease-mp",
+    "typecheck": "npm run -w shared typecheck && npm run -w server typecheck && npm run -w client typecheck",
+    "test:budget:dedupe": "npm run -w server test:budget:dedupe",
+    "test:budget:preflight-scan-cost": "npm run -w server test:budget:preflight-scan-cost",
+    "test:budget:reauth-resume": "npm run -w server test:budget:reauth-resume",
+    "test:budget:reauth-grace": "npm run -w server test:budget:reauth-grace",
+    "test:budget:no-tailwind": "npm run -w client test:budget:no-tailwind"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.62.1",
+    "eslint": "^9.39.0",
+    "globals": "^15.15.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.47.0"
+  },
+  "type": "module"
+}

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Classroom Copier — UI Mockups (The Registrar's Manifest)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper-0:#FBF9F4;
+    --paper-1:#F2EEE3;
+    --paper-2:#EAE4D2;
+    --line:#D8D2C2;
+    --line-strong:#B9B29B;
+    --ink-900:#16231F;
+    --ink-700:#3C4A45;
+    --ink-500:#5B6B67;
+    --teal-700:#0F5C56;
+    --teal-600:#147A72;
+    --teal-100:#DCEEEB;
+    --amber-700:#8A5A00;
+    --amber-100:#FBEDD1;
+    --green-700:#1E7A42;
+    --green-100:#E1F3E7;
+    --red-700:#A22C2C;
+    --red-100:#FBE4E4;
+    --slate-600:#5B6B67;
+    --focus:#1857C9;
+    --font-head:'Source Serif 4', Georgia, serif;
+    --font-body:'Public Sans', system-ui, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper-2); color:var(--ink-900);
+    font-family:var(--font-body); line-height:1.5;
+    padding:32px 0 96px;
+  }
+  h1.gallery-title{
+    font-family:var(--font-head); font-weight:600; font-size:22px;
+    text-align:center; color:var(--ink-900); margin:0 0 6px;
+  }
+  p.gallery-sub{ text-align:center; color:var(--ink-500); font-size:13px; margin:0 0 36px;}
+  .frame{
+    max-width:900px; margin:0 auto 40px; background:var(--paper-0);
+    border:1px solid var(--line-strong); border-radius:6px;
+    overflow:hidden; box-shadow:0 1px 2px rgba(22,35,31,.06);
+  }
+  .frame-label{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink-500); background:var(--paper-1);
+    border-bottom:1px solid var(--line); padding:8px 20px;
+  }
+  .screen{ padding:28px 32px; }
+  .header-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 32px; border-bottom:1px solid var(--line); background:var(--paper-0);
+    font-size:13px;
+  }
+  .header-account{ display:flex; align-items:center; gap:8px; color:var(--ink-700); }
+  .avatar{
+    width:24px; height:24px; border-radius:50%; background:var(--teal-100);
+    color:var(--teal-700); font-weight:600; font-size:11px;
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono);
+  }
+  .link-btn{
+    background:none; border:none; color:var(--teal-700); font-family:var(--font-body);
+    font-size:13px; font-weight:600; cursor:pointer; padding:4px 6px; border-radius:var(--radius);
+  }
+  .link-btn:hover{ background:var(--teal-100); }
+  .steps{
+    display:flex; gap:0; padding:12px 32px; border-bottom:1px solid var(--line);
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase;
+    color:var(--ink-500); background:var(--paper-1);
+  }
+  .step{ padding-right:22px; position:relative; }
+  .step.current{ color:var(--teal-700); font-weight:600; }
+  .step.done{ color:var(--ink-700); }
+  .step:not(:last-child)::after{ content:'—'; position:absolute; right:8px; color:var(--line-strong); }
+
+  h2.screen-title{ font-family:var(--font-head); font-weight:600; font-size:20px; margin:0 0 6px; }
+  p.screen-sub{ color:var(--ink-700); font-size:14.5px; margin:0 0 24px; max-width:52ch; }
+
+  .btn{
+    font-family:var(--font-body); font-weight:600; font-size:14px;
+    padding:10px 20px; border-radius:var(--radius); border:1px solid transparent;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{ background:var(--teal-700); color:#fff; }
+  .btn-primary:hover{ background:var(--teal-600); }
+  .btn-primary:disabled{ background:var(--line-strong); color:var(--paper-0); cursor:not-allowed; }
+  .btn-secondary{ background:var(--paper-0); color:var(--ink-900); border-color:var(--line-strong); }
+  .btn-secondary:hover{ background:var(--paper-1); }
+  .btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  /* ---- Screen 1: Sign in ---- */
+  .signin-screen{ text-align:center; padding:64px 32px; }
+  .wordmark{ font-family:var(--font-head); font-weight:700; font-size:26px; margin-bottom:4px; }
+  .wordmark .seal{ display:inline-block; width:10px;height:10px;border-radius:50%;background:var(--teal-700); margin-right:8px; }
+  .signin-tag{ color:var(--ink-700); font-size:15px; max-width:44ch; margin:0 auto 32px; }
+  .mock-note{ color:var(--ink-500); font-size:12.5px; margin-top:20px; font-family:var(--font-mono); }
+
+  /* cold start */
+  .coldstart{ text-align:center; padding:70px 32px; color:var(--ink-700); }
+  .spinner{
+    width:28px; height:28px; border-radius:50%;
+    border:3px solid var(--line); border-top-color:var(--teal-700);
+    margin:0 auto 18px; animation:spin 1s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .coldstart-title{ font-family:var(--font-head); font-weight:600; font-size:17px; color:var(--ink-900); margin-bottom:4px;}
+  .coldstart-sub{ font-size:13px; color:var(--ink-500); }
+
+  /* account picker */
+  .account-list{ max-width:420px; margin:0 auto; text-align:left; }
+  .account-row{
+    display:flex; align-items:center; gap:12px; padding:14px 16px;
+    border:1px solid var(--line); border-radius:var(--radius); margin-bottom:10px;
+    cursor:pointer; background:var(--paper-0);
+  }
+  .account-row:hover{ border-color:var(--teal-600); background:var(--teal-100); }
+  .account-row .radio{ width:16px;height:16px;border-radius:50%;border:2px solid var(--line-strong); flex-shrink:0; }
+  .account-avatar{ width:32px; height:32px; border-radius:50%; background:var(--teal-100); color:var(--teal-700); font-family:var(--font-mono); font-weight:600; display:flex;align-items:center;justify-content:center; font-size:12px; }
+  .account-name{ font-weight:600; font-size:14px; }
+  .account-email{ font-size:12.5px; color:var(--ink-500); font-family:var(--font-mono); }
+  .account-actions{ display:flex; justify-content:space-between; margin-top:18px; max-width:420px; margin-left:auto; margin-right:auto;}
+
+  /* ---- Screen 3: Source/Target ---- */
+  .field-group{ margin-bottom:22px; max-width:520px; }
+  label.field-label{ display:block; font-weight:600; font-size:13px; margin-bottom:6px; color:var(--ink-900); }
+  select.select-input, .select-input{
+    width:100%; padding:11px 12px; border:1px solid var(--line-strong); border-radius:var(--radius);
+    font-family:var(--font-body); font-size:14px; background:var(--paper-0); color:var(--ink-900);
+  }
+  select.select-input:focus-visible{ outline:3px solid var(--focus); outline-offset:1px; }
+  .badge{
+    display:inline-block; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.03em; padding:2px 7px; border-radius:2px; border:1px solid currentColor;
+    margin-left:8px; font-weight:600;
+  }
+  .badge-active{ color:var(--green-700); background:var(--green-100); border-color:var(--green-700); }
+  .badge-archived{ color:var(--ink-500); background:var(--paper-1); border-color:var(--line-strong); }
+  .badge-sis{ color:var(--teal-700); background:var(--teal-100); border-color:var(--teal-700); }
+  .notice{
+    display:flex; gap:10px; padding:12px 14px; background:var(--amber-100);
+    border:1px solid var(--amber-700); border-radius:var(--radius); font-size:13.5px;
+    color:var(--amber-700); max-width:520px; margin-bottom:20px;
+  }
+  .notice .glyph{ font-family:var(--font-mono); font-weight:700; color:var(--amber-700); }
+  .actions-row{ display:flex; justify-content:flex-end; max-width:520px; }
+
+  /* ---- Preflight scanning ---- */
+  .scanning{ text-align:center; padding:70px 32px; }
+  .scan-lines{ margin-top:18px; color:var(--ink-700); font-size:13.5px; font-family:var(--font-mono); }
+  .scan-lines div{ margin-bottom:4px; }
+  .scan-lines .done::before{ content:'✓ '; color:var(--green-700); font-weight:700; }
+  .scan-lines .active{ color:var(--teal-700); font-weight:600; }
+
+  /* ---- Action sheet modal ---- */
+  .modal-backdrop{
+    background:rgba(22,35,31,.55); padding:36px 24px;
+  }
+  .modal{
+    max-width:640px; margin:0 auto; background:var(--paper-0); border:1px solid var(--line-strong);
+    border-radius:6px; box-shadow:0 8px 28px rgba(22,35,31,.25);
+  }
+  .modal-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:20px 24px 14px; border-bottom:1px solid var(--line);
+  }
+  .modal-head h3{ font-family:var(--font-head); font-size:17px; font-weight:600; margin:0; max-width:44ch; }
+  .modal-close{ background:none;border:none;color:var(--ink-500);font-size:13px;font-weight:600;cursor:pointer; }
+  .toggle-row{
+    display:flex; align-items:center; gap:10px; padding:14px 24px;
+    background:var(--paper-1); border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .switch{ width:36px; height:20px; border-radius:10px; background:var(--line-strong); position:relative; flex-shrink:0; }
+  .switch::after{ content:''; position:absolute; width:16px;height:16px;border-radius:50%;background:#fff; top:2px; left:2px; }
+  .toggle-copy{ color:var(--ink-700); }
+  .toggle-copy b{ color:var(--ink-900); }
+  .issue-row{ padding:16px 24px; border-bottom:1px solid var(--line); }
+  .issue-row:last-of-type{ border-bottom:none; }
+  .issue-file{ font-weight:600; font-size:14px; }
+  .issue-context{ color:var(--ink-500); font-size:12.5px; margin-bottom:2px; }
+  .issue-desc{ color:var(--ink-700); font-size:13px; margin-bottom:10px; }
+  .option{ display:flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid var(--line); border-radius:var(--radius); margin-bottom:6px; font-size:13.5px; }
+  .option .radio{ width:14px;height:14px;border-radius:50%;border:2px solid var(--line-strong); flex-shrink:0; }
+  /* "Recommended" is a static per-row label — tint + stamp only, independent of whether the row is chosen. */
+  .option.recommended{ border-color:var(--teal-600); background:var(--teal-100); }
+  /* "Selected/checked" is the dynamic interaction state — its own shape change (hollow ring -> filled dot),
+     using neutral ink so a chosen non-recommended option is just as visibly confirmed as a chosen recommended one. */
+  .option.selected .radio{
+    border-color:var(--ink-900);
+    background: radial-gradient(circle, var(--ink-900) 0 4px, transparent 4.5px);
+  }
+  /* Recommended AND selected together (teacher accepted the recommendation): the dot picks up the teal
+     treatment plus an outer ring, still a distinct shape from the plain "selected" dot above. */
+  .option.recommended.selected .radio{
+    border-color:var(--teal-700);
+    background: radial-gradient(circle, var(--teal-700) 0 4px, transparent 4.5px);
+    box-shadow: inset 0 0 0 2.5px var(--teal-100);
+  }
+  .stamp{
+    font-family:var(--font-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--teal-700); border:1px solid var(--teal-700); border-radius:2px; padding:1px 6px;
+    margin-left:auto; font-weight:700;
+  }
+  .modal-foot{ display:flex; justify-content:flex-end; padding:16px 24px; }
+
+  /* ---- Ready to transfer ---- */
+  .ready-card{
+    max-width:560px; padding:22px 24px; border:1px solid var(--line-strong); border-radius:var(--radius);
+    background:var(--paper-1);
+  }
+  .ready-card p{ margin:0 0 14px; font-size:14.5px; color:var(--ink-900); }
+  .ready-card .reassure{ color:var(--green-700); font-weight:600; }
+
+  /* ---- Batch transfer progress ---- */
+  .progress-wrap{ max-width:560px; }
+  .progress-count{ font-family:var(--font-mono); font-size:15px; font-weight:600; margin-bottom:10px; }
+  .progress-track{ height:10px; background:var(--paper-1); border:1px solid var(--line-strong); border-radius:2px; overflow:hidden; margin-bottom:20px; }
+  .progress-fill{ height:100%; background:repeating-linear-gradient(90deg, var(--teal-700) 0 8px, var(--teal-600) 8px 9px); }
+  .ticker{ border:1px solid var(--line); border-radius:var(--radius); }
+  .ticker-row{ display:flex; gap:10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .ticker-row:last-child{ border-bottom:none; }
+  .ticker-icon{ font-family:var(--font-mono); font-weight:700; width:16px; text-align:center; }
+  .icon-ok{ color:var(--green-700); }
+  .icon-note{ color:var(--amber-700); }
+  .icon-skip{ color:var(--slate-600); }
+  .rate-banner{
+    display:flex; gap:10px; align-items:center; padding:12px 14px; background:var(--amber-100);
+    border:1px solid var(--amber-700); border-radius:var(--radius); font-size:13.5px; color:var(--amber-700); margin-top:14px;
+  }
+
+  /* ---- Completion summary ---- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:18px; }
+  .stat-tile{ border:1px solid var(--line-strong); border-radius:var(--radius); padding:12px 10px; background:var(--paper-1); text-align:center; }
+  .stat-num{ font-family:var(--font-mono); font-size:22px; font-weight:600; color:var(--ink-900); }
+  .stat-label{ font-size:10.5px; color:var(--ink-500); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+  .reconcile{
+    font-family:var(--font-mono); font-size:12.5px; padding:10px 14px; background:var(--green-100);
+    border:1px solid var(--green-700); border-radius:var(--radius); color:#0F4A28; margin-bottom:22px;
+  }
+  table.log-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.log-table th{
+    text-align:left; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--ink-500); padding:8px 10px; border-bottom:2px solid var(--line-strong);
+  }
+  table.log-table td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.log-table tr:nth-child(even) td{ background:var(--paper-1); }
+  table.log-table td.note-cell{ max-width:230px; white-space:normal; word-break:break-word; }
+  .outcome-pill{ font-family:var(--font-mono); font-size:11px; padding:2px 7px; border-radius:2px; font-weight:600; }
+  .outcome-transferred{ color:var(--green-700); background:var(--green-100); }
+  .outcome-fallback{ color:var(--amber-700); background:var(--amber-100); }
+  .outcome-skipped{ color:var(--slate-600); background:var(--paper-1); border:1px solid var(--line-strong); }
+  .summary-actions{ display:flex; gap:10px; margin-top:22px; }
+
+  .section-divider{ height:1px; background:var(--line); margin:0; }
+</style>
+</head>
+<body>
+
+<h1 class="gallery-title">Classroom Copier — UI Mockups</h1>
+<p class="gallery-sub">Design concept: “The Registrar's Manifest” · Public Sans + Source Serif 4 + IBM Plex Mono · docs/product/03-ui-direction.md</p>
+
+<!-- SCREEN 1: SIGN-IN -->
+<div class="frame">
+  <div class="frame-label">Screen 1 — Sign-in landing</div>
+  <div class="signin-screen">
+    <div class="wordmark"><span class="seal"></span>Classroom Copier</div>
+    <p class="signin-tag">Batch-copy your classwork into any existing course — without duplicating Drive files.</p>
+    <button class="btn btn-primary">Sign in with Google (mock)</button>
+    <div class="mock-note">v1 uses simulated Google accounts for demo/testing.</div>
+  </div>
+</div>
+
+<!-- COLD START -->
+<div class="frame">
+  <div class="frame-label">Cold-start overlay — reusable component</div>
+  <div class="coldstart">
+    <div class="spinner"></div>
+    <div class="coldstart-title">Waking up server…</div>
+    <div class="coldstart-sub">This can take up to 50 seconds the first time.</div>
+  </div>
+</div>
+
+<!-- SCREEN 2: ACCOUNT PICKER -->
+<div class="frame">
+  <div class="frame-label">Screen 2 — Mock account picker (forced)</div>
+  <div class="screen">
+    <h2 class="screen-title">Choose an account</h2>
+    <p class="screen-sub" style="margin-bottom:22px;">Classroom Copier keeps courses separated by account — pick the one whose classes you want to copy.</p>
+    <div class="account-list">
+      <div class="account-row">
+        <div class="radio"></div>
+        <div class="account-avatar">JR</div>
+        <div><div class="account-name">Jamie Rivera</div><div class="account-email">jamie.rivera@pickettusd.mock.edu</div></div>
+      </div>
+      <div class="account-row">
+        <div class="radio"></div>
+        <div class="account-avatar">DO</div>
+        <div><div class="account-name">Dana Okafor</div><div class="account-email">dana.okafor@pickettusd.mock.edu</div></div>
+      </div>
+      <div class="account-actions">
+        <button class="link-btn" disabled style="color:var(--ink-500);cursor:not-allowed;">Use another account</button>
+        <button class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: SOURCE/TARGET -->
+<div class="frame">
+  <div class="frame-label">Screen 3 — Source &amp; Target Selection</div>
+  <div class="header-bar">
+    <div class="header-account"><div class="avatar">JR</div> Jamie Rivera &lt;jamie.rivera@pickettusd.mock.edu&gt;</div>
+    <div><button class="link-btn">Switch account</button><button class="link-btn">Sign out</button></div>
+  </div>
+  <div class="steps">
+    <span class="step current">1 Select</span><span class="step">2 Pre-flight</span><span class="step">3 Transfer</span><span class="step">4 Summary</span>
+  </div>
+  <div class="screen">
+    <div class="field-group">
+      <label class="field-label">Copy from (source)</label>
+      <div class="select-input">US History (2025) — Period 3 <span class="badge badge-active">Active</span> · 42 posts</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Copy to (target)</label>
+      <div class="select-input">US History — Period 3 <span class="badge badge-sis">SIS Roster Shell</span></div>
+    </div>
+    <div class="notice"><span class="glyph">!</span><span>Running the same copy more than once creates duplicate drafts — Classroom Copier does not check for existing copies yet.</span></div>
+    <div class="actions-row"><button class="btn btn-primary">Continue →</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 4a: PREFLIGHT SCANNING -->
+<div class="frame">
+  <div class="frame-label">Screen 4a — Pre-flight scanning (healthy path)</div>
+  <div class="steps"><span class="step done">1 Select</span><span class="step current">2 Pre-flight</span><span class="step">3 Transfer</span><span class="step">4 Summary</span></div>
+  <div class="scanning">
+    <div class="spinner"></div>
+    <div class="scan-lines">
+      <div class="done">Checking topics…</div>
+      <div class="done">Verifying attachments…</div>
+      <div class="active">Checking permissions…</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4b: ACTION SHEET MODAL -->
+<div class="frame">
+  <div class="frame-label">Screen 4b — Action Sheet Modal (conditional — F2/F3)</div>
+  <div class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>We found 2 items that need your attention before copying.</h3>
+        <button class="modal-close">✕ Cancel</button>
+      </div>
+      <div class="toggle-row">
+        <div class="switch"></div>
+        <div class="toggle-copy"><b>Apply recommended fixes automatically</b> — off by default. Review each item, or turn this on to accept the recommended option for every row.</div>
+      </div>
+      <div class="issue-row">
+        <div class="issue-context">Attached to “Week 1 Reading” (Material)</div>
+        <div class="issue-file">Unit 1 Slides.pdf</div>
+        <div class="issue-desc">Issue: file is trashed or deleted.</div>
+        <div class="option recommended selected"><div class="radio"></div> Create Draft Shell with Note <span class="stamp">Recommended</span></div>
+        <div class="option"><div class="radio"></div> Skip Material</div>
+      </div>
+      <div class="issue-row">
+        <div class="issue-context">Attached to “Essay 1” (Assignment)</div>
+        <div class="issue-file">Rubric Template.docx</div>
+        <div class="issue-desc">Issue: permission-locked (co-teacher owned).</div>
+        <div class="option recommended"><div class="radio"></div> Copy to My Drive (Become Owner) <span class="stamp">Recommended</span></div>
+        <div class="option selected"><div class="radio"></div> Link Existing File (Risk Warning)</div>
+        <div class="option"><div class="radio"></div> Skip Attachment and Note Draft</div>
+      </div>
+      <div class="modal-foot"><button class="btn btn-primary">Continue →</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4c: READY TO TRANSFER -->
+<div class="frame">
+  <div class="frame-label">Screen 4c — Ready to Transfer (confirmation checkpoint)</div>
+  <div class="steps"><span class="step done">1 Select</span><span class="step current">2 Pre-flight</span><span class="step">3 Transfer</span><span class="step">4 Summary</span></div>
+  <div class="screen">
+    <div class="ready-card">
+      <p>Ready to copy <b>42 posts</b> from “US History (2025)” into “US History — Period 3 (SIS Shell).”</p>
+      <p class="reassure">Everything will land as Drafts with dates cleared — nothing is visible to students until you publish it.</p>
+      <div class="notice"><span class="glyph">!</span><span>Running the same copy more than once creates duplicate drafts — Classroom Copier does not check for existing copies yet.</span></div>
+      <div style="display:flex; justify-content:space-between; margin-top:6px;">
+        <button class="btn btn-secondary">← Back</button>
+        <button class="btn btn-primary">Start Transfer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 5: BATCH TRANSFER PROGRESS -->
+<div class="frame">
+  <div class="frame-label">Screen 5 — Batch Transfer Progress (with rate-limit pause)</div>
+  <div class="steps"><span class="step done">1 Select</span><span class="step done">2 Pre-flight</span><span class="step current">3 Transfer</span><span class="step">4 Summary</span></div>
+  <div class="screen">
+    <div class="progress-wrap">
+      <div class="progress-count">Transferring 31 of 50 posts…</div>
+      <div class="progress-track"><div class="progress-fill" style="width:62%"></div></div>
+      <div class="ticker">
+        <div class="ticker-row"><span class="ticker-icon icon-ok">✓</span> “Week 3 Reading” → transferred</div>
+        <div class="ticker-row"><span class="ticker-icon icon-ok">✓</span> “Quiz: Ch. 2” → transferred</div>
+        <div class="ticker-row"><span class="ticker-icon icon-note">◆</span> “Essay 1” → fallback shell (attachment locked)</div>
+      </div>
+      <div class="rate-banner">⏱ Google is rate-limiting requests — retrying automatically in 8s. Progress pauses here and resumes on its own.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 6: COMPLETION SUMMARY -->
+<div class="frame">
+  <div class="frame-label">Screen 6 — Completion Summary (full-screen report, not a modal)</div>
+  <div class="steps"><span class="step done">1 Select</span><span class="step done">2 Pre-flight</span><span class="step done">3 Transfer</span><span class="step current">4 Summary</span></div>
+  <div class="screen">
+    <h2 class="screen-title">Transfer complete.</h2>
+    <div class="stat-grid">
+      <div class="stat-tile"><div class="stat-num">6</div><div class="stat-label">Topics created/mapped</div></div>
+      <div class="stat-tile"><div class="stat-num">39</div><div class="stat-label">Drafts transferred</div></div>
+      <div class="stat-tile"><div class="stat-num">2</div><div class="stat-label">Fallback shells</div></div>
+      <div class="stat-tile"><div class="stat-num">1</div><div class="stat-label">Skipped by you</div></div>
+      <div class="stat-tile"><div class="stat-num">1</div><div class="stat-label">Rubric notes added</div></div>
+    </div>
+    <div class="reconcile">✓ 39 + 2 + 1 = 42 of 42 posts scanned — every post resolved to a transfer, fallback, or skip.</div>
+    <table class="log-table">
+      <thead><tr><th>Title</th><th>Type</th><th>Topic</th><th>Outcome</th><th>Type-specific fields</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>Week 1 Reading</td><td>Material</td><td>Unit 1</td><td><span class="outcome-pill outcome-transferred">Transferred</span></td><td>—</td><td class="note-cell">—</td></tr>
+        <tr><td>Essay 1</td><td>Assignment</td><td>Unit 2</td><td><span class="outcome-pill outcome-fallback">Fallback</span></td><td>Due: cleared · Max pts: 100</td><td class="note-cell">[Classroom Copier Note: Original attachment 'Unit_1_Quiz.pdf' could not be linked due to a permission error or deleted file.]</td></tr>
+        <tr><td>Quiz: Ch. 2</td><td>Quiz assignment</td><td>Unit 2</td><td><span class="outcome-pill outcome-transferred">Transferred</span></td><td>Due: cleared · Max pts: 50</td><td class="note-cell">—</td></tr>
+        <tr><td>Discussion Q1</td><td>Question</td><td>(none)</td><td><span class="outcome-pill outcome-transferred">Transferred</span></td><td>Answer: Multiple choice (4 opts)</td><td class="note-cell">—</td></tr>
+        <tr><td>Bonus Worksheet</td><td>Material</td><td>Unit 3</td><td><span class="outcome-pill outcome-skipped">Skipped</span></td><td>—</td><td class="note-cell">Skipped by you — chose “Skip Material” after the attachment could not be linked.</td></tr>
+        <tr><td>Final Project</td><td>Assignment</td><td>Unit 3</td><td><span class="outcome-pill outcome-transferred">Transferred</span></td><td>Due: cleared · Max pts: 100</td><td class="note-cell">Rubric not copied (license) — counted separately</td></tr>
+        <tr><td colspan="6" style="text-align:center; color:var(--ink-500); font-family:var(--font-mono); font-size:12px;">… 36 more rows (42 posts scanned total) …</td></tr>
+      </tbody>
+    </table>
+    <div class="summary-actions">
+      <button class="btn btn-secondary">Open target course (mock link)</button>
+      <button class="btn btn-primary">Start another transfer</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

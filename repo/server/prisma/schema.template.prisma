@@ -1,0 +1,529 @@
+// Classroom Copier — data-model (§5 of docs/product/04-architecture.md).
+//
+// One SQLite file holds BOTH the simulated Google world (the `Mock*`-namespaced
+// block below) and application state. Co-location is deliberate: it is what
+// lets an integration test assert that "the draft the item claims it created
+// actually exists" — an assertion the persistence ADR argues for and which was
+// unimplementable until TransferJobItem gained `targetPostId` (D14).
+//
+// Note on enums: the SQLite provider does not support Prisma `enum`, so the
+// closed vocabularies (outcome, skipReason, status, workType, shareMode, ...)
+// are `String` columns whose single source of truth is the zod schema in
+// `shared/src/api-types.ts`. Every write goes through a typed helper that
+// parses against those schemas, so the vocabulary is still closed at the
+// application boundary — but it is enforced by code, not by the DB, and this
+// comment says so rather than letting the doc imply otherwise.
+
+// ---------------------------------------------------------------------------
+// THIS FILE IS THE SINGLE SOURCE OF TRUTH FOR THE DATA MODEL.
+//
+// `schema.prisma` next to it is GENERATED and gitignored — never edit it.
+// `scripts/prisma-datasource.mjs` concatenates a `generator` + `datasource`
+// block (provider chosen by DATABASE_PROVIDER: sqlite | postgresql) with the
+// model bodies below. Dev and test stay on sqlite; production sets
+// DATABASE_PROVIDER=postgresql. Every model body here must stay
+// provider-portable — which it already is, because the SQLite provider has no
+// `enum`, so every closed vocabulary is a String column validated by zod at the
+// application boundary (see the note above).
+// ---------------------------------------------------------------------------
+
+/* ================================================================= *
+ *  MOCK GOOGLE WORLD
+ *  Namespaced by comment rather than by table prefix so the schema
+ *  reads like the real API's resources; every table below disappears
+ *  when a RealClassroomProvider ships.
+ * ================================================================= */
+
+model MockAccount {
+  id          String  @id
+  displayName String
+  email       String  @unique
+  initials    String
+
+  courses MockCourse[]
+
+  @@map("mock_account")
+}
+
+model MockCourse {
+  id             String  @id
+  ownerAccountId String
+  name           String
+  section        String?
+  /// ACTIVE | ARCHIVED
+  state          String
+  isSisShell     Boolean @default(false)
+  /// When false the mock rubrics API answers LicenseBlockedError (F7).
+  rubricsLicensed Boolean @default(true)
+  /// Stable fixture key (F1..F14) so tests address seeds by name, not by id.
+  fixtureKey     String?
+
+  owner               MockAccount          @relation(fields: [ownerAccountId], references: [id], onDelete: Cascade)
+  topics              MockTopic[]
+  courseWork          MockCourseWork[]
+  courseWorkMaterials MockCourseWorkMaterial[]
+
+  @@index([ownerAccountId, state])
+  @@map("mock_course")
+}
+
+model MockTopic {
+  id        String @id
+  courseId  String
+  name      String
+  sortOrder Int    @default(0)
+
+  course              MockCourse               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseWork          MockCourseWork[]
+  courseWorkMaterials MockCourseWorkMaterial[]
+
+  @@index([courseId])
+  @@map("mock_topic")
+}
+
+/// Assignment | Quiz assignment | Question. Carries dueDate, maxPoints and
+/// answer-config. STRUCTURALLY SEPARATE from MockCourseWorkMaterial — driver 5.
+model MockCourseWork {
+  id             String    @id
+  courseId       String
+  title          String
+  description    String?
+  /// ASSIGNMENT | QUIZ_ASSIGNMENT | SHORT_ANSWER_QUESTION | MULTIPLE_CHOICE_QUESTION
+  workType       String
+  /// DRAFT | PUBLISHED | SCHEDULED  (F8 — all three must transfer)
+  state          String
+  dueDate        DateTime?
+  scheduledTime  DateTime?
+  maxPoints      Int?
+  /// JSON: { "type": "multipleChoice", "choices": [...] } | { "type": "shortAnswer" }
+  answerConfig   String?
+  quizFormLink   String?
+  topicId        String?
+  creationTime   DateTime
+  /// Seed-authoring ordinal for this table only. It is NOT the enumerator's
+  /// tiebreak: `post-enumerator` merges two tables, and a per-table ordinal is
+  /// not comparable across them, so the total order is
+  /// (creationTime, sourceType, sourceId) and this column is deliberately not
+  /// carried on the port's read types (APPLY-J — the previous comment claimed
+  /// a role the code never gave it).
+  createdOrder   Int
+
+  course MockCourse  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic  MockTopic?  @relation(fields: [topicId], references: [id])
+  rubric MockRubric?
+
+  @@index([courseId, state])
+  @@index([courseId, creationTime])
+  @@map("mock_course_work")
+}
+
+/// Material. There is NO dueDate column and NO maxPoints column here — not
+/// nulled-out fields on a shared table. A Material row cannot carry them.
+model MockCourseWorkMaterial {
+  id           String   @id
+  courseId     String
+  title        String
+  description  String?
+  /// DRAFT | PUBLISHED | SCHEDULED
+  state        String
+  topicId      String?
+  creationTime DateTime
+  /// Seed-authoring ordinal for this table only — see MockCourseWork.createdOrder.
+  createdOrder Int
+
+  course MockCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic  MockTopic? @relation(fields: [topicId], references: [id])
+
+  @@index([courseId, state])
+  @@index([courseId, creationTime])
+  @@map("mock_course_work_material")
+}
+
+/// Polymorphic parent (parentType + parentId, no FK) because the two coursework
+/// surfaces are separate tables by design.
+model MockAttachment {
+  id             String  @id
+  /// courseWork | courseWorkMaterial | myDrive
+  ///
+  /// `myDrive` is the acting account's Drive, NOT a course post: it is where
+  /// `copyAttachmentToMyDrive` puts the NEW file it creates. Real
+  /// `drive.files.copy` produces a new Drive file and leaves the source
+  /// untouched; modelling the copy as an in-place update of the source row made
+  /// the mock a *move* and broke the product's one promise about the source
+  /// course (P0-3). Rows with parentType='myDrive' are never returned by either
+  /// coursework surface, so the source post's attachment list is unchanged.
+  parentType     String
+  parentId       String
+  /// driveFile | youTubeVideo | link | form
+  kind           String
+  driveFileId    String?
+  url            String?
+  title          String
+  /// VIEW | EDIT | STUDENT_COPY. Copied from the source, NEVER defaulted.
+  /// Real Classroom accepts shareMode only on driveFile; modelling it uniformly
+  /// here is a small mock-shaped divergence, deliberate and flagged.
+  shareMode      String?
+  /// healthy | trashed | deleted | permission_locked  (pre-flight simulation)
+  driveState     String  @default("healthy")
+  ownerAccountId String?
+  /// D22 — makes "attachments 1-20" a total order. Without it, which 20
+  /// survived depended on unspecified query ordering and F5 was flaky by
+  /// construction.
+  sortOrder      Int     @default(0)
+
+  @@index([parentType, parentId, sortOrder])
+  @@map("mock_attachment")
+}
+
+/// Cycle-2 DEFER 1 — persists `MockClassroomProvider`'s rate-limit attempt
+/// counter so F6's transient-429 rule (fail N times, then succeed) survives
+/// the provider being reconstructed mid-run. The provider used to hold this
+/// count in a plain in-memory Map: correct for one provider instance, but a
+/// rebuilt provider (a fresh `new MockClassroomProvider(...)`, e.g. after a
+/// process restart or in a test that constructs a second instance over the
+/// same database) silently reset the counter to zero and re-issued 429s the
+/// caller had already exhausted. Keyed on the SAME `${title}:${mode}` string
+/// the in-memory Map used, so this is a storage swap, not a behaviour change.
+model MockRateLimitAttempt {
+  key          String @id
+  attemptCount Int    @default(0)
+
+  @@map("mock_rate_limit_attempt")
+}
+
+/// D23 — a rubric is criteria and levels, not a boolean. `copyRubric` was
+/// replaced by getRubric + createRubric to match the real API's get-then-create
+/// shape, and this is the body those calls carry.
+model MockRubric {
+  id            String  @id
+  courseWorkId  String  @unique
+  /// Mirrors the owning course's licence at seed time; the mock rubrics API
+  /// throws LicenseBlockedError on create when true (F7).
+  licenseBlocked Boolean @default(false)
+
+  courseWork MockCourseWork        @relation(fields: [courseWorkId], references: [id], onDelete: Cascade)
+  criteria   MockRubricCriterion[]
+
+  @@map("mock_rubric")
+}
+
+model MockRubricCriterion {
+  id          String  @id
+  rubricId    String
+  title       String
+  description String?
+  sortOrder   Int     @default(0)
+
+  rubric MockRubric         @relation(fields: [rubricId], references: [id], onDelete: Cascade)
+  levels MockRubricLevel[]
+
+  @@index([rubricId, sortOrder])
+  @@map("mock_rubric_criterion")
+}
+
+model MockRubricLevel {
+  id          String  @id
+  criterionId String
+  title       String
+  description String?
+  points      Int
+  sortOrder   Int     @default(0)
+
+  criterion MockRubricCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@index([criterionId, sortOrder])
+  @@map("mock_rubric_level")
+}
+
+/* ================================================================= *
+ *  APPLICATION STATE
+ * ================================================================= */
+
+/// Backs JWT revocation. A stateless JWT alone cannot be revoked, and with two
+/// seeded accounts a replayed cookie would write classwork into the wrong
+/// teacher's course — a data-integrity bug, not merely a security abstraction.
+/* ================================================================= *
+ *  REAL GOOGLE IDENTITY
+ *  The production counterpart to MockAccount. `id` is Google's stable
+ *  `sub` claim — never the email, which a teacher can change.
+ * ================================================================= */
+
+model GoogleAccount {
+  id          String  @id
+  email       String  @unique
+  displayName String
+  pictureUrl  String?
+
+  // AES-256-GCM under TOKEN_ENCRYPTION_KEY, which is deliberately NOT
+  // SESSION_SECRET: a compromise of the JWT-signing key must not also expose
+  // every teacher's Google token. All three parts are base64; the IV is random
+  // per encryption and the tag is what makes a wrong-key read detectable.
+  accessTokenCiphertext String
+  accessTokenIv         String
+  accessTokenTag        String
+  accessTokenExpiresAt  DateTime
+
+  // Space-separated exactly as Google returns them — an audit trail of what the
+  // teacher actually consented to, which may be less than what was requested.
+  scopesGranted String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("google_account")
+}
+
+model Session {
+  id        String    @id
+  accountId String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  // NO relation to MockAccount. `accountId` is polymorphic: it names a
+  // MockAccount.id in mock mode and a GoogleAccount.id in google mode, resolved
+  // by `account-directory`'s provider-mode gate. Prisma cannot express a FK to
+  // either of two tables, and the same deliberately-unenforced pattern already
+  // appears in this schema as MockAttachment.parentType/parentId.
+  //
+  // Dropping the FK removes the database's own cross-account safety net, so the
+  // guarantee now rests entirely on application-level `accountId` scoping —
+  // pinned by test/cross-account-isolation.test.ts (§8.0/S5). Do not delete that
+  // test; it is the only thing holding this.
+  @@index([accountId])
+  @@map("session")
+}
+
+/// D11 — the persisted pre-flight scan. `totalPostsScanned` is written once,
+/// at scan time, and `POST /transfer-jobs` inserts its items FROM the stored
+/// PreflightScanItem rows. That is what makes count(items) == totalPostsScanned
+/// one measurement read twice, rather than two independent scans hoped to agree.
+model PreflightScan {
+  id                String   @id
+  accountId         String
+  sourceCourseId    String
+  targetCourseId    String
+  sourceCourseName  String
+  targetCourseName  String
+  totalPostsScanned Int
+  /// JSON-serialised PreflightFinding[] as returned to the client.
+  findingsJson      String
+  /// JSON TopicReuseDisclosure[] — the same idiom as findingsJson above. The
+  /// map is built once, at scan time, so the transfer reuses exactly the topics
+  /// the teacher was shown rather than re-resolving names mid-run.
+  topicReuseJson    String   @default("[]")
+  scannedAt         DateTime @default(now())
+
+  items PreflightScanItem[]
+  /// APPLY-C — at most ONE job per scan. `TransferJob.scanId` is `@unique`, so
+  /// replaying a completed scan into a second transfer (back button, then
+  /// confirm) is unrepresentable rather than merely unintended.
+  job   TransferJob?
+
+  @@index([accountId])
+  @@map("preflight_scan")
+}
+
+model PreflightScanItem {
+  id           String  @id
+  scanId       String
+  /// courseWork | courseWorkMaterial
+  sourceType   String
+  sourceId     String
+  title        String
+  workType     String?
+  /// APPLY-E — the per-type fields are copied HERE, at scan time, so the
+  /// itemized log renders the immutable record rather than re-reading live
+  /// source rows that may have been edited or deleted since.
+  maxPoints    Int?
+  /// JSON AnswerConfig, copied at scan time.
+  answerConfig String?
+  topicId      String?
+  topicName    String?
+  /// Position in post-enumerator's total order (creationTime, sourceType, sourceId).
+  createdOrder Int
+
+  /// Decision C — set when this post's title already exists on the DESTINATION
+  /// course. Written at scan time and read by the transfer engine, so the
+  /// duplicate decision is made ONCE, from one picture of the destination,
+  /// rather than re-derived per item from a destination that may have changed
+  /// under the run.
+  ///
+  /// `duplicateOfTitle` holds the destination title VERBATIM (un-normalized) so
+  /// the disclosure can quote what the teacher will actually see there.
+  duplicateOfTitle String?
+  /// 'DRAFT' | 'PUBLISHED' — which is what lets the copy say "already there as
+  /// a draft" rather than just "already there".
+  duplicateOfState String?
+
+  scan  PreflightScan      @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  items TransferJobItem[]
+
+  @@index([scanId, createdOrder])
+  @@map("preflight_scan_item")
+}
+
+/// status is a clean lifecycle enum: queued | running | completed | interrupted
+/// | failed. A rate-limit pause is the nullable `rateLimitPause` FIELD below,
+/// NOT a status (D5) — as a status it escaped the single-active-job index while
+/// /active still returned the job, which is exactly the double-submit window
+/// the guard exists for.
+model TransferJob {
+  id                    String    @id
+  accountId             String
+  /// APPLY-C — one job per scan, enforced by the database.
+  scanId                String    @unique
+  status                String
+  /// P0-2 — the EXECUTOR LEASE. Set to a fresh token when `execute()` claims
+  /// the job; every subsequent executor write is `updateMany where {id,
+  /// executorId}`. The reconciler claims a stale job by nulling this column, so
+  /// the displaced executor's next write affects 0 rows and it aborts instead of
+  /// racing. Without it, staleness was the reconciler's ONLY predicate and a
+  /// slow-but-alive executor had `activeAccountId` pulled out from under it —
+  /// releasing the single-active-job guard mid-run.
+  executorId            String?
+  /// JSON Resolution[] — the teacher's Action-Sheet choices, persisted so the
+  /// engine is self-contained and a restart applies the same decisions.
+  resolutionsJson       String    @default("[]")
+  /// JSON RateLimitPause | null
+  rateLimitPause        String?
+  lastHeartbeatAt       DateTime  @default(now())
+  /// Decision D — split from the previous single `topicsCreatedOrMapped`, which
+  /// could not answer the question the completion summary now asks: did we make
+  /// a topic in the teacher's course, or did we file into one they already had?
+  /// `topicsCreatedCount` increments ONLY on a real `createTopic`;
+  /// `topicsReusedCount` ONLY on a `topicReuseJson` hit. Neither increments when
+  /// a topic is already in `topicMapJson` — that is a re-entry, not work.
+  topicsCreatedCount    Int       @default(0)
+  topicsReusedCount     Int       @default(0)
+  /// JSON TopicReuseDisclosure[], copied from the scan at job creation, so the
+  /// transfer reuses exactly the topics the teacher was shown at pre-flight.
+  topicReuseJson        String?
+  /// P0 (§4.3 fix 2) — JSON Record<sourceTopicId, destinationTopicId> of the
+  /// topics THIS JOB has already resolved, written in the same lease-checked
+  /// update as the per-topic heartbeat.
+  ///
+  /// `topicReuseJson` cannot do this job: it is a pre-flight snapshot, blind to
+  /// the topics pass 1 created itself. Without this column `buildTopicMap`
+  /// calls `createTopic` unconditionally for every source topic on EVERY entry,
+  /// so a resumed job duplicates every topic it had already made.
+  topicMapJson          String?
+  createdAt             DateTime  @default(now())
+  startedAt             DateTime?
+  finishedAt            DateTime?
+
+  /// The mid-transfer Cancel control's flag — the EXECUTOR READS this BETWEEN
+  /// items; it is never an external write to TransferJobItem rows while the
+  /// executor holds the lease. Set true (idempotently) by
+  /// `POST /transfer-jobs/:id/cancel`; refused with 409 once the job is
+  /// already terminal.
+  cancelRequested   Boolean   @default(false)
+  /// First time the flag was set — preserved across an idempotent second
+  /// cancel rather than overwritten.
+  cancelRequestedAt DateTime?
+  /// Written in the SAME statement as `status: 'completed'` when the
+  /// executor's own drain resolved the job's remaining items. Deliberately
+  /// NOT a status of its own (mirrors D5's rate-limit-pause-is-a-field
+  /// precedent) — the single-active-job guard, `/active`, and the reconciler
+  /// all still key off `status` alone.
+  cancelledAt       DateTime?
+
+  /// Decision F — set when the job stopped because Google rejected the
+  /// credential. It is a FIELD, not a status (the same precedent as
+  /// rateLimitPause): the single-active-job guard, `/active` and the reconciler
+  /// all still key off `status` alone, and the paused job keeps its
+  /// `activeAccountId` so a second job cannot start while this one waits.
+  ///
+  /// The OAuth callback finds the job to resume by
+  /// { accountId: <session account>, googleReauthRequiredAt: { not: null } } —
+  /// NEVER by a job id taken from the request (§8.0/S8), which would let one
+  /// account resume another's job.
+  googleReauthRequiredAt DateTime?
+
+  /// D5 — a partial unique index, expressed the way SQLite can enforce one:
+  /// this column holds `accountId` while the job is NON-TERMINAL and NULL once
+  /// it reaches {completed, interrupted, failed}. SQLite treats NULLs as
+  /// distinct in a unique index, so at most one non-terminal job per account is
+  /// a schema fact rather than a convention — and a rate-limit-paused job is
+  /// still guarded, because pause is not a status.
+  activeAccountId String? @unique
+
+  scan  PreflightScan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  items TransferJobItem[]
+
+  @@index([accountId, status])
+  @@index([status, lastHeartbeatAt])
+  @@map("transfer_job")
+}
+
+model TransferJobItem {
+  id           String  @id
+  jobId        String
+  scanItemId   String
+  sourceType   String
+  sourceId     String
+  title        String
+  workType     String?
+  /// APPLY-E — copied from the scan row at job creation. The itemized log reads
+  /// these, never the live source rows.
+  maxPoints    Int?
+  answerConfig String?
+  topicName    String?
+  createdOrder Int
+
+  /// Single-valued and NOT NULL: pending | transferred | fallback_shell | skipped.
+  /// No representable state lands an item in two buckets. `pending` IS
+  /// representable, which is why the totality obligations (D12) exist in code
+  /// with their own gates rather than being claimed as a schema property.
+  outcome    String  @default("pending")
+  /// user_skip_post | user_skip_attachment | provider_error |
+  /// server_interrupted | rate_limit_exhausted
+  skipReason String?
+  /// Strictly orthogonal to outcome — this is what makes "non-additive subset
+  /// tag" a schema fact and the combined-outcome rule fall out for free.
+  rubricDegraded Boolean @default(false)
+  note           String?
+  /// The Action-Sheet option the teacher chose for this post, if any (D15).
+  resolutionKind String?
+
+  attemptCount  Int       @default(0)
+  nextAttemptAt DateTime?
+  /// D14 — written IMMEDIATELY BEFORE the provider call. At reconciliation time
+  /// this is the difference between "never attempted" (honestly skipped) and
+  /// "outcome unknown" (must be verified against the target).
+  attemptedAt   DateTime?
+  /// D14 — written in the SAME statement as outcome='transferred'. Without it
+  /// the item never claims to have created anything, and the persistence ADR's
+  /// own rationale is unimplementable.
+  targetPostId  String?
+  /// P0-1 / P0-4 — written IMMEDIATELY AFTER the provider create returns and
+  /// BEFORE any follow-up step (pause clearing, rubric copy, description
+  /// amendment) can throw. It is the evidence the JOB OWNS: the item-level
+  /// catch reads it before re-bucketing, so a post that was created can never be
+  /// reported as "nothing was written", and the reconciler resolves an
+  /// interrupted item from this id instead of guessing from a title in a
+  /// namespace shared with pre-existing posts, prior runs, and duplicates.
+  claimedTargetPostId String?
+
+  job      TransferJob       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  scanItem PreflightScanItem @relation(fields: [scanItemId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, outcome])
+  @@index([jobId, createdOrder])
+  @@index([jobId, claimedTargetPostId])
+  @@map("transfer_job_item")
+}
+
+/// Stub. Untouched while FEATURE_MONETIZATION_ENABLED=false; exists so a future
+/// StripeMonetizationService is a flag flip, not a migration.
+model CreditLedger {
+  id        String   @id
+  accountId String
+  delta     Int
+  reason    String
+  jobId     String?
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+  @@map("credit_ledger")
+}

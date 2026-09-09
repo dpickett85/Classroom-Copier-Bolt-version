@@ -1,0 +1,872 @@
+{
+  "schemaVersion": 1,
+  "track": {
+    "type": "feature",
+    "name": "Real Google Integration & Duplicate Prevention",
+    "slug": "real-google-integration",
+    "productType": "web app",
+    "scopeMode": "open",
+    "jira": null
+  },
+  "currentStage": "qc",
+  "stages": {
+    "kickoff": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "null",
+      "artifactHash": null,
+      "decisions": [
+        {
+          "question": "Is this Phase-2 work a bolt-on feature, or a full product revision?",
+          "optionChosen": "Full product revision (resume Option C) — new feature track with scopeMode \"open\"",
+          "rationale": "The Directions open with 'Re-architect', replace the entire mock provider layer with live Google APIs, and change the PRD (duplicate prevention supersedes v1's explicit no-dedupe decision). Parent product stays at qc/approved-complete as the reference.",
+          "source": "human",
+          "at": "2026-08-23T22:16:00Z"
+        },
+        {
+          "question": "Run in Beast Mode, and if so which stage should it stop after?",
+          "optionChosen": "Yes — Beast Mode through qc (full lifecycle: pm → ux → ui → architect → engineer → qa → qc)",
+          "rationale": "User explicitly asked to 'fix the indicated bugs in beastmode'. Full lifecycle chosen because the PRD changed and the provider layer is being re-architected, so the upstream artifacts (01-04) are stale and downstream stages read them.",
+          "source": "human",
+          "at": "2026-08-23T22:17:00Z"
+        },
+        {
+          "question": "The Directions say 'Remove all mock/test auth states'. How literally should the mock Google layer be removed?",
+          "optionChosen": "Keep the mock provider as a TEST-ONLY double; make the real Google provider the only thing a production build can select",
+          "rationale": "The mock layer backs all 365 tests, 11 quality budgets and the Playwright E2E suite. Deleting it outright would delete the entire verification surface, leaving QA/QC nothing to verify against. No mock sign-in, no demo accounts, no reachable mock mode in a deployed build satisfies the Directions' actual intent.",
+          "source": "human",
+          "at": "2026-08-23T22:17:30Z"
+        },
+        {
+          "question": "Beast Mode cannot sign into the user's Google account. How should QA/QC define done?",
+          "optionChosen": "Automated green (build clean, suite green, real-provider contract tests, Render-deployable config) plus a numbered live-OAuth checklist handed to the user; fix findings in a follow-up pass",
+          "rationale": "An unattended run cannot perform an interactive Google consent flow. Gating on it would stall the run; declaring live E2E verified without it would be false. Explicitly declined handling the user's Client Secret or signing into their account.",
+          "source": "human",
+          "at": "2026-08-23T22:18:00Z"
+        },
+        {
+          "question": "The Directions say to audit that 'Tailwind/CSS' stylesheets are imported in main.tsx. Convert to Tailwind?",
+          "optionChosen": "No — keep the existing hand-built design-token CSS system; fix the reported rendering defects within it",
+          "rationale": "The app has never used Tailwind. client/src/styles/tokens.css is a v1 UI-stage design system verified at WCAG 2.1 AA with axe-core in real Chromium, and main.tsx already imports it correctly. Converting would discard the accessibility work for no gain. The reported defects ('two big icons', raw unstyled fallback buttons) are real and remain in scope.",
+          "source": "human",
+          "at": "2026-08-23T22:18:30Z"
+        },
+        {
+          "question": "What baseline should the engineer stage build on, given the prior session's hand-edits?",
+          "optionChosen": "Restore the v1 build configuration from commit 0694779 and re-apply the intent of the Gemini changes on top, rather than patching 06c3d05 forward",
+          "rationale": "Commits 4a879d9..06c3d05 regressed 9 files: root package.json gutted, @classroom-copier/shared dropped from server deps, Prisma/Express/zod downgraded across majors, all 10 test scripts and the seed script repointed at nonexistent paths, app.ts halved. Patching forward would mean rediscovering a known-good configuration that is already in git history.",
+          "source": "human",
+          "at": "2026-08-23T22:19:00Z"
+        },
+        {
+          "question": "Who is the intended audience for the deployed app? (Determines whether Google restricted-scope verification ever applies.)",
+          "optionChosen": "The user plus staff at their school — Google OAuth TESTING MODE with an explicit test-user list (~100 cap). No app verification, no third-party security assessment.",
+          "rationale": "Google does not gate testing mode on verification, so restricted scopes (drive.readonly / drive.metadata.readonly) carry NO paperwork cost at this audience size. This REMOVES the constraint that would otherwise have forced the architect to contort the pre-flight health check to avoid Drive metadata. Architect should now choose Drive scopes on least-privilege and fidelity grounds alone, and must NOT sacrifice health-check fidelity to dodge a restricted classification that costs nothing here. Public launch is out of scope for this phase; if it is ever pursued, restricted-scope verification becomes a real gate and is a separate decision.",
+          "source": "human",
+          "at": "2026-08-23T23:10:00Z"
+        },
+        {
+          "question": "What should happen to the code once it is built and green?",
+          "optionChosen": "Commit to the phase2/real-google-integration branch locally. Do NOT push to GitHub and do NOT merge to main.",
+          "rationale": "Keeps origin/main and the live Render deployment untouched until the user has reviewed the diff and completed the live-OAuth checklist. Live verification has not happened by definition under this run's definition of done, so pushing would put unverified auth code in front of the deploy pipeline. The user reviews and pushes themselves.",
+          "source": "human",
+          "at": "2026-08-23T23:10:30Z"
+        },
+        {
+          "question": "Should the opt-in security reviews (off by default) run for this phase?",
+          "optionChosen": "Yes — security-architect-Agent-C runs at the architect stage against 04-architecture.md, and security-engineer-Agent-C runs at the engineer stage against the implemented code. Equivalent to stages.architect.requiredReviews and stages.engineer.requiredReviews.",
+          "rationale": "User explicitly requested it. This phase introduces a materially different risk surface from the mock-backed v1: real Google OAuth, server-side custody of Google access tokens, JWT/session secrets, and CSRF interactions. v1 stored nothing sensitive because nothing was real. Findings are tagged APPLY/DEFER and folded in by the owning stage; the reviews read and audit only — they never exploit, never scan a live host, never rotate a credential.",
+          "source": "human",
+          "at": "2026-08-23T23:50:00Z"
+        }
+      ],
+      "artifactKind": null,
+      "requiredReviews": []
+    },
+    "pm": {
+      "status": "approved-complete",
+      "revisions": 1,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/features/real-google-integration/01-pm-brief.md",
+      "artifactHash": "d0779377a65072727cf7e319d9184845cec3b78806ee15fdb412fc67ae4cc8a4",
+      "decisions": [
+        {
+          "question": "What is this phase, product-wise: just the real-Google follow-on, or also repair?",
+          "optionChosen": "Double definition: restore the v1 verification surface from 0694779 AND deliver real integration + dedupe; neither alone is the phase",
+          "rationale": "Regressions A1-A9 make the 365-test/11-budget surface unrunnable at HEAD; live OAuth on a broken harness would be un-QC-able.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:30:00Z"
+        },
+        {
+          "question": "What counts as 'already exists' for duplicate prevention?",
+          "optionChosen": "Same-surface title match (CourseWork vs CourseWorkMaterial matched separately), destination checked in BOTH DRAFT and PUBLISHED states",
+          "rationale": "Directions mandate draft+published; cross-surface matching would silently drop real content (an Assignment and a Material sharing a title are different objects).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:30:10Z"
+        },
+        {
+          "question": "How are titles compared (normalization rule)?",
+          "optionChosen": "Unicode NFC + trim + collapse internal whitespace + case-insensitive fold; NO punctuation stripping or fuzzy matching",
+          "rationale": "Biased toward the cheaper failure: a false-negative recreates v1 duplicate behavior for one item; a false-positive skip silently loses content and violates zero-silent-drop.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:30:20Z"
+        },
+        {
+          "question": "When is duplication detected and how does it reconcile against the totality invariant?",
+          "optionChosen": "Detected at pre-flight, disclosed before transfer, counted exactly once as skipped with new closed-vocabulary reason 'duplicate_title'; invariant transferred+fallback_shell+skipped==count(items) unchanged",
+          "rationale": "The invariant is a shipped quality budget; duplicates enter the existing skipped term rather than creating a fourth outcome. Distinct from skippedByUser (product-decided, not user-chosen).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:30:30Z"
+        },
+        {
+          "question": "Does dedupe need a fixture?",
+          "optionChosen": "Yes - new seeded fixture: draft match, published match, normalization-only match, near-miss non-match (Unit 1 vs Unit 11), cross-surface non-match",
+          "rationale": "v1 rule: a behavior without a fixture is not testable and QC certifies only what a fixture exercises.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:30:40Z"
+        },
+        {
+          "question": "What does 'remove all mock/test auth states' mean observably?",
+          "optionChosen": "Production boot refuses providerMode mock (including unset default) with fail-fast error naming accepted values; single canonical value 'google'; mock routes unregistered (404) in real mode; production client bundle greps clean of the mock endpoint string; mock retained for npm test",
+          "rationale": "Each criterion testable without a Google account; closes B12 (real vs google spelling) and the B11 bundle-leak failure mode; kickoff binds mock retention as test double.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:30:50Z"
+        },
+        {
+          "question": "What is the v1-of-phase-2 OAuth scope list?",
+          "optionChosen": "classroom.courses.readonly, classroom.coursework.students, classroom.courseworkmaterials, classroom.topics (NEW - topic creation is a shipped behavior nobody had scoped), drive.file, drive.metadata.readonly (over drive.readonly)",
+          "rationale": "Pre-flight health check needs metadata, not content; architect reconciles against actual calls and may overturn the metadata choice only with evidence. Restricted-scope verification flagged as an external user-clearable gate; testing mode (~100 test users) is the phase ceiling.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:31:00Z"
+        },
+        {
+          "question": "Acceptance criteria for the unreproduced frontend defects (B15 'two big icons', unstyled buttons)?",
+          "optionChosen": "Reproduce-first against a statically-served production build of the RESTORED config; pass = visual parity with dev, zero asset 404s, no user-agent-default buttons, axe 0 critical/serious; honest not-reproducible-post-restore exit allowed; hardcoded onrender.com fallback origin in SignInLanding.tsx is a confirmed in-scope fix",
+          "rationale": "Nobody has reproduced B15; the defect was observed on a deploy of the regressed tree, so restoration is a live suspect. Fixes stay within the token design system per kickoff.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:31:10Z"
+        },
+        {
+          "question": "Production persistence?",
+          "optionChosen": "PostgreSQL on Render (per Directions); dev/test mapping is an explicit architect decision that must preserve the per-file test-DB isolation pattern",
+          "rationale": "Closes B7 and moots the Render-SQLite-durability spike for production; Prisma is single-provider per schema so the test strategy is a real design question, not a footnote.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:31:20Z"
+        },
+        {
+          "question": "Per-area keep/revise/reinvent scoping (open-scope contract)?",
+          "optionChosen": "KEEP: transfer engine, reconciliation invariants, job/executor/lease, fixtures (+1 new), port interface, mock adapter (test-only), design system, monetization stubs, wizard UX core. REVISE: preflight engine (dedupe pass), build config (restore from 0694779 + minimal deltas), persistence (Postgres), deployment/docs, sign-in/pre-flight/summary UX surfaces. REINVENT: RealClassroomProvider (06c3d05 file is reference material at most), auth (real Google OAuth 2.0, server-side tokens, JWT session; AuthFlow+SignInLanding change as one unit with tests per B4)",
+          "rationale": "Downstream stages read this as their scoping contract per feature-mode open-scope rules; brief section 9 carries the full table.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:31:30Z"
+        },
+        {
+          "question": "Phase success bar and definition of done?",
+          "optionChosen": "Automated bar: verify recipe + 11 budgets green at restored-then-extended count, real-provider contract tests green, production mock-unreachability criteria pass, dedupe fixture passes, .env.example complete, Render config documented. Human bar (MANUAL-VERIFY, never claimed by the run): user completes a real transfer via the numbered live-OAuth checklist and a re-run creates 0 duplicates",
+          "rationale": "Kickoff binds: done excludes live-Google verification; checklist findings return as a follow-up pass; no Client Secret handling.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:31:40Z"
+        },
+        {
+          "question": "Directions conflicts C1-C6 (mock removal vs test suite, Tailwind claim, incomplete scopes, workspaces contradiction, dedupe PRD change, .env.example surface)?",
+          "optionChosen": "Each named in brief section 0 with its resolution; none papered over; four resolved by binding kickoff decisions, scope list extended in section 8, .env.example scoped to what the code actually reads",
+          "rationale": "Honesty requirement: Directions internally inconsistent with the repo in six places; the brief records the conflict table as the audit trail.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:31:50Z"
+        },
+        {
+          "question": "Critic F1: extend duplicate prevention to topics, or declare topics a dedupe non-goal?",
+          "optionChosen": "Extend to topics (§6.8): match by §6.2-normalized name (no state/surface clause — topics have neither), reuse the existing destination topic instead of creating; reported via a parallel topicsCreated + topicsReused accounting line outside the item totality invariant; fixture cases added to §6.6",
+          "rationale": "A re-run that skipped every assignment but doubled every topic is the same 'don't double my course' complaint the phase exists to prevent; non-goaling it would leave the headline promise visibly false on the first re-run.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:05:00Z"
+        },
+        {
+          "question": "Critic F2: when an item is both a duplicate-title match and has a health-check issue (trashed/permission-locked attachment), which check wins?",
+          "optionChosen": "The duplicate skip short-circuits: a duplicate_title item never enters the pre-flight action sheet and resolves as exactly one outcome, the duplicate_title skip (§6.3); combined-case fixture row added (§6.6)",
+          "rationale": "Prompting the teacher to resolve attachment health on an item that will never be written demands a decision with no consequence and invites a wrong answer on an item that is transferred.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:05:30Z"
+        },
+        {
+          "question": "B15 evidence changed post-draft (reproduced and root-caused in inputs/b15-two-big-icons-diagnosis.md): how do the §7.2 acceptance criteria change?",
+          "optionChosen": "Rewrite against the known cause: retire reproduce-first staging and the not-reproducible-post-restore exit; the fix is re-authoring SignInLanding.tsx in the existing design-token system (no Tailwind, per binding kickoff decision); add a test/quality/ guard asserting no Tailwind utility classes under client/src as a phase requirement (§7.2c)",
+          "rationale": "SignInLanding.tsx is the only file under client/src using Tailwind utilities in a project with no Tailwind — the inert classes explain both the 898px icons and the unstyled buttons as one defect. The guard is a cheap grep-shaped assertion that would have caught the introducing commit.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:06:00Z"
+        },
+        {
+          "question": "Critic F4: should the Directions' ambiguous 'pass Google access tokens to server routes' phrasing get a C-number like the other five conflicts?",
+          "optionChosen": "Yes — recorded as C7: server-side-only token custody (§7.1e); browser holds only the HttpOnly session cookie; no access token ever reaches the client bundle",
+          "rationale": "The resolution already existed in §7.1e; naming it C7 makes the conflict ledger complete at zero cost.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:06:30Z"
+        }
+      ],
+      "artifactKind": null,
+      "requiredReviews": []
+    },
+    "ux": {
+      "status": "approved-complete",
+      "revisions": 1,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/features/real-google-integration/02-ux-workflow.md",
+      "artifactHash": "ba759e5f8735c5a5704e36ac5878e087bd829640c28f82f646596c881977f70f",
+      "decisions": [
+        {
+          "question": "Popup vs full-page redirect for Google sign-in?",
+          "optionChosen": "Full-page redirect, not a popup",
+          "rationale": "More reliable across school-network/Chromebook environments (popup blockers are a common classroom-device failure mode); matches the standard authorization-code flow with server-side token exchange (C7).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:00Z"
+        },
+        {
+          "question": "How does the client obtain the Google authorization URL?",
+          "optionChosen": "An ordinary fetch to the backend before navigating, not a direct browser navigation to a backend-constructed URL",
+          "rationale": "This is what makes the pre-redirect leg cold-start-coverable at all by the existing api-client.ts machine (Delta P0-1).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:01Z"
+        },
+        {
+          "question": "What does the OAuth callback redirect to?",
+          "optionChosen": "The frontend origin (always-warm static site), which confirms sign-in via its own cold-start-covered fetch",
+          "rationale": "A backend-rendered post-auth landing state would leave the entire confirmation step uncovered by the existing cold-start machine.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:02Z"
+        },
+        {
+          "question": "Should the pre-redirect warm-up block the redirect or fire in parallel?",
+          "optionChosen": "Blocks the redirect until the backend confirms warm",
+          "rationale": "Trades a small amount of extra wait for a real reduction in the odds of hitting the structurally-uncoverable mid-flow dead-screen window, which is the higher-cost failure.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:03Z"
+        },
+        {
+          "question": "What replaces the mock account-picker screen?",
+          "optionChosen": "Retired outright, no in-app replacement screen",
+          "rationale": "Google's own chooser fully absorbs that responsibility off-domain; no UI budget spent redesigning a screen that no longer needs to exist.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:04Z"
+        },
+        {
+          "question": "Where does the duplicate/topic-reuse disclosure live?",
+          "optionChosen": "Folded into the existing Ready to Transfer confirmation checkpoint, not a new modal or wizard step",
+          "rationale": "Duplicates are informational, not decision-requiring (theme-4, not theme-5), so this keeps the 'silent when nothing needs a decision' principle intact while satisfying PM §6.3's disclosed-before-commit requirement.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:05Z"
+        },
+        {
+          "question": "Do duplicate items appear in the Action Sheet Modal?",
+          "optionChosen": "No — excluded entirely from its count and rows (PM §6.3 precedence)",
+          "rationale": "The modal should only ever reflect items genuinely requiring a teacher decision; duplicates never enter it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:06Z"
+        },
+        {
+          "question": "How should duplicate-skip vs user-chosen-skip be presented in the Completion Summary stat tiles?",
+          "optionChosen": "Two separate stat tiles, not one 'Skipped' tile with a sub-breakdown",
+          "rationale": "The trust distinction ('already there' vs 'we lost it') needs to be visible at a glance, not one interaction away behind a tooltip or expand control.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:07Z"
+        },
+        {
+          "question": "How should topics created vs reused be reported?",
+          "optionChosen": "Two adjacent stat tiles plus a collapsed-by-default per-topic detail panel, replacing v1's single 'created/mapped' tile",
+          "rationale": "Created and reused are now materially different outcomes a teacher needs to tell apart, unlike v1 where mapping vs creating had no product-visible distinction.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:08Z"
+        },
+        {
+          "question": "Should session-expiry and Google-token-failure mid-transfer share one interrupt banner?",
+          "optionChosen": "No — two visually and semantically distinct interrupt banners",
+          "rationale": "Their causes, recovery actions, and what's actually still safe differ enough that conflating them would send a teacher down the wrong recovery path.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:09Z"
+        },
+        {
+          "question": "What happens to the Selection screen's duplicate-run warning notice?",
+          "optionChosen": "Flips from warning to reassurance copy, superseding v1's 'this check does not exist yet' language entirely",
+          "rationale": "The product's own behavior changed; the old warning copy would now be actively false if left in place.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:10Z"
+        },
+        {
+          "question": "Who specifies the live-OAuth checklist's shape?",
+          "optionChosen": "UX specifies shape and content requirements here (§7: numbered, grouped, checkbox-style steps with inline troubleshooting and a concrete success checkpoint); engineer fills in as-built specifics",
+          "rationale": "Satisfies the binding kickoff decision that the checklist is a first-class UX deliverable, not documentation-as-afterthought, per the process lesson that the teacher-user couldn't act on prior unstructured instructions.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:11Z"
+        },
+        {
+          "question": "Should wireframes be produced, and for which screens?",
+          "optionChosen": "Yes, for every materially-changed screen only (4 files); no redraw of Keep screens",
+          "rationale": "Matches the assignment's explicit scoping instruction rather than defaulting to redrawing the whole wizard.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T22:53:12Z"
+        },
+        {
+          "question": "Critic F1: §7 live-OAuth checklist's inline-troubleshooting list omits B7 (PostgreSQL provisioning on Render), which PM §7.3 requires.",
+          "optionChosen": "Add a bullet to §7 item 3's list covering B7 in the same plain-language register as the other six bullets.",
+          "rationale": "PM §7.3 explicitly names B7 as required checklist content; same failure class/severity as the included items.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        },
+        {
+          "question": "Critic F2: Delta P0-2's fail-outright branch doesn't say how an unattempted item resolves into the closed transferred/fallback_shell/skipped vocabulary.",
+          "optionChosen": "Record as an explicit open question for the architect (not resolved here) — naming both the vocabulary-extension question and the P0-3-style distinguishability follow-on if a new skip reason is introduced.",
+          "rationale": "Mechanism choice (pause-and-wait vs. fail-outright) is architect scope; the doc should surface the tension rather than let it be discovered late.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        },
+        {
+          "question": "Critic F3: no explicit statement closes 'user closes the browser tab mid-redirect'.",
+          "optionChosen": "Add one sentence to §5, parallel to the Back-button treatment, stating this is not a distinct failure state under the full-page-redirect model (Decision 1).",
+          "rationale": "No parent tab is left waiting on a popup under the redirect model; the ordinary session check on next visit handles it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        },
+        {
+          "question": "Critic F4: Next Handoff doesn't flag that Completion Summary stat tiles grew from 5 (v1) to 7 (this phase), against v1's five-tiles-in-a-row layout assumption.",
+          "optionChosen": "Add a line to Next Handoff flagging the tile-count growth (topics split into created/reused, skips split into duplicate/user-chosen) as a layout-level problem for UI to resolve, citing v1's implemented 1024px/768px stat-grid breakpoints (verified in client/src/styles/tokens.css).",
+          "rationale": "UI runs next and reads Next Handoff; a 7-tile count may break the 5-tile row/reflow assumption outright, not just need distinct coloring.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        },
+        {
+          "question": "Critic F5 (DEFER, applied as trivially cheap): Decision 11 quotes v1's notice copy in quotation marks when it isn't a literal quote.",
+          "optionChosen": "Rephrase without quotation marks, describing v1's notice by its actual effect (warned that re-running creates duplicate drafts) rather than presenting it as a direct quote.",
+          "rationale": "Trivially cheap accuracy fix; avoids the doc misrepresenting v1's actual copy.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        },
+        {
+          "question": "Critic F6 (DEFER, applied as trivially cheap): §7 item 4's test-user pre-flight step doesn't mention the secondary co-teacher persona.",
+          "optionChosen": "Add one clause to §7 item 4 noting the test-user list must include anyone signing in during testing, not just the primary teacher.",
+          "rationale": "Natural corollary of the same step engineer will already write; closing it explicitly avoids leaving it to be inferred.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        }
+      ],
+      "artifactKind": null,
+      "requiredReviews": []
+    },
+    "ui": {
+      "status": "approved-complete",
+      "revisions": 1,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/features/real-google-integration/03-ui-direction.md",
+      "artifactHash": "712d817f55574c6953edd62c46ea404b9d86e5ff6b57e39c1914876263c4b11e",
+      "decisions": [
+        {
+          "question": "How to resolve the 5→7 stat-tile problem UX flagged?",
+          "optionChosen": "Regroup into two labeled ledger sections (4-tile 'Items scanned' + 3-tile 'Reported separately'), reusing the existing 1024px/768px breakpoints, over extending the row to repeat(7,1fr) or inventing a new breakpoint",
+          "rationale": "A flat 7-across row makes every tile narrower at the exact moment two labels got longer; the two-group split makes the invariant membership visible by layout, not just by the reconciliation sentence, and reuses the system's own established two-breakpoint strategy.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:00Z"
+        },
+        {
+          "question": "Should the reconciliation line's term order match the UX worked-example order or the new tile order?",
+          "optionChosen": "Changed to match the new tile order (transferred, fallback, already-existed, by-you)",
+          "rationale": "The wireframe's own stated reason for the line's design is that the arithmetic is checkable by eye against the tiles above it — that only holds if the two orders match.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:01Z"
+        },
+        {
+          "question": "What visual treatment distinguishes a duplicate-skip from a user-chosen skip beyond color?",
+          "optionChosen": "New glyph (≡) plus the existing teal 'verified' family (--teal-700/--teal-100, already used for badge-sis and the Recommended stamp), added via an additive skipReason prop on OutcomePill/OutcomeIcon",
+          "rationale": "Color alone is insufficient per the project's own accessibility rule; teal's existing meaning in this system ('verified') is a direct semantic fit and avoids growing the palette for its own sake. Contrast computed at ≈6.50:1, clears AA.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:02Z"
+        },
+        {
+          "question": "How should the three sign-in failure states (1e/1f/1g) be visually differentiated?",
+          "optionChosen": "One shared visual treatment (inline amber banner on the landing screen), differentiated by copy only, never a full-page takeover",
+          "rationale": "None of the three lost data or is more broken than another; differentiating them visually would overstate a severity difference that doesn't exist, and rendering inline (never leaving the landing screen) reinforces 'recoverable, not broken' structurally.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:03Z"
+        },
+        {
+          "question": "How should the mid-wizard (4a) vs mid-transfer (4b/4c) interrupts be built?",
+          "optionChosen": "4a reuses the existing .error-state/.notice-glyph combination verbatim; 4b/4c get a new, heavier .interrupt-banner distinct from the existing slim .rate-banner",
+          "rationale": "4a fully replaces its screen (matches error-state's existing use); 4b/4c must coexist with a frozen, still-visible progress bar, which error-state cannot do, and must read as more consequential than the passive rate-limit strip.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:04Z"
+        },
+        {
+          "question": "How should the three expand/collapse surfaces (duplicate list, topic-reuse list, topic detail panel) be built?",
+          "optionChosen": "One new shared Disclosure component built on native <details>/<summary>, reused in all three places",
+          "rationale": "Native semantics give the required keyboard/AT behavior for free, matching UX's accessibility requirement without hand-rolled ARIA or a bespoke JS open/closed state per surface.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:05Z"
+        },
+        {
+          "question": "How should the real 'Sign in with Google' button be styled against Google's branding requirements?",
+          "optionChosen": "Treated as a bounded, documented exception to the token system (Google's fixed colors/font/logo, contained to two CSS classes) rather than reskinning it into the product palette or letting Tailwind render it",
+          "rationale": "Google's branding guidelines (verified live 2026-08-23) are non-negotiable for a custom button; the exception is scoped to exactly two classes and does not set precedent elsewhere in the product.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:06Z"
+        },
+        {
+          "question": "Is the B15 diagnosis's claim that SignInLanding.tsx is the only Tailwind-broken file under client/src accurate?",
+          "optionChosen": "No — a broader Tailwind-class-shaped scan run this stage found AuthFlow.tsx also carries inert Tailwind classes (min-h-screen, bg-slate-50, flex, items-center, justify-center, text-slate-500, font-medium); regression-guard scope corrected accordingly",
+          "rationale": "The diagnosis's grep pattern was built from the five substrings that reproduced the 898px-icon symptom specifically, not a general Tailwind sweep; a guard built from that literal pattern would ship green with AuthFlow.tsx still broken.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:07Z"
+        },
+        {
+          "question": "Should mockups be produced, and for which surfaces?",
+          "optionChosen": "Yes, for the three highest-risk new surfaces only (sign-in landing, 7-tile Completion Summary, Ready-to-Transfer disclosure) — not a full redraw of every changed screen",
+          "rationale": "The remaining new patterns (.signin-error, .interrupt-banner) are each shown once in the mockup and reused by reference for their other call sites; a second rendering of an already-shown pattern adds no new information.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:08Z"
+        },
+        {
+          "question": "Should the UI stage take up the design-system sync offer to Claude Design?",
+          "optionChosen": "Declined under the Beast Mode repository-boundary override",
+          "rationale": "Publishing outward-facing hosted state is an offer Beast Mode's own protocol never auto-accepts; recorded as MANUAL-VERIFY for a human to take up interactively.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T23:40:09Z"
+        },
+        {
+          "question": "Does this phase warrant generated imagery (hero images, illustrations, empty-state art)?",
+          "optionChosen": "None needed — same reasoning as v1, unchanged by this phase's scope (single-purpose B2B/education utility; imagery would work against the plainspoken 'not clever' register).",
+          "rationale": "Carried forward from v1's imagery assessment; this phase adds no consumer-facing surface that would change that assessment.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-23T00:00:00Z"
+        }
+      ],
+      "artifactKind": null,
+      "requiredReviews": []
+    },
+    "architect": {
+      "status": "approved-complete",
+      "revisions": 1,
+      "criticPasses": 0,
+      "checkpoint": {
+        "sectionsCompleted": [
+          "read-reports",
+          "read-source",
+          "verify-findings",
+          "P0-fix-design-4.3",
+          "F2-6.1",
+          "F1-6.2",
+          "F6-5.2a",
+          "F9-5.1",
+          "S1-S9-8.0",
+          "F10-F4-9.1-9.1a",
+          "MDB-complete-12-modules"
+        ],
+        "currentSection": "diagrams-deltas-assumptions",
+        "draftPath": "docs/features/real-google-integration/04-architecture.md",
+        "notes": "MDB now 12 modules (was 10): added server-typecheck-clean (F3) and quality-budgets-registration (F8). YAML validated via node, no dangling deps. reconciliation.ts + 4 test files + 3 package.json + docs/project-profile.md now all owned. Remaining: update 2 diagrams, Deltas table (P0-B resolution), Assumptions, Risks #9, Next handoff (F11 module count), 8.1 budget rows, F13-F15 DEFER backlog."
+      },
+      "artifactPath": "docs/features/real-google-integration/04-architecture.md",
+      "artifactHash": "c9da602beff51763d2d3c590090875222d24693fda577b5d062c82cfe85f4d32",
+      "decisions": [
+        {
+          "question": "Decision A — does this app need access_type=offline?",
+          "optionChosen": "No. Access-token-only; no refresh token requested or stored.",
+          "rationale": "In OAuth Testing status, a stored refresh token would expire on the same 7-day cycle regardless, so offline access buys no durability advantage here; a ~1h access token covers any realistic interactive transfer. Resumability comes entirely from Decision F, not from the token's lifetime — the two now agree by construction.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:00Z"
+        },
+        {
+          "question": "Decision B — token custody and session design",
+          "optionChosen": "New GoogleAccount model, AES-256-GCM at rest with a dedicated TOKEN_ENCRYPTION_KEY (separate from SESSION_SECRET); Session.accountId stays a plain, un-FK'd String (polymorphic, matching the existing MockAttachment idiom); session cookie shape unchanged from v1; sign-out best-effort revokes the Google token.",
+          "rationale": "Server-side-only custody per PM C7. A dedicated encryption key limits blast radius of a SESSION_SECRET leak. Prisma cannot express a FK to either of two tables, so the polymorphic accountId reuses a pattern this schema already has.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:01Z"
+        },
+        {
+          "question": "Decision C — the duplicate-detection query",
+          "optionChosen": "Two paginated destination reads (courseWorkStates/courseWorkMaterialStates=[DRAFT,PUBLISHED]) sharing post-enumerator's existing pagination loop; same-surface matching enforced structurally via a sourceType-prefixed map key (not a separate precedence rule); no write-time re-check.",
+          "rationale": "Matches the verified Google default (PUBLISHED-only unless stated explicitly). Reuses the existing enumerator rather than a second hand-rolled paginator. selection_screen_call_cost is unaffected since these reads only happen inside POST /courses/:id/preflight.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:02Z"
+        },
+        {
+          "question": "Decision D — topic dedupe",
+          "optionChosen": "Name-normalized match (PM §6.2's rule, no state/surface clause), first-by-return-order on ambiguity, reuse map persisted on PreflightScan/TransferJob, topicsCreated/topicsReused tracked as a parallel pair outside the item invariant.",
+          "rationale": "Matches PM §6.8 exactly; reuses the same normalization function as coursework dedupe rather than inventing a second rule.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:03Z"
+        },
+        {
+          "question": "Decision E — the OAuth cold-start window (UX Delta P0-1)",
+          "optionChosen": "Blocking pre-redirect warm-up + frontend-routed callback confirmation close two of three legs. The callback route's own processing time (Google's redirect landing on a possibly-cold backend) is named explicitly as architecturally unclosable, not claimed fixed.",
+          "rationale": "A page cannot render before it loads; no client-side mechanism can cover a request with no page loaded yet. Honesty required by UX's own instruction rather than overclaiming a fix.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:04Z"
+        },
+        {
+          "question": "Decision F — token-failure mid-transfer mechanism (UX Delta P0-2)",
+          "optionChosen": "Pause-and-wait, but DB-durable: a nullable TransferJob.googleReauthRequiredAt field (not a new status), executor lease released (not activeAccountId), remaining items stay pending, resumed by an explicit resume() call re-entering the same execution entry point job creation uses, bounded by a reconciler grace period (GOOGLE_REAUTH_GRACE_MS). Reuses existing skip reasons (provider_error, server_interrupted) — no new vocabulary needed.",
+          "rationale": "An in-process wait would violate the same durability driver v1 already rejected for job execution generally. This design gets pause-and-wait's better UX (matches UX's own acceptance scenario 9's 'the job resumes' language) without that regression, by reusing the DB-checkpoint + reconciler machinery already trusted for interruption recovery.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:05Z"
+        },
+        {
+          "question": "Decision G — TransferJobStatus duplicate-count field",
+          "optionChosen": "New skippedDuplicate count field (GROUP-BY-derived, never an independent counter); additive skipReason prop on OutcomePill/OutcomeIcon; skippedTotal = skippedByUser + skippedBySystem + skippedDuplicate by construction.",
+          "rationale": "Folding duplicate_title into skippedBySystem would make the existing systemSkipLine copy actively false for duplicates, exactly the gap UI's Delta identified.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:06Z"
+        },
+        {
+          "question": "Decision H — build restoration baseline",
+          "optionChosen": "Precise restoration of root/server package.json, server/src/app.ts (buildApp shape), and server/src/config.ts from commit 0694779, verbatim except two deliberate deltas: googleapis + google-auth-library dependencies, and the root build script restored to include the server. Lockfile regenerated and committed.",
+          "rationale": "The lockfile is an intact, uncorrupted record of the v1 tree; restoring makes package.json and the lockfile agree with near-zero dependency churn versus patching 06c3d05's downgraded majors forward.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:07Z"
+        },
+        {
+          "question": "Decision I — Postgres production, dev/test mapping",
+          "optionChosen": "Single templated schema, provider-portable since every vocabulary is already a String column; a pregenerate script selects sqlite (dev/test, default) or postgresql (production) via DATABASE_PROVIDER. Production boots via idempotent `prisma db push`, explicitly not `migrate deploy`. Per-file SQLite test isolation fully preserved.",
+          "rationale": "Avoids two hand-maintained schema files drifting apart, the exact failure class this project's own Lessons Learned already names. db push trades away production migration rollback history, an explicit accepted cost at this project's single-tenant stakes.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:08Z"
+        },
+        {
+          "question": "Decision J — the no-Tailwind guard (PM §7.2c)",
+          "optionChosen": "Shape-based regex (Tailwind class prefixes, not the diagnosis doc's 5 literal substrings) at client/src/test/quality/no-tailwind.quality.test.ts, proven red against AuthFlow.tsx before the fix lands.",
+          "rationale": "A literal-substring guard already demonstrably missed AuthFlow.tsx's inert classes; a guard that would not have caught what it exists to catch is not a guard.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:09Z"
+        },
+        {
+          "question": "Decision K — Render deployment topology",
+          "optionChosen": "Two services, each with its OWN scoped build command (api: shared+server only; web: shared+client only) — neither runs the root build script, which is reserved for local/CI verification. npm ci on both, sequenced after the lockfile regeneration. CORS confirmed already correctly shaped for the CSRF header's preflight.",
+          "rationale": "Conflating the root verification script with a per-service Render build command is exactly the shape of the bug already hit once (backend building the client instead of the server).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:10Z"
+        },
+        {
+          "question": "Scope list reconciliation (PM §8)",
+          "optionChosen": "Confirmed with zero drops. drive.metadata.readonly reaffirmed over drive.readonly on least-privilege/fidelity grounds alone.",
+          "rationale": "Every scope PM listed maps to a named RealClassroomProvider method call; no evidence found that metadata reads are insufficient for the health check.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:11Z"
+        },
+        {
+          "question": "Live-OAuth checklist delivery surface",
+          "optionChosen": "A new markdown document (docs/handoff/connecting-to-live-google.md) supersedes the existing .docx as the source of truth; the docx stays in the repo as a historical artifact, not deleted.",
+          "rationale": "Git-diffable, reviewable, no proprietary tooling required to edit.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:12Z"
+        },
+        {
+          "question": "Diagrams — offer and produce?",
+          "optionChosen": "Yes — two Mermaid sequence diagrams (OAuth cold-start sequence; token-failure pause-resume sequence).",
+          "rationale": "Both new runtime scenarios are genuinely non-obvious multi-actor sequences that benefit from a visual, and neither crosses the repository boundary.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-24T00:15:13Z"
+        }
+      ],
+      "artifactKind": "architecture",
+      "requiredReviews": []
+    },
+    "engineer": {
+      "status": "approved-complete",
+      "revisions": 3,
+      "criticPasses": 0,
+      "checkpoint": {
+        "sectionsCompleted": [
+          "cycle3-orientation",
+          "QA-7 drive.metadata.readonly scope restored (commit a18a751)",
+          "QA-7 capability test oauth-scopes.test.ts — 4 assertions, 3 mutation-proven red",
+          "QA-7 scope-list duplication audit — no test literals existed anywhere",
+          "QA-7 other Drive callers checked — files.copy residual recorded as MANUAL-VERIFY",
+          "QA-doc-1 consent-screen preview + QA-7 troubleshooting line (commit b756ac2)",
+          "05-implementation.md §10",
+          "full verify recipe + 16/16 budgets green"
+        ],
+        "currentSection": "complete — cycle 3 done",
+        "draftPath": "docs/features/real-google-integration/05-implementation.md",
+        "notes": "Commits a18a751 (QA-7) and b756ac2 (QA-doc-1). npm test 26+337+268 pass; npm run build pass; npm run lint pass; check:citations zero unresolved; budgets 16/16 PASS incl. both blocking rows. §1/§8 preserved-premise convention untouched — §10 supersedes rather than rewrites. BLOCKED WRITE: backlog_add refused — backlog.md was hand-edited before this cycle (dirty at ef5a2d7, plus untracked backlog.md.json), so the structured channel is poisoned; the files.copy residual is recorded in 05-implementation §10 as MANUAL-VERIFY instead of hand-editing. Cost line: UNCAPPED — $0.00 (no cap declared — recorded, not capped)."
+      },
+      "artifactPath": "docs/features/real-google-integration/05-implementation.md",
+      "artifactHash": "7084865cd6822e66fb3332b4a15aa547d2337eda2d57fe3c50282db6a3268b1b",
+      "decisions": [
+        {
+          "question": "How should the API expose topic counts after the DB column topicsCreatedOrMapped was split into topicsCreatedCount + topicsReusedCount?",
+          "optionChosen": "Keep topicsCreatedOrMapped in TransferJobStatus as a DERIVED sum of the two new fields, and add both new fields alongside it",
+          "rationale": "The MDB instructs replacing the database column, which was done. The API field had existing client consumers and removing it bought nothing; computed from the two counters it cannot drift.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T18:50:00.000Z"
+        },
+        {
+          "question": "Should the 1e/1f/1g sign-in error banner carry its own 'Try again' button, as sketched in the wireframe?",
+          "optionChosen": "No - the existing Google CTA directly above is the retry",
+          "rationale": "UI 3.1's table is the binding spec and describes only a banner below the button. Two controls with the same accessible name doing the same thing is worse than one.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T18:50:00.000Z"
+        },
+        {
+          "question": "What to do with client/src/features/auth/AccountPicker.tsx once AuthFlow stops routing to it?",
+          "optionChosen": "Delete it, and remove listMockAccounts/signIn from api-client",
+          "rationale": "A string literal in api-client.ts ships in the production bundle whether or not anything calls it. Leaving a mock sign-in UI in the tree contradicts the mock-unreachability non-negotiable.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T18:50:00.000Z"
+        },
+        {
+          "question": "Google's sign-in button is a documented exemption from the contrast tokens - should a color-contrast suppression be added?",
+          "optionChosen": "No. Measured #1F1F1F on #FFFFFF at 16.48:1, which passes AA, so no suppression exists anywhere",
+          "rationale": "Resolves the MANUAL-VERIFY in 8.4a arithmetically. A suppression for a violation that never fires is its own kind of lie.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T18:50:00.000Z"
+        },
+        {
+          "question": "How should the OAuth success redirect signal the callback return leg to the frontend?",
+          "optionChosen": "?auth=callback on the success redirect, stripped by history.replaceState before React paints",
+          "rationale": "Without a marker the 1d 'Signing you in...' state is unreachable. The authorization code itself never reaches the frontend URL at all.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T18:50:00.000Z"
+        },
+        {
+          "question": "jsdom cannot exercise <summary>'s Enter-key activation. How should the Disclosure keyboard requirement be tested?",
+          "optionChosen": "Assert the element choice, summary focusability, click toggling and the absence of hand-rolled ARIA; record the keyboard path as MANUAL-VERIFY",
+          "rationale": "A keyboard assertion here would test jsdom's gaps, not the component. The keyboard behaviour follows from the element choice, and the element choice is what is pinned down.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T18:50:00.000Z"
+        }
+      ],
+      "artifactKind": null,
+      "requiredReviews": []
+    },
+    "qa": {
+      "status": "approved-complete",
+      "revisions": 1,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/features/real-google-integration/06-qa-report.md",
+      "artifactHash": "68d321c051f1f0cfa350d10f0999e0944eed1c6456cd8e50485212146517e84b",
+      "decisions": [
+        {
+          "question": "Does the shipped production boot actually refuse GOOGLE_PROVIDER_MODE=mock/unset under NODE_ENV=production, as PM brief §7.1a, 04-architecture.md §8.3, and 05-implementation.md all claim?",
+          "optionChosen": "NO — reproduced live: booted server/dist with NODE_ENV=production and GOOGLE_PROVIDER_MODE unset, it boots successfully and serves the mock provider (`providerMode:\"mock\"` in the boot log). config.ts's googleProviderMode default has no isProductionLike gate anywhere; app.ts's only guard fires when mode is explicitly 'google' but resolves wrong, never when mode is mock/unset in production. composition-root.test.ts's 5 tests never cover this branch. Filed as QA blocker.",
+          "rationale": "This is PM brief automated-bar item 3 and the phase's #3 headline requirement (no reachable mock in a production build). A production deploy that simply forgets to set GOOGLE_PROVIDER_MODE=google boots fine and silently serves fixture data to a real signed-in teacher.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T21:00:00Z"
+        },
+        {
+          "question": "Does the Selection screen / Ready-to-Transfer persistent notice carry the required reassurance copy (UX Decision 11, Acceptance Scenario 16), replacing v1's duplicate-risk warning?",
+          "optionChosen": "NO — confirmed live and in source: NarrationBanner.tsx's DUPLICATE_RUN_NOTICE constant still reads v1's stale warning verbatim ('Running the same copy more than once creates duplicate drafts — Classroom Copier does not check for existing copies yet.') and is rendered unchanged on both SelectionScreen.tsx and ReadyToTransfer.tsx. selection.test.tsx and preflight.test.tsx both assert this stale text as correct, citing 'Scenario 6' (a v1 scenario) rather than Phase 2's Scenario 16. Filed as QA blocker.",
+          "rationale": "This is the exact class of stale, false claim the project's own project-profile.md Lessons-learned section warns about, and it is user-facing: every teacher sees a banner telling them the opposite of the product's actual (fixed) behavior, directly undermining this phase's headline value proposition.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T21:00:30Z"
+        },
+        {
+          "question": "QA verdict for this stage.",
+          "optionChosen": "FAIL (back to engineer) — two blocker findings (production mock-boot fail-fast absent; stale duplicate-run notice copy), plus major findings (Ready-to-Transfer headline count doesn't exclude duplicates per Acceptance Scenario 10/13; focus management missing on all new 1e/1f/1g/4a/4b/4c screens per UI §6). Everything else verified strong: duplicate/topic dedupe mechanics, reconciliation invariant, real-OAuth flow incl. PKCE, mock-unreachability in the bundle/routes, 7-tile Completion Summary, duplicate-vs-user-skip pill, no-898px-icon fix, no-unstyled-button fix — all confirmed in a real Chromium browser against the statically-served production build.",
+          "rationale": "Full findings and evidence in docs/features/real-google-integration/06-qa-report.md.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T21:01:00Z"
+        },
+        {
+          "question": "Cycle 2: do the engineer's fixes for QA-1 through QA-4 actually hold when reproduced live, not just read from 05-implementation.md §9?",
+          "optionChosen": "YES for all four, independently reproduced live — QA-1: production boot exits non-zero on unset/mock/typo GOOGLE_PROVIDER_MODE and boots on google (re-verified by rebuilding and booting server/dist myself). QA-2: the Selection/Ready-to-Transfer banner renders the exact reassurance copy with the teal-700/teal-100 pairing (measured computed style), not v1's warning. QA-3: driving the real F15 fixture pair produced 'Ready to copy 3 of 7 posts' with the correct 4 duplicate titles skipped. QA-4: document.activeElement is the .signin-error banner on the consent-denied error state, and remains <body> (does not steal focus) on a clean landing — the negative case holds behaviorally, not just in a unit test.",
+          "rationale": "The assignment required driving the real UI in a browser, not trusting the implementation doc's claims — the same discipline that caught QA-1/QA-2 in cycle 1.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T21:15:00Z"
+        },
+        {
+          "question": "Independent sweep for a ninth instance of the project's recurring 'stale claim not read from the actual code' pattern — found anything beyond the engineer's own four?",
+          "optionChosen": "YES — QA-7 (major, new): the shipped GOOGLE_SCOPES array (server/src/adapters/google/oauth-client.ts) has only drive.file, missing drive.metadata.readonly that 04-architecture.md's own design and the project's verified-facts input doc both call for. drive.file cannot read a Drive file the app did not create, which is exactly what driveFileHealth() tries to do against a teacher's pre-existing attachments — likely making every real attachment mis-classify as trashed/permission-locked on live Google. The 2026-08-26 security-engineer report already saw this exact scope substitution (S9) but only evaluated exposure/blast-radius, never functional sufficiency. Cannot be confirmed without live Google credentials (QA sought none, per instruction); filed as backlog QA-0031 (high) with a concrete, credential-free next step (a developer smoke-test against one non-app-created Drive file).",
+          "rationale": "This is a stronger instance of the recurring pattern than a copy/citation drift: a design decision that was researched and written down (in the verified-facts input doc) and then not followed at implementation, uncaught by two prior reviews asking different questions of the same three lines.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T21:15:30Z"
+        },
+        {
+          "question": "Cycle 2 QA verdict.",
+          "optionChosen": "PASS WITH FINDINGS — both blockers (QA-1, QA-2) and both majors (QA-3, QA-4) from cycle 1 independently confirmed closed by live reproduction; no new blocker; one new major (QA-7) filed with a clear, cheap, credential-free next step; the teacher-facing handoff doc reviewed end to end and judged followable with one minor gap (no consent-screen scope preview) plus a note to add once QA-7 is resolved; the stale Playwright E2E suite judged worse-than-absent while broken and recommended for higher priority than its filed severity implies.",
+          "rationale": "Full findings and evidence in docs/features/real-google-integration/06-qa-report.md Cycle 2 section.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-26T21:16:00Z"
+        }
+      ],
+      "artifactKind": null,
+      "requiredReviews": []
+    },
+    "qc": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/features/real-google-integration/07-qc-report.md",
+      "artifactHash": "b149f6b71e2bf294739bb8e4480fd4e7bd68746c68cc5f4a7d03777460d214ca",
+      "decisions": [],
+      "artifactKind": null,
+      "requiredReviews": []
+    }
+  },
+  "pendingFeedback": {
+    "stage": "engineer",
+    "source": "critic",
+    "text": "6 APPLY findings. Both P0s verified fixed by mutation (I reverted the fixes and watched the budgets go red), reconciliation's three-way split is structurally sound, courseWorkStates/courseWorkMaterialStates are explicit on both destination reads, no test was weakened. Apply: (F1, significant) processItem's catch calls recordItemFailure for AuthExpiredError even when attemptedAt is null and nothing was attempted — a token expiring during copyAttachmentToMyDrive (transfer-engine.ts:1176, before createWithBackoff:1207) permanently marks the post skipped/provider_error, so resume() never retries it and the post is silently lost; leave such items pending and rethrow, plus a reauth-resume budget case. (F2) shared.test.tsx:298 \"routes every consumer through ONE label function\" and the CSV case both assert duplicated string literals, so nothing pins that buildLogCsv and OutcomePill share outcomeText — the MDB demands \"asserted by import\"; derive the expected CSV Outcome column from outcomeText and loop over SkipReasonSchema.options. (F3) transfer.test.tsx's \"differ in heading, glyph AND button label\" reads .interrupt-head's full textContent, which contains the glyph, so the heading assertion passes on the glyph difference alone; read span:last-child. (F4) OutcomePill.tsx:21-32 re-implements the skip partition that shared exports (isUserSkip/isDuplicateSkip) — use them. (F5) project-profile.md:91-95's \"every new row enters as advisory, nothing promotes itself\" is contradicted by the two blocking rows above it; record 04 §8.1's exception. (F6) add one reauth-resume case that pins the outcome:'pending' filter alone — reverting it leaves that file 7/7 green today because fix 3 masks it; run the F15 pair so terminal duplicate rows with attemptedAt null are present at resume. 6 DEFER findings in the report.",
+    "reportPath": "docs/features/real-google-integration/critic-reports/2026-08-26-engineer-p1.md"
+  },
+  "backlog": [
+    {
+      "id": "2cb1f28f-7634-42fb-82fe-0cb37e55c1f2",
+      "stage": "pm",
+      "text": "real-google-integration: Google app-verification / restricted-scope security-assessment submission (Drive read scopes). Explicitly OUT of Phase 2 — the phase ceiling is OAuth testing mode (explicit test users). Submit only after the live-OAuth checklist has succeeded and the scope list is final; include a last scope-minimization check (drive.metadata.readonly vs drive.readonly evidence from the shipped health check) before submitting.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-23T22:27:51.974Z"
+    },
+    {
+      "id": "d0d026c5-ad81-4b39-95a1-c9d90ae84e27",
+      "stage": "pm",
+      "text": "real-google-integration: Follow-up pass for live-OAuth checklist findings. Per kickoff decision, done = automated green + numbered checklist handed to the user; whatever the user hits while executing it (GCP console, redirect URI, Render env, CORS, first real transfer, real re-run dedupe check) comes back as a scoped fix pass. Open until the user reports a completed real transfer and a 0-duplicate re-run.",
+      "severity": "high",
+      "status": "open",
+      "createdAt": "2026-08-23T22:27:54.796Z"
+    },
+    {
+      "id": "85560ca9-84a4-4dcc-bc2e-04ada64f9764",
+      "stage": "pm",
+      "text": "real-google-integration: Provenance-based exact re-run detection as a dedupe upgrade — v1-of-phase-2 dedupe is normalized-title-only by design (brief §6.7: no content diff, no fuzzy match, no merge/overwrite). A future slice could tag created drafts with provenance so an exact re-run of the same source→target is recognized as such and offered richer options (update/merge) instead of title-skip.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-23T22:27:57.982Z"
+    },
+    {
+      "id": "39885cda-964c-48de-8833-d65118219ea0",
+      "stage": "ux",
+      "text": "real-google-integration: Formalize a fixture (or simulated-provider harness) covering the three new mid-wizard/mid-transfer auth-interrupt states this UX pass specified — session-expired mid-wizard, session-expired mid-transfer (reconnect to live job), and Google token-refresh-failure mid-transfer (see docs/features/real-google-integration/02-ux-workflow.md §5 and wireframes/04-session-and-token-interrupts.md). None of the F1-F14 manifest or the new §6.6 dedupe fixture exercises these; they join cold-start and F6-exhaustion as fixture-uncovered states per the same fixture-honesty discipline v1 already established. Not fixture-covered means QC must not treat them as certified.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-23T22:52:55.896Z"
+    },
+    {
+      "id": "43273990-fb6f-4beb-89f5-c0049e85d6e7",
+      "stage": "ui",
+      "text": "real-google-integration UI: itemized-log outcome filter split ('Already in course' / 'Skipped by you') leaves the three system-interrupted skip reasons (provider_error/server_interrupted/rate_limit_exhausted) reachable only via 'All'. A future pass could add a third 'Skipped — couldn't confirm' filter option mirroring the existing systemSkipLine copy. Not required this phase (PM/UX scoped the split to exactly two kinds) — see 03-ui-direction.md Deltas P1.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-23T23:22:28.272Z"
+    },
+    {
+      "id": "8099253c-95c7-4743-ac4f-5054ec026caa",
+      "stage": "architect",
+      "text": "real-google-integration: three new mid-wizard/mid-transfer auth-interrupt states (session-expired mid-wizard, session-expired mid-transfer, Google-reconnect mid-transfer) remain fixture-uncovered at the UI/E2E level. The engine-level unit budget (token_failure_pause_resume_fidelity) covers the transfer-engine mechanism but not a full UI fixture. Carried from UX's own P1 Delta, unchanged by architecture. Not fixture-covered means QC must not treat these three states as fixture-certified.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-24T00:16:02.158Z"
+    },
+    {
+      "id": "721ac562-1d7a-47ff-bbf3-d92521df90db",
+      "stage": "architect",
+      "text": "real-google-integration: Decision I's production boot strategy (`prisma db push` on every boot, not `prisma migrate deploy`) has no migration rollback history in production. Explicitly accepted at this project's current single-tenant stakes. Revisit with `prisma migrate deploy` plus a parallel Postgres-specific migrations folder if this app ever gets a second production consumer whose schema changes need rollback safety.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:16:04.339Z"
+    },
+    {
+      "id": "1f56adca-1f36-401d-b66b-34139ed3ca40",
+      "stage": "architect",
+      "text": "real-google-integration: whether Render's health-check polling of /api/health prevents free-tier dyno sleep is unresolved (carried unchanged from v1 backlog DEFER-1). Explicitly NOT relied upon by the OAuth cold-start design (04-architecture.md Decision E / §4.1) — if verified true, it would be a genuine additional mitigation for the callback-processing window; if false, no design assumption breaks either way.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:16:07.065Z"
+    },
+    {
+      "id": "e01d1366-bf29-4367-b1fc-3d9ae0acadc8",
+      "stage": "architect",
+      "text": "real-google-integration: whether `classroom.topics` scope alone is sufficient for `topics.list` reads (vs. also needing `classroom.topics.readonly`) is not independently confirmed — the verified-facts doc confirmed only the `topics.create` requirement. Engineer should confirm during the live-OAuth checklist's first real transfer; if listTopics fails under this scope alone, add classroom.topics.readonly to the consent-screen scope list.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:16:08.697Z"
+    },
+    {
+      "id": "f2156435-70e9-4337-a541-4fa537f3c7f0",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S1): OAuth authorization-code flow in 04-architecture.md §4.1/§6.3 has no PKCE (code_verifier/code_challenge) — only the state cookie is specified. RFC 9700 (Jan 2025) recommends PKCE for confidential clients and OAuth 2.1 draft defaults it for all authorization-code clients. google-auth-library's OAuth2Client supports it natively. Add to oauth-client.ts's authorization-URL construction and token exchange.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-24T00:24:46.640Z"
+    },
+    {
+      "id": "e0f37fe7-8163-4fbb-a013-8e486444b3e2",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S2): The OAuth callback's outbound 302 \"to the frontend origin\" (04-architecture.md §4.1, §6.3) has no named, fixed config source — risk of open redirect if derived from request data instead of a server-side constant. Name an explicit source (new FRONTEND_ORIGIN env var, or CORS_ORIGINS[0]) used verbatim; add a test asserting the callback's Location header is always exactly that fixed origin regardless of request input.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-24T00:24:50.905Z"
+    },
+    {
+      "id": "8edfe757-a2cb-45ac-8930-e3cc5ccb7bc3",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S3): TOKEN_ENCRYPTION_KEY (04-architecture.md §5.1/§8.2) has only a presence-only fail-fast (mirrors SESSION_SECRET's existing config.ts pattern), no generation guidance for the non-developer audience this architecture explicitly designs for (driver 9). A 32-byte value passes Node's AES-256-GCM key-length check regardless of entropy. Live-OAuth checklist and .env.example must give an exact generation command (e.g. openssl rand -base64 32).",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-24T00:24:53.647Z"
+    },
+    {
+      "id": "b2f60576-c1fa-4c72-b38a-4873af8a77b2",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S4): token-crypto decrypt failures (e.g. from TOKEN_ENCRYPTION_KEY rotation/corruption) aren't routed through the existing AuthExpiredError/reauth pause-and-resume path in 04-architecture.md §4.2 — would currently surface as an unhandled exception instead of the routine \"reconnect Google\" UX. real-classroom-provider.ts/oauth-client.ts should catch a decrypt failure and treat it identically to AuthExpiredError.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-24T00:24:55.800Z"
+    },
+    {
+      "id": "68e9b5e0-8e19-41ac-bfdd-faa1db5a5329",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S5): Session.accountId's FK removal (04-architecture.md §5.1, Decision B) deletes the DB's own safety net for cross-account isolation. Verified safe today by reading middleware/auth.ts, session.ts, routes/{courses,transfer-jobs}.ts directly (every route derives accountId from the resolved session and checks resource ownership) but nothing pins this invariant going forward now that Prisma can't enforce it. Add an explicit cross-account-isolation contract test as an acceptance criterion on google-auth-core/google-oauth-routes.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:24:58.527Z"
+    },
+    {
+      "id": "78a6d301-e410-495e-8e36-16d44adadedb",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S6): No explicit rule in 04-architecture.md against logging decrypted tokens, ciphertext, or raw googleapis/google-auth-library error payloads (which can echo Authorization headers). Sign-out revoke failure is \"logged at WARN\" (§5.1) with no stated content constraint. State the rule explicitly; security-engineer should verify against actual log call sites once code exists.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:25:00.156Z"
+    },
+    {
+      "id": "8cf0c663-0627-47f3-bc9a-807ecade406a",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S7): cc_oauth_state cookie's Secure flag and TTL in production aren't stated in 04-architecture.md §5.1 (the session cookie's are). Mirror the session cookie's environment-conditional Secure/SameSite behavior; short max-age (~10 min).",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:25:02.344Z"
+    },
+    {
+      "id": "6863a4e3-2cbc-4345-b290-7af70f13303c",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S8): Decision F's resume(jobId) account-scoping (\"finds this account's paused job\") is shown in diagrams/token-failure-pause-resume-sequence.md but not a stated acceptance criterion in 04-architecture.md. Add a test that reconnecting as account B never resumes a job paused under account A.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:25:04.009Z"
+    },
+    {
+      "id": "7a42b550-13fd-4844-9ba9-df2cb19c09ae",
+      "stage": "architect",
+      "text": "security-architect (2026-08-23-security-architect.md, S9): drive.metadata.readonly (04-architecture.md §7 scope reconciliation) grants metadata visibility across the entire Drive, not just app-touched files, for the life of any live token. Least-privilege choice is reasonable and reaffirmed on its own merits; the exposure surface just isn't stated explicitly anywhere in 04. Add one sentence to §5.1 or §7 naming this trade-off, since the live-OAuth checklist already explains scopes to the non-developer end user consenting to them.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-24T00:25:06.023Z"
+    }
+  ],
+  "beastMode": {
+    "active": false,
+    "startedFromStage": "engineer",
+    "targetStage": null,
+    "startedAt": "2026-08-26T18:00:06.037Z",
+    "stagesRun": [],
+    "stagesSkipped": [],
+    "lastError": null,
+    "completedAt": "2026-08-26T21:42:04.641Z",
+    "sessionId": "89e96082-b37f-4206-a112-7b77bc672a50",
+    "workingDir": "/Users/brettevanssf/Code/Pickett Classroom"
+  },
+  "updatedAt": "2026-08-26T21:41:51.851Z"
+}

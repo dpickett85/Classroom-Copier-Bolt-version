@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Phase 2 UI Mockups — Real Google Integration</title>
+<style>
+/* :root block copied verbatim from client/src/styles/tokens.css — the
+   authoritative token source. Do not hand-edit values here; edit tokens.css
+   and re-copy. See 03-ui-direction.md §Mockups. */
+:root{
+  --paper-0:#FBF9F4;
+  --paper-1:#F2EEE3;
+  --paper-2:#EAE4D2;
+  --line:#D8D2C2;
+  --line-strong:#B9B29B;
+  --ink-900:#16231F;
+  --ink-700:#3C4A45;
+  --ink-500:#5B6B67;
+  --teal-700:#0F5C56;
+  --teal-600:#147A72;
+  --teal-100:#DCEEEB;
+  --amber-700:#8A5A00;
+  --amber-100:#FBEDD1;
+  --green-700:#1E7A42;
+  --green-100:#E1F3E7;
+  --red-700:#A22C2C;
+  --red-100:#FBE4E4;
+  --slate-600:#5B6B67;
+  --focus:#1857C9;
+  --font-head:'Source Serif 4', Georgia, serif;
+  --font-body:'Public Sans', system-ui, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+  --radius:3px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--paper-2); color:var(--ink-900);
+  font-family:var(--font-body); line-height:1.5; padding:32px 0 96px;
+}
+:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+.frame{ max-width:760px; margin:0 auto 48px; background:var(--paper-0); border:1px solid var(--line-strong); border-radius:6px; padding:28px 32px; }
+.frame-label{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-500); margin:0 0 14px; }
+h2.screen-title{ font-family:var(--font-head); font-weight:600; font-size:20px; margin:0 0 6px; }
+
+/* ---- Buttons ---- */
+.btn{
+  font-family:var(--font-body); font-weight:600; font-size:14px;
+  padding:10px 20px; border-radius:var(--radius); border:1px solid transparent;
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:44px;
+}
+.btn-primary{ background:var(--teal-700); color:#fff; }
+.btn-secondary{ background:var(--paper-0); color:var(--ink-900); border-color:var(--line-strong); }
+
+/* ---- Sign-in landing (03-ui-direction.md §3.1) ---- */
+.signin-screen{ text-align:center; padding:48px 32px; }
+.wordmark{ font-family:var(--font-head); font-weight:700; font-size:26px; margin-bottom:4px; }
+.wordmark .seal{ display:inline-block; width:10px;height:10px;border-radius:50%;background:var(--teal-700); margin-right:8px; }
+.signin-tag{ color:var(--ink-700); font-size:15px; max-width:44ch; margin:0 auto 32px; }
+.signin-hint{ color:var(--ink-500); font-size:12.5px; margin-top:20px; font-family:var(--font-mono); }
+
+/* Google sign-in button — brand-locked exception (§2). Colors/font/logo are
+   Google's fixed spec, not this product's palette. Radius uses the system's
+   own --radius (3px) — see §2's shape-customization note. */
+.google-signin-btn{
+  display:inline-flex; align-items:center; gap:10px;
+  background:#FFFFFF; color:#1F1F1F;
+  border:1px solid #747775; border-radius:var(--radius);
+  padding:10px 12px; font-family:'Google Sans Text','Google Sans',Roboto,Arial,sans-serif;
+  font-weight:500; font-size:14px; min-height:44px; cursor:pointer;
+}
+.google-signin-btn:hover{ background:#F8F8F8; }
+.google-g-logo{ flex-shrink:0; display:block; }
+
+/* Inline sign-in failure banner (1e/1f/1g) — one treatment, copy differs */
+.signin-error{
+  display:flex; gap:10px; align-items:flex-start; margin-top:22px; padding:12px 14px;
+  background:var(--amber-100); border:1px solid var(--amber-700); border-radius:var(--radius);
+  color:var(--amber-700); font-size:13.5px; max-width:420px; margin-left:auto; margin-right:auto; text-align:left;
+}
+.signin-error .glyph{ font-family:var(--font-mono); font-weight:700; color:var(--amber-700); }
+.signin-error .ref{ display:block; margin-top:4px; color:var(--ink-500); font-family:var(--font-mono); font-size:11.5px; }
+
+/* ---- Completion Summary — 7-tile grouped ledger sections (§3.2) ---- */
+.stat-groups{ display:flex; flex-direction:column; gap:20px; margin-bottom:18px; }
+.stat-group-label{
+  font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+  letter-spacing:.03em; color:var(--ink-500); margin-bottom:8px;
+}
+.stat-group-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.stat-group-grid.topics-group{
+  grid-template-columns:repeat(3,1fr); padding-top:18px; border-top:1px solid var(--line);
+}
+.stat-tile{ border:1px solid var(--line-strong); border-radius:var(--radius); padding:12px 10px; background:var(--paper-1); text-align:center; }
+.stat-num{ font-family:var(--font-mono); font-size:22px; font-weight:600; color:var(--ink-900); font-variant-numeric:tabular-nums; }
+.stat-label{ font-size:10.5px; color:var(--ink-500); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+/* Reuses tokens.css's existing 768px tier only — corrected this revision.
+   See 03-ui-direction.md §3.2's breakpoint correction: 620px (the prior
+   value here) appears nowhere in tokens.css and was a bug, not a deliberate
+   third breakpoint. */
+@media (max-width: 768px){
+  .stat-group-grid, .stat-group-grid.topics-group{ grid-template-columns:repeat(2,1fr); }
+}
+.topics-callout{ color:var(--ink-700); font-size:13px; margin-top:10px; }
+.reconcile{
+  font-family:var(--font-mono); font-size:12.5px; padding:10px 14px; background:var(--green-100);
+  border:1px solid var(--green-700); border-radius:var(--radius); color:#0F4A28; margin:18px 0 22px;
+  font-variant-numeric:tabular-nums; white-space:normal; overflow-wrap:break-word;
+}
+
+/* ---- Outcome pills — duplicate vs. user-chosen (§3.3) ---- */
+.outcome-pill{ font-family:var(--font-mono); font-size:11px; padding:2px 7px; border-radius:2px; font-weight:600; }
+.outcome-skipped{ color:var(--slate-600); background:var(--paper-1); border:1px solid var(--line-strong); }
+.outcome-duplicate{ color:var(--teal-700); background:var(--teal-100); border:1px solid var(--teal-700); }
+table.log-table{ width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+table.log-table th{
+  text-align:left; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+  letter-spacing:.03em; color:var(--ink-500); padding:8px 10px; border-bottom:2px solid var(--line-strong);
+}
+table.log-table td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.log-table tr:nth-child(even) td{ background:var(--paper-1); }
+
+/* ---- Disclosure — Ready-to-Transfer duplicate/topic lists (§3.4) ---- */
+.disclosure{ border:1px solid var(--line-strong); border-radius:var(--radius); margin-bottom:14px; background:var(--paper-0); }
+.disclosure > summary{
+  list-style:none; cursor:pointer; padding:12px 14px; font-size:13.5px; font-weight:600;
+  color:var(--ink-900); display:flex; align-items:center; gap:8px; min-height:44px;
+}
+.disclosure > summary::-webkit-details-marker{ display:none; }
+.disclosure > summary::before{ content:'▸'; color:var(--teal-700); font-size:11px; }
+.disclosure[open] > summary::before{ content:'▾'; }
+.disclosure-body{ border-top:1px solid var(--line); padding:4px 14px 10px; font-size:13px; color:var(--ink-700); }
+.disclosure-row{ padding:7px 0; border-bottom:1px solid var(--line); }
+.disclosure-row:last-child{ border-bottom:none; }
+.disclosure-toggle-text .when-open{ display:none; }
+.disclosure[open] .disclosure-toggle-text .when-open{ display:inline; }
+.disclosure[open] .disclosure-toggle-text .when-closed{ display:none; }
+.disclosure-toggle-text{ margin-left:auto; color:var(--ink-500); font-weight:400; font-size:12px; }
+
+/* ---- Mid-transfer interrupt banner (§3.5) ---- */
+.interrupt-banner{
+  display:flex; flex-direction:column; gap:10px; align-items:flex-start;
+  padding:16px 18px; background:var(--amber-100); border:1px solid var(--amber-700);
+  border-radius:var(--radius); margin-top:14px; max-width:520px;
+}
+.interrupt-banner .interrupt-head{ display:flex; gap:8px; align-items:center; font-weight:700; color:var(--amber-700); font-size:14px; }
+.interrupt-banner p{ margin:0; color:var(--ink-900); font-size:13.5px; }
+.progress-track{ height:10px; background:var(--paper-1); border:1px solid var(--line-strong); border-radius:2px; overflow:hidden; margin-bottom:6px; max-width:520px; }
+.progress-fill{ height:100%; width:62%; background:repeating-linear-gradient(90deg, var(--teal-700) 0 8px, var(--teal-600) 8px 9px); }
+.progress-count{ font-family:var(--font-mono); font-size:13px; font-weight:600; margin-bottom:8px; color:var(--ink-700); }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <p class="frame-label">1a — Sign-in landing</p>
+  <div class="signin-screen">
+    <div class="wordmark"><span class="seal" aria-hidden="true"></span>Classroom Copier</div>
+    <p class="signin-tag">Batch-copy your classwork into any existing course — without duplicating Drive files.</p>
+
+    <button class="google-signin-btn" type="button">
+      <svg class="google-g-logo" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.07 5.08-4.42 6.64v5.52h7.15C42.73 36.9 45.12 31.18 45.12 24.5z"/>
+        <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.15-5.52c-1.97 1.32-4.5 2.11-7.41 2.11-5.71 0-10.55-3.86-12.28-9.05H4.36v5.7C7.98 41.07 15.45 46 24 46z"/>
+        <path fill="#FBBC05" d="M11.72 28.21c-.44-1.32-.69-2.72-.69-4.21s.25-2.89.69-4.21v-5.7H4.36C2.87 17.03 2 20.4 2 24s.87 6.97 2.36 9.91z"/>
+        <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.45 2 7.98 6.93 4.36 14.09l7.36 5.7c1.73-5.19 6.57-9.04 12.28-9.04z"/>
+      </svg>
+      <span>Sign in with Google</span>
+    </button>
+
+    <p class="signin-hint">First sign-in today can take up to a minute while the app wakes up.</p>
+
+    <div class="signin-error" role="alert">
+      <span class="glyph" aria-hidden="true">!</span>
+      <span>
+        You didn't grant access, so we couldn't sign you in. Nothing was changed.
+        <br /><button class="btn btn-secondary" style="margin-top:8px;">Try again</button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="frame">
+  <p class="frame-label">3a/3b — Completion Summary: 7 tiles, grouped ledger sections</p>
+  <h2 class="screen-title">Transfer complete.</h2>
+
+  <div class="stat-groups">
+    <div>
+      <div class="stat-group-label">Items scanned — 40 of 40</div>
+      <div class="stat-group-grid">
+        <div class="stat-tile"><div class="stat-num">32</div><div class="stat-label">Drafts transferred</div></div>
+        <div class="stat-tile"><div class="stat-num">2</div><div class="stat-label">Fallback shells</div></div>
+        <div class="stat-tile"><div class="stat-num">5</div><div class="stat-label">Skipped, already existed</div></div>
+        <div class="stat-tile"><div class="stat-num">1</div><div class="stat-label">Skipped by you</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="stat-group-label">Reported separately</div>
+      <div class="stat-group-grid topics-group">
+        <div class="stat-tile"><div class="stat-num">4</div><div class="stat-label">Topics created</div></div>
+        <div class="stat-tile"><div class="stat-num">2</div><div class="stat-label">Topics reused</div></div>
+        <div class="stat-tile"><div class="stat-num">1</div><div class="stat-label">Rubric notes added</div></div>
+      </div>
+      <p class="topics-callout">Topics are reported separately and never counted in the item total below —
+        reusing an existing topic is not an item outcome. 4 created + 2 reused = 6 topics referenced by this transfer.</p>
+    </div>
+  </div>
+
+  <div class="reconcile">✓ 32 + 2 + 5 + 1 = 40 of 40 items scanned — every item resolved to a transfer, fallback, or skip.</div>
+
+  <table class="log-table">
+    <thead><tr><th>Title</th><th>Outcome</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Week 1 Reading</td>
+        <td><span class="outcome-pill outcome-duplicate">≡ Already in course</span></td>
+        <td>Matches existing Draft</td>
+      </tr>
+      <tr>
+        <td>Rubric Q</td>
+        <td><span class="outcome-pill outcome-skipped">⊘ Skipped — you chose to skip</span></td>
+        <td>Skip Question</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="frame">
+  <p class="frame-label">2c — Ready to Transfer: duplicate & topic disclosure</p>
+  <p style="font-size:14.5px;">Ready to copy 37 of 42 posts from "US History (2025)" into "US History — Period 3 (SIS Shell)".</p>
+
+  <details class="disclosure">
+    <summary>
+      5 items already exist in the destination and will be skipped
+      <span class="disclosure-toggle-text"><span class="when-closed">[expand]</span><span class="when-open">[collapse]</span></span>
+    </summary>
+    <div class="disclosure-body">
+      <div class="disclosure-row">"Week 1 Reading" (Material) — matches existing Draft</div>
+      <div class="disclosure-row">"Essay 1" (Assignment) — matches existing Published post</div>
+      <div class="disclosure-row">"Unit 1 Quiz" (Quiz assignment) — matches existing Draft</div>
+    </div>
+  </details>
+
+  <details class="disclosure" open>
+    <summary>
+      2 topics already exist and will be reused, not recreated
+      <span class="disclosure-toggle-text"><span class="when-closed">[expand]</span><span class="when-open">[collapse]</span></span>
+    </summary>
+    <div class="disclosure-body">
+      <div class="disclosure-row">"Unit 2" — reused (exact name match)</div>
+      <div class="disclosure-row">"Unit 3" — reused (matched after ignoring case/spacing)</div>
+    </div>
+  </details>
+</div>
+
+<div class="frame">
+  <p class="frame-label">4c — Mid-transfer interrupt: Google reconnect needed</p>
+  <p class="progress-count">Transferring 31 of 50 posts…</p>
+  <div class="progress-track"><div class="progress-fill"></div></div>
+  <div class="interrupt-banner" role="alert">
+    <div class="interrupt-head"><span aria-hidden="true">⇄</span> Time to reconnect Google</div>
+    <p>This happens about once a week while the app is in testing — it's expected, not a sign of a problem. Nothing has been lost or duplicated; items already copied are safe.</p>
+    <button class="btn btn-primary">Reconnect Google account</button>
+  </div>
+</div>
+
+</body>
+</html>

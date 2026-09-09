@@ -1,0 +1,1070 @@
+{
+  "schemaVersion": 1,
+  "track": {
+    "type": "product",
+    "name": "Classroom Copier",
+    "slug": null,
+    "productType": "web app",
+    "scopeMode": "conform"
+  },
+  "currentStage": "qc",
+  "stages": {
+    "kickoff": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "null",
+      "artifactHash": null,
+      "decisions": [
+        {
+          "question": "Is this new work a feature of an existing registered product, or a brand-new standalone product?",
+          "optionChosen": "Brand-new standalone product",
+          "rationale": "Target directory was empty; no existing registered product covers Google Classroom coursework copying.",
+          "source": "human",
+          "at": "2026-08-14T07:06:00Z"
+        },
+        {
+          "question": "Product type?",
+          "optionChosen": "web app",
+          "rationale": "PRD section 6 specifies React/Tailwind frontend + Node/Express backend deployed on Render.",
+          "source": "human",
+          "at": "2026-08-14T07:06:00Z"
+        },
+        {
+          "question": "scopeMode?",
+          "optionChosen": "conform",
+          "rationale": "Greenfield project; default for new products.",
+          "source": "human",
+          "at": "2026-08-14T07:06:00Z"
+        },
+        {
+          "question": "Run in Beast Mode, and if so which stage should it stop after?",
+          "optionChosen": "Yes - Beast Mode through qc (full lifecycle)",
+          "rationale": "User asked to kick off in Beast Mode; chose end-to-end run pm-ux-ui-architect-engineer-qa-qc with automated verification.",
+          "source": "human",
+          "at": "2026-08-14T07:06:00Z"
+        }
+      ],
+      "artifactKind": null
+    },
+    "pm": {
+      "status": "approved-complete",
+      "revisions": 2,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/01-pm-brief.md",
+      "artifactHash": "a90bd16e19671d5af9741a2f52462ffc9a60f4e2d51e5690777434fa33a8519b",
+      "decisions": [
+        {
+          "question": "Should v1 be built against live Google APIs or a mock layer?",
+          "optionChosen": "Mock Google Classroom + Drive API layer with seeded fixture courses/topics/coursework/attachments and mock test users; real OAuth + live APIs as a named high-priority follow-on",
+          "rationale": "Standing user directive: 'run qa on everything that you can, we will revisit the apis later' and 'mock any test users and google apis that are blocking.'",
+          "source": "human",
+          "at": "2026-08-14T07:15:00.000Z"
+        },
+        {
+          "question": "Which of the PRD's three problems anchors the product framing?",
+          "optionChosen": "SIS/roster-sync lockout as the anchor; Drive duplication and Reuse Post friction as compounding pains",
+          "rationale": "The lockout is a hard blocker native tooling structurally cannot solve; the other two are severe friction. Leading with the unsolvable problem sharpens differentiation.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:01.000Z"
+        },
+        {
+          "question": "Who is the primary persona for v1?",
+          "optionChosen": "K-12 teacher in an SIS-managed district copying a prior term's course into an IT-provisioned roster shell at term rollover; curriculum lead/co-teacher secondary; IT admins explicitly not users",
+          "rationale": "Matches the anchor problem and the recurring term-boundary usage spike; admins are beneficiaries but never operate the tool.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:02.000Z"
+        },
+        {
+          "question": "How should the product be positioned against alternatives?",
+          "optionChosen": "Single-purpose utility competing with Google-native Copy Class / Reuse Post; acknowledge third-party admin suites as a category but do not target them",
+          "rationale": "Teachers default to native features; admin suites are IT-purchased and admin-operated. Narrow positioning keeps the OAuth trust story and scope defensible.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:03.000Z"
+        },
+        {
+          "question": "What are the success metrics? (PRD silent)",
+          "optionChosen": "North star: completed batch transfers. Leading: >=80% activation from selection screen, median sign-in-to-done < 5 min for 50 posts, >=95% fidelity without fallback notes on healthy sources, 100% zero-silent-drop guarantee. v1 bar: 100% acceptance pass across all three fixture scenarios with exact summary-report reconciliation; metric events instrumented locally, no analytics vendor.",
+          "rationale": "PRD provides no metrics; these are derivable from its own guarantees (draft-shell guarantee, batch speed claim) and are testable against the mock layer.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:04.000Z"
+        },
+        {
+          "question": "Whole-course copy or granular per-item selection in v1?",
+          "optionChosen": "Whole-course copy only; per-item choices exist only in the pre-flight action sheet; granular selection deferred to backlog",
+          "rationale": "PRD's core promise is 'entire semester or year in one click' and its workflow has no selection UI; granular picking adds surface area without serving the anchor JTBD.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:05.000Z"
+        },
+        {
+          "question": "What happens when the same copy is run twice into the same target? (PRD silent)",
+          "optionChosen": "v1 performs no dedupe — a re-run creates a second set of drafts; the UI states this before transfer; idempotent re-run/dedupe deferred to backlog",
+          "rationale": "Dedupe requires cross-run provenance tracking that inflates v1; drafts are safe (never student-visible) and easy to delete, so honest warning is acceptable.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:06.000Z"
+        },
+        {
+          "question": "How to resolve the PRD's contradictory ordering rule ('reverse chronological order (oldest post first, newest post last)')?",
+          "optionChosen": "Create posts oldest-first by source creation time (ascending)",
+          "rationale": "The parenthetical and the stated intent — 'target topic feed maintains correct chronological ordering' — win over the mislabeled term 'reverse chronological'.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:07.000Z"
+        },
+        {
+          "question": "How to handle the PRD's OAuth scope gaps (Materials coursework; Scenario-3 'Copy to My Drive' write)?",
+          "optionChosen": "Record classroom.courseworkmaterials as required for Materials and drive.file (write) as required for Copy-to-My-Drive; model both behaviors in the mock layer; corrected scope list goes to the real-API follow-on",
+          "rationale": "courseWorkMaterials is a separate Classroom API surface not covered by classroom.coursework.students, and copying a file exceeds drive.readonly — the PRD's scope list cannot deliver its own feature set.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:08.000Z"
+        },
+        {
+          "question": "Business model for v1?",
+          "optionChosen": "100% free unlimited transfers at launch; credit-balance and subscription-status middleware stubbed as feature-flagged no-ops; credit rule specified (deduct only on 100% clean transfer, auto-refund on any fallback injection); Stripe activation and pricing deferred to backlog",
+          "rationale": "Matches PRD section 7-10 exactly; specifying the credit rule now makes later activation a flag flip rather than a redesign.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:09.000Z"
+        },
+        {
+          "question": "Timeline estimates for the brief?",
+          "optionChosen": "Standard Mode (with approval gates): ~3-4 weeks. Beast Mode (auto-accept, no inter-stage gates; final ship still requires the user): ~1 week of stage runtime. Estimates cover the mock-backed v1 only.",
+          "rationale": "Mock-first scope removes external OAuth/verification dependencies from the v1 critical path; gate waits of 1-2 days per stage dominate the Standard Mode delta.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:15:10.000Z"
+        },
+        {
+          "question": "How to close the fixture-to-behavior coverage gap (critic finding 1)?",
+          "optionChosen": "Add an explicit fixture manifest (F1-F11) to §6 item 12 enumerating every seed the mock layer must provide (3 pre-flight scenario courses, 50-post throughput course, 21+-attachment cap course, deterministic 429 rate-limit simulation, rubric-license-denial course, all-3-states coverage, all-4-types coverage incl. Question configs and Materials, >=2 mock teacher accounts, topic-map coverage) and widen the §5 v1 acceptance bar to reference the full manifest instead of only the 3 pre-flight scenarios",
+          "rationale": "The run targets QC and QC can only certify what a fixture exercises; every named v1 behavior now maps to at least one obligated fixture.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:35:00.000Z"
+        },
+        {
+          "question": "How to resolve the unresolved assumption about mock sign-in / forced-account-picker testability (critic finding 2)?",
+          "optionChosen": "Confirm as a decision that the mock identity layer seeds >=2 selectable mock teacher accounts with distinct course lists so prompt=select_account forced-picker behavior is exercisable end-to-end; assumption removed; Next Handoff note added directing UX to design the mock account-chooser screen",
+          "rationale": "The standing user directive explicitly authorizes mocking test users ('mock any test users and google apis that are blocking'), so seeding >=2 accounts is the right resolution rather than narrowing the v1 claim.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:35:01.000Z"
+        },
+        {
+          "question": "How to correct the post-transformation rules that read as uniform across all 4 coursework types (critic finding 3)?",
+          "optionChosen": "State that transformation rules apply per available field per type, with an explicit per-type field table in §6 item 5: Materials have no due date and no max points; Questions carry type-specific answer-config fields (multiple-choice options / short-answer) that must be preserved; architect must model distinct per-type shapes (CourseWork vs CourseWorkMaterial), not one generic post record",
+          "rationale": "Prevents a downstream engineer from building a single generic transform and a mock data model that omits type-specific fields.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:35:02.000Z"
+        },
+        {
+          "question": "Recategorize the self-answered 'archived courses as targets' open question (critic finding 4)?",
+          "optionChosen": "Moved to Decisions: archived courses are NOT valid targets in v1 (active target courses only, per PRD); removed from Open Questions; noted as a post-v1 revisit candidate based on user feedback",
+          "rationale": "The item was already answered inline ('v1: no') and so was not genuinely open.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:35:03.000Z"
+        },
+        {
+          "question": "Entry-mode detector flagged an edit-outside-lifecycle conflict (artifact hash mismatch) - which baseline to revise from?",
+          "optionChosen": "Treat the current on-disk 01-pm-brief.md as the baseline and apply critic feedback on top (option a)",
+          "rationale": "The critic report's citations match the current on-disk content exactly, so it is the version that was reviewed; re-marking awaiting-approval re-records the hash and closes the conflict.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:35:04.000Z"
+        }
+      ],
+      "artifactKind": null
+    },
+    "ux": {
+      "status": "approved-complete",
+      "revisions": 2,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/02-ux-workflow.md",
+      "artifactHash": "e77ef2f5ee03c5a7f672719bfd22baf00d1efe39b94aa7001f399dcabc95d56c",
+      "decisions": [
+        {
+          "question": "What overall structure should the product's UI take — linear wizard or dashboard/tabs?",
+          "optionChosen": "A single linear wizard (Sign in -> Select -> Pre-flight -> Transfer -> Summary) with a non-interactive step indicator, no dashboard/history",
+          "rationale": "Matches the brief's 5-step workflow and single-purpose-utility positioning; v1 has no run history to show.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:00.000Z"
+        },
+        {
+          "question": "Where does the user land immediately after sign-in?",
+          "optionChosen": "Directly on Source & Target Selection, no intermediate dashboard screen",
+          "rationale": "No run history exists in v1 to justify a landing dashboard.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:01.000Z"
+        },
+        {
+          "question": "Is the forced account picker a first-login-only gate or reachable anytime?",
+          "optionChosen": "Also reachable anytime via a persistent header 'Switch account' control, not just at first sign-in",
+          "rationale": "Exercises the multi-account-collision-avoidance behavior (F10) beyond a single first login, matching the brief's Next Handoff note.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:02.000Z"
+        },
+        {
+          "question": "Should the Action Sheet render as a modal overlay or a dedicated page?",
+          "optionChosen": "Modal overlay on top of the pre-flight scan screen",
+          "rationale": "Matches PRD naming ('Action Sheet Modal') and its blocking-until-resolved intent.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:03.000Z"
+        },
+        {
+          "question": "Should a confirmation checkpoint exist between pre-flight resolution and the actual batch-write commit, even though the PRD names only 5 steps?",
+          "optionChosen": "Yes — insert a 'Ready to Transfer' confirmation screen before Start Transfer",
+          "rationale": "A batch-write operation (even drafts-only) warrants one explicit human confirmation click rather than auto-firing the instant pre-flight clears.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:04.000Z"
+        },
+        {
+          "question": "Should the Completion Summary render as a small modal dialog (per PRD wording) or a full-screen report?",
+          "optionChosen": "Full-screen scrollable report surface, not a small modal dialog",
+          "rationale": "F4's 50-post itemized log with multi-type/multi-outcome rows cannot stay usable in a compact dialog; recorded as Deltas P0 #1.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:05.000Z"
+        },
+        {
+          "question": "What is the default state of the Action Sheet Modal's 'apply recommended fixes automatically' toggle?",
+          "optionChosen": "OFF by default",
+          "rationale": "A trust-sensitive, fail-safe-by-design product should default to explicit per-item review, not silent auto-application.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:06.000Z"
+        },
+        {
+          "question": "Which option is recommended/starred for Scenario 2 (trashed/deleted file)?",
+          "optionChosen": "Create Draft Shell with Note",
+          "rationale": "Never silently skips content; always produces a reviewable artifact.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:07.000Z"
+        },
+        {
+          "question": "Which option is recommended/starred for Scenario 3 (permission-locked/co-teacher file)?",
+          "optionChosen": "Copy to My Drive (Become Owner)",
+          "rationale": "A permanent, targeted fix applied only to the flagged file, consistent with the brief's option ordering; safer long-term than a standing access-risk link.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:08.000Z"
+        },
+        {
+          "question": "Where and how often should the no-dedupe/duplicate-run warning appear?",
+          "optionChosen": "Two touchpoints — persistent notice on the Selection screen, restated on the Ready-to-Transfer checkpoint immediately before commit",
+          "rationale": "Belt-and-suspenders given the batch-write is effectively irreversible from the UI once started.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:09.000Z"
+        },
+        {
+          "question": "Is a 429 mid-batch rate-limit pause in-the-moment feedback (theme 4) or an edge case (theme 5)?",
+          "optionChosen": "In-the-moment feedback as long as it resolves on its own; becomes an edge case only if retries exhaust",
+          "rationale": "Per the shared elicitation method's theme-4/5 boundary: it doesn't change the interaction unless the retry limit blocks further progress.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:10.000Z"
+        },
+        {
+          "question": "What retry-exhaustion behavior applies when 429 exponential backoff never succeeds (unspecified by brief/F6)?",
+          "optionChosen": "Bounded retry cap (e.g. 5 attempts); on exhaustion the item resolves as a fallback/skip with a logged reason, batch continues",
+          "rationale": "Zero-silent-drop requires every post to resolve to transfer/fallback/skip; an unbounded retry has no representable UI state. Flagged as an assumption needing architect/engineer/QA sign-off — recorded as Deltas P0 #3.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:11.000Z"
+        },
+        {
+          "question": "How should rubric graceful degradation (F7) be counted in the Completion Summary, given it doesn't fit the brief's three named buckets?",
+          "optionChosen": "Distinct 'rubric notes added' count/log category, separate from fallback shells; the assignment itself counts as transferred",
+          "rationale": "Attachment linking succeeded — only the rubric failed to copy; folding it into fallback shells would misrepresent the outcome and break exact reconciliation. Recorded as Deltas P0 #4.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:12.000Z"
+        },
+        {
+          "question": "Should a mid-transfer cancel control exist in v1?",
+          "optionChosen": "No — deferred to backlog",
+          "rationale": "Partial-cancel semantics for already-created drafts are undefined; keeping v1 simple matches the brief's non-goals discipline.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:13.000Z"
+        },
+        {
+          "question": "What accessibility target applies, given the brief doesn't state one explicitly?",
+          "optionChosen": "WCAG AA, applied as current best practice",
+          "rationale": "Current standard for education-sector web tools; focus-trapped modal, aria-live progress announcements, full keyboard reachability.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:14.000Z"
+        },
+        {
+          "question": "Should low-fidelity wireframes be produced for this stage?",
+          "optionChosen": "Yes — produced for all 6 surfaces plus the overall flow diagram",
+          "rationale": "Two high-complexity conditional surfaces (Action Sheet Modal, Completion Summary) benefit from a structural sketch before UI applies visual design.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:45:15.000Z"
+        },
+        {
+          "question": "UX P0-1: Completion Summary is specified as a modal, but F4's 50-post itemized log with multi-type/multi-outcome rows cannot stay usable in a compact dialog. Modal or page?",
+          "optionChosen": "Page-level report surface, not a modal component. Binding constraint on the UI and architect stages; overrides the PRD/brief wording of 'modal'.",
+          "rationale": "Auto-accepted UX's own recommended resolution per Beast Mode override. F4 seeds a 50-post course; an itemized per-post log at that size is unusable in a dialog.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:40:00.000Z"
+        },
+        {
+          "question": "UX P0-2: What happens if the browser tab is refreshed or closed mid-batch-transfer? Brief names resumability as first-class; PRD is silent on mechanism.",
+          "optionChosen": "Architect MUST expose a server-side transfer job with an id and a pollable status endpoint so the frontend can reconnect and resume reporting after a refresh. A new fixture (F12) covering interrupt-and-reconnect must be added to the manifest.",
+          "rationale": "Auto-accepted UX's recommended resolution. Render free-tier cold starts plus 50+ post batches make mid-transfer interruption likely, not exotic. No F1-F11 fixture exercises this, so a fixture must be added or QC cannot certify it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:40:01.000Z"
+        },
+        {
+          "question": "UX P0-3: 429 rate-limit retry exhaustion has no defined terminal state (F6 only specifies 'returns HTTP 429 mid-batch'). What is the terminal behavior?",
+          "optionChosen": "Bounded exponential-backoff retry capped at 5 attempts per call; on exhaustion the post falls through to the guaranteed draft-shell path with a fallback note naming rate-limit exhaustion as the cause, and is counted as a fallback shell in the summary. Never a silent drop.",
+          "rationale": "Auto-accepted UX's recommended resolution. The brief's zero-silent-drop guarantee requires a defined terminal state on every failure path; reusing the existing draft-shell fallback keeps one failure vocabulary.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:40:02.000Z"
+        },
+        {
+          "question": "UX P0-4: Rubric graceful degradation (F7) does not fit the three named Completion Summary buckets, leaving the exact-reconciliation acceptance bar with undefined math.",
+          "optionChosen": "Add a fourth summary count: 'rubric notes added'. An assignment whose rubric could not be copied counts as successfully transferred (NOT a fallback shell) and additionally increments the rubric-notes count. Reconciliation math updated accordingly.",
+          "rationale": "Auto-accepted UX's recommended resolution. The assignment itself transferred completely; only the rubric degraded, so counting it as a fallback shell would misreport transfer fidelity and break the >=95% fidelity metric.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:40:03.000Z"
+        },
+        {
+          "question": "Critic finding 1 (ERROR): Acceptance Scenario #15's reconciliation formula sums topics-created into a post-count total and omits rubric-notes — how to correct it?",
+          "optionChosen": "Corrected formula: (drafts transferred) + (fallback shells) + (user-chosen skips) = total posts scanned. Topics created/mapped is removed from the sum (a topic is not a post). Rubric-notes-added is documented as a non-additive subset tag over already-counted posts, never a term in the sum. Matches the worked example in wireframes/05-completion-summary.md (39+2+1=42).",
+          "rationale": "The prior formula was dimensionally wrong (summed a topic count into a post-count total) and could never balance for any course with topics > 0; it also contradicted the doc's own worked wireframe example. This was the doc's stated acceptance contract for engineer/QA, so an unfixable formula would have blocked verification entirely. Both the UX and UI stages independently flagged this error.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:50:00.000Z"
+        },
+        {
+          "question": "Critic finding 2: what is the rule for a single post that is BOTH a fallback shell (attachment failure) AND rubric-degraded?",
+          "optionChosen": "Fallback-shell status wins the primary transferred/fallback/skipped bucket — the post counts exactly once, under 'Fallback shells,' in the reconciliation sum. 'Rubric notes added' is a non-exclusive secondary tag that can co-occur with any of the three primary outcomes without ever adding a second term to the sum. The itemized log's Note column shows both notes on that row.",
+          "rationale": "The two failure modes are independent (attachment failure vs. a separate rubric API call) and can co-occur, but the reconciliation sum needs exactly-once counting per post; treating fallback-shell as the primary bucket and rubric-notes as a non-exclusive tag preserves the exact-reconciliation acceptance bar. No fixture combines F2/F3 with F7, so this is flagged as an untested assumption.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:50:01.000Z"
+        },
+        {
+          "question": "Critic finding 3: the itemized log table (Title/Type/Topic/Outcome/Note) doesn't implement the per-type field display the doc claims — add the fields or drop the claim?",
+          "optionChosen": "Add the fields: a new 'Type-specific fields' column in the Completion Summary itemized log, rendering per-type (empty for Materials; 'Due: cleared · Max pts: N' for Assignments/Quiz assignments; 'Answer: Multiple choice (N opts)' / 'Answer: Short answer' for Questions). Updated in both 02-ux-workflow.md §3/§6 and wireframes/05-completion-summary.md.",
+          "rationale": "Per the task's explicit preference: the brief mandates per-type coherence and the architect needs the per-type shape modeled — narrowing the claim would have papered over a real completeness gap rather than closing it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:50:02.000Z"
+        },
+        {
+          "question": "Critic finding 4: Action Sheet Modal Scenario-2 button labels are hardcoded 'Skip Assignment' even for Materials/Questions/Quizzes — fix?",
+          "optionChosen": "Made the skip label type-aware: 'Skip <Type>' (e.g. 'Skip Material,' 'Skip Question,' 'Skip Quiz Assignment'), never hardcoded to 'Skip Assignment.' Updated in 02-ux-workflow.md §3 screen 5, Acceptance Scenario #3, and wireframes/03-preflight-and-action-sheet.md (row now also shows the flagged item's type).",
+          "rationale": "A teacher resolving a flagged Material or Question should not see a button that misidentifies the item's type — this was a symptom of the action-sheet row template never surfacing which of the four coursework types was involved.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:50:03.000Z"
+        },
+        {
+          "question": "Critic finding 5 (fixture honesty): wireframes/00-flow.md cites a phantom 'F: cold-start sim' tag and wireframes/01-sign-in-and-account-picker.md cites a nonexistent Deltas row for cold-start; F6 as scoped may only exercise retry-success, not retry-exhaustion.",
+          "optionChosen": "Removed both phantom citations; cold-start is now explicitly labeled fixture-uncovered in both wireframes and in 02-ux-workflow.md (§4, new Deltas P1 row, new Assumptions bullet) rather than citing something that doesn't exist. Added a second new Deltas P1 row recommending F6 be extended to cover a persistent/exhausting 429 condition, or a companion fixture (e.g. F13) be added alongside F12, mirroring how resumability's fixture gap was closed.",
+          "rationale": "An uncovered behavior carrying a phantom citation is worse than one honestly flagged — it teaches QC to trust tags that aren't reliable. F6's retry-exhaustion gap is structurally identical to the resumability gap that correctly got F12; it deserved the same treatment and had not received it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:50:04.000Z"
+        },
+        {
+          "question": "Critic finding 6: WCAG AA claimed but under-specified for aria-live throttling, outcome-icon text alternatives, and focus management; cold-start idle detection not flagged as an architecture dependency.",
+          "optionChosen": "Added three accessibility specifics to §6: (a) aria-live throttling — the progress ticker announces periodic counts (~every 5 items or ~3s) plus one completion announcement, not all 50 per-item events; (b) every outcome icon carries a text label/aria-label, never icon-or-color-alone; (c) focus returns to the triggering control after Action Sheet close (or the new screen's heading if that control is gone), and moves to the Completion Summary's main heading on landing. Also added a new §6 bullet flagging cold-start's '>15min idle' detection as a client/server timing dependency needing an architect contract, the same treatment resumability already received.",
+          "rationale": "A live region announcing up to 50 unthrottled rows is a well-known AA usability failure for screen-reader users; icon-only status communication risks a 1.4.1/1.1.1 violation; and undefined focus management after a modal close or major screen transition breaks the WCAG AA bar the doc already claims. The idle-detection mechanism has the same client/server ambiguity as resumability, which was correctly escalated.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:50:05.000Z"
+        }
+      ],
+      "artifactKind": null
+    },
+    "ui": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/03-ui-direction.md",
+      "artifactHash": "e7cd98780638f114586047e783c0c1bc15eadb50bf09942d5d98aa5ce96f2194",
+      "decisions": [
+        {
+          "question": "What central design concept/metaphor should organize the product's visual identity?",
+          "optionChosen": "\"The Registrar's Manifest\" — an itemized, reconciled-ledger metaphor (shipping manifest / school transcript) rooted in the product's own zero-silent-drop guarantee",
+          "rationale": "Makes the brief's core promise (every item accounted for) visible as the design's organizing idea rather than a generic SaaS-dashboard or consumer-app concept; passes the \"only this product\" test.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:00.000Z"
+        },
+        {
+          "question": "What typography system should the product use?",
+          "optionChosen": "Source Serif 4 (headings/report titles) + Public Sans (UI chrome/body) + IBM Plex Mono (tabular numbers only)",
+          "rationale": "A three-role pairing that reinforces the civic-trust/paperwork register (Public Sans is USWDS's government-trust typeface) and makes the reconciliation line read as ledger arithmetic; avoids the Inter/Geist reflex default. Verified current 2026-08-14 (Source Serif 4 actively maintained with a new Display cut submitted 2026-08-07; Public Sans feature-complete at v2.001, still hosted on Google Fonts and widely deployed).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:01.000Z"
+        },
+        {
+          "question": "What color system should the product use?",
+          "optionChosen": "A muted, paper-grounded palette with function-coded status colors: teal = brand/action, green = success, amber = attention/in-the-moment narration, red = reserved for true errors only, slate = neutral/skipped",
+          "rationale": "Keeps color meaning consistent and non-decorative; avoids the indigo/purple gradient default and avoids brand-color/link-color/focus-color collisions by choosing teal over saturated SaaS blue.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:02.000Z"
+        },
+        {
+          "question": "How should key elements (buttons, cards, modal, progress bar) be styled?",
+          "optionChosen": "Rectangular low-radius controls, hairline-bordered flat cards (no shadow/glassmorphism), a segmented/hatched progress-bar fill, and a stamp-style \"Recommended\" badge in the Action Sheet Modal",
+          "rationale": "Consistent with the paperwork/ledger concept; avoids rounded pill-shaped consumer-app styling and glassmorphism-everywhere slop defaults.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:03.000Z"
+        },
+        {
+          "question": "What voice and tone should the product's copy use?",
+          "optionChosen": "Plainspoken, warm-administrative, fact-stating register (school-office-clerk voice)",
+          "rationale": "Matches the brief's \"safe and trustworthy, not clever\" mandate; avoids cheerful-assistant voice and generic AI hedge-speak.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:04.000Z"
+        },
+        {
+          "question": "Should mockups be produced for this stage?",
+          "optionChosen": "Yes — a single token-driven HTML gallery covering all six primary surfaces plus the two shared narration components (cold-start overlay, rate-limit/duplicate-run banner)",
+          "rationale": "UX flagged the Action Sheet Modal and Completion Summary as the two highest-complexity surfaces warranting a structural pass, and a from-scratch design concept benefits from being shown, not just described.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:05.000Z"
+        },
+        {
+          "question": "Does this product warrant generated imagery (hero images, illustrations, empty-state art)?",
+          "optionChosen": "No — none needed",
+          "rationale": "Single-purpose B2B/education utility used briefly under time pressure by a non-technical teacher; imagery would work against the plainspoken, \"not clever\" design concept and the internal-tool-tier imagery-need assessment.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:06.000Z"
+        },
+        {
+          "question": "Should the design be synced to Claude Design as a hosted design system?",
+          "optionChosen": "Declined",
+          "rationale": "Beast Mode's auto-accept stops at the repository boundary (stage-protocol §10, AGNTC-0130) — publishing to claude.ai/design is outward-facing and not undoable by an unattended run; recorded as a MANUAL-VERIFY item for a human to take up interactively.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:20:07.000Z"
+        },
+        {
+          "question": "Critic pass-1 finding 1: the fallback-note string is claimed 'exact and non-negotiable' but the mockup's own demo row drops the <name> placeholder and truncates with an ellipsis — fix the mockup or soften the claim?",
+          "optionChosen": "Fix the mockup: render the full, non-truncated canonical string (with <name> substituted for a real filename) in the itemized log's Fallback row Note cell.",
+          "rationale": "The string is a product guarantee (brief §6 item 8); the doc's claim was already correct, so the mockup — not the doc — needed to match it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        },
+        {
+          "question": "Critic pass-1 finding 2: per-type field differentiation is asserted in §3 but the itemized log has 5 generic columns for every type and the Question row's Note is '—' — implement real per-type rendering or scope down the claim?",
+          "optionChosen": "Implement it: add the 'Type-specific fields' column UX rev 2 now specifies, and populate it per type across all four coursework types shown in the mockup (empty for Materials, 'Due: cleared · Max pts: N' for Assignments/Quiz assignments, 'Answer: Multiple choice (N opts)' for Questions).",
+          "rationale": "This is the third recurrence of this defect class in the run (PM brief, UX doc, now UI); the ledger metaphor requires genuinely different row shapes per type, and UX rev 2 already specifies the exact column to add.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        },
+        {
+          "question": "Critic pass-1 finding 3: the duplicate-run notice is claimed 'reused verbatim' but the mockup shows two different sentences at its two touchpoints — make them identical or drop the verbatim claim?",
+          "optionChosen": "Make them identical: both the Selection-screen notice and the Ready-to-Transfer restatement now use the same exact sentence; reworded the §3 doc bullet to distinguish the shared narration component (styling, reused across 3 screens) from the duplicate-run copy (verbatim only at its own 2 touchpoints) from the rate-limit banner's own distinct copy.",
+          "rationale": "The mockup is positioned as a living style reference; two different strings for a claimed-identical component would hand engineering ambiguous copy.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        },
+        {
+          "question": "Critic pass-1 finding 4: the Completion Summary log has no .outcome-skipped CSS class and no example Skipped row, despite Skipped being one of three filterable outcome kinds — add the missing state?",
+          "optionChosen": "Added an .outcome-skipped pill style (slate-600 text on paper-1 fill, line-strong border) and a sample Skipped row ('Bonus Worksheet') to the mockup's itemized log.",
+          "rationale": "The Completion Summary is the highest-value surface named in the review brief; Skipped is tied directly to teacher agency and the zero-silent-drop guarantee and cannot be the one outcome kind engineer has to invent a style for.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        },
+        {
+          "question": "Critic pass-1 finding 5: the Action Sheet Modal's radio styling conflates 'recommended' (static label) with 'selected/checked' (dynamic state) — give checked state its own independent, non-color-dependent treatment?",
+          "optionChosen": "Added an independent .selected radio treatment (filled ink-900 dot; filled teal-700 dot with outer ring when combined with .recommended) decoupled from the .recommended row-tint/stamp styling; the mockup now demonstrates both a recommended-and-accepted row and a non-recommended-but-selected row.",
+          "rationale": "Without an independent checked state, choosing a non-recommended option gave no visual confirmation, breaking the doc's own 'visible shape change, never color alone' accessibility claim on one of the two highest-complexity surfaces.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        },
+        {
+          "question": "Minor finding 6: the 'Next handoff' note describes all five Completion Summary counts (topics, transferred, fallback, skips, rubric-notes) as 'independently reconciling,' but only three sum to the post total — correct the wording?",
+          "optionChosen": "Reworded to state only transferred/fallback/skips sum to total posts scanned; topics-created is a separate count and rubric-notes is a non-additive subset tag, matching the settled reconciliation rule.",
+          "rationale": "The prior wording risked the backend data model treating topics/rubric-notes as values that must balance against the post total, when they explicitly don't.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        },
+        {
+          "question": "Minor finding 7: .notice/.rate-banner text color is hardcoded to #5C3D00 in the mockup CSS instead of the documented --amber-700 token — move it onto the token?",
+          "optionChosen": "Replaced the hardcoded hex with var(--amber-700) in both .notice and .rate-banner.",
+          "rationale": "The mockup is framed as token-driven/authoritative for engineer; no contrast regression since amber-700 on amber-100 was already spot-checked by the critic at 4.4:1+.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T07:11:30.211Z"
+        }
+      ],
+      "artifactKind": null
+    },
+    "architect": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/04-architecture.md",
+      "artifactHash": "ab84d370150e3ece0dc0f0069f4c77bf7ff9a01a4dde99f2d6fb5222a6e85a5f",
+      "decisions": [
+        {
+          "question": "What overall architecture style should the system take — modular monolith, microservices, or a queue/worker-fleet for the batch transfer job?",
+          "optionChosen": "Modular monolith, single Express process, ports-and-adapters (hexagonal) only at the Google-integration boundary; the transfer job runs in-process as an async promise chain checkpointed to the database per item",
+          "rationale": "Matches driver 6 (simplicity — realistic v1 load is one teacher, one job) and driver 4 (each Render free service sleeps independently, so splitting services multiplies cold starts); a queue/worker-fleet buys capability nothing in v1 needs and requires paid infra Render's free tier lacks.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:00.000Z"
+        },
+        {
+          "question": "What persistence engine should back both the mock Google world and application state (sessions, transfer jobs)?",
+          "optionChosen": "SQLite via Prisma, single file, holding both the simulated-Google tables and app-state tables",
+          "rationale": "Driver 2/3 require durable rows that outlive a browser tab; Postgres on Render's free tier expires after 30 days (cost/ops for unneeded durability); in-memory storage fails F12's resumability requirement outright when the process restarts.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:01.000Z"
+        },
+        {
+          "question": "What transport should the frontend use to track batch-transfer progress and support browser-refresh resumability (UX P0-2)?",
+          "optionChosen": "HTTP polling: POST returns 202 {jobId} immediately; GET /status polled ~1.5s; GET /active for reconnect discovery; GET /items fetched once at completion",
+          "rationale": "Poll traffic itself keeps the Render dyno awake during an active transfer (driver 4); /active makes reconnection a server fact rather than depending on client storage surviving a refresh (driver 3); splitting the compact poll payload from the full itemized log solves aria-live flooding at the protocol layer (driver 8). WebSockets/SSE rejected as fragile across Render's sleep/wake cycle for a one-way, low-frequency stream.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:02.000Z"
+        },
+        {
+          "question": "How should the zero-silent-drops reconciliation guarantee (UX P0-4, the settled exact formula) be enforced in the data model?",
+          "optionChosen": "TransferJobItem.outcome is a single-valued NOT-NULL enum (pending|transferred|fallback_shell|skipped); rows are inserted pending before any provider call is attempted; rubricDegraded is a separate boolean that never touches outcome; client-facing counts are served via GROUP BY aggregation, never independently-incremented counters",
+          "rationale": "Makes the reconciliation sum and the non-additive-subset-tag rule schema-level facts rather than documentation claims — directly closes the defect class (an assertion with no enforced implementation) flagged as having recurred three times upstream. A set-valued outcome or nulled-until-resolved rows were rejected as reintroducing exactly that defect class.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:03.000Z"
+        },
+        {
+          "question": "How should the four coursework types (Assignment, Quiz assignment, Question, Material) be modeled given the brief's per-type transformation table?",
+          "optionChosen": "Two structurally separate tables — CourseWork (workType enum, dueDate, maxPoints, answer-config) and CourseWorkMaterial (title/description/topic/attachments only — no dueDate or maxPoints columns exist)",
+          "rationale": "A shared table with nullable fields makes per-type correctness a runtime convention that can be silently violated; two tables make it a compile-time and schema-level guarantee, and mirrors Classroom's real separate courseWork/courseWorkMaterials API surfaces, serving the swappable-boundary driver.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:04.000Z"
+        },
+        {
+          "question": "How should the Google Classroom/Drive integration boundary be structured to satisfy the standing mock-first, swappable-adapter directive?",
+          "optionChosen": "A type-only ClassroomProvider TypeScript interface (no runtime code) implemented by MockClassroomProvider now and a future RealClassroomProvider later, with concrete wiring confined to a single composition-root module; list methods are pagination-shaped (pageToken/nextPageToken) from day one even though the mock may serve single pages",
+          "rationale": "A type-only port makes the dependency graph enforce 'who talks to Google' by inspection; the same test suite becomes a contract test runnable against either implementation. Pagination-shaping now avoids a signature rewrite later, which is exactly the cost the swappable-boundary driver exists to avoid.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:05.000Z"
+        },
+        {
+          "question": "How should mock authentication and the forced account-picker requirement (never skipped, never remembered) be implemented?",
+          "optionChosen": "Signed JWT in an httpOnly, SameSite=None, Secure cookie scoped to a mock account id, plus a minimal revocable Session table; sign-in always mints a fresh session rather than checking for an existing valid one",
+          "rationale": "Pure stateless JWT has no revocation, so switch-account/sign-out would leave a replayable token; SameSite=None is required because frontend and backend are split-origin Render services; implementing the forced picker as a route property (always fresh) rather than a conditional avoids it being silently optimized away later.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:06.000Z"
+        },
+        {
+          "question": "What frontend and testing stacks should be used?",
+          "optionChosen": "React + Vite + TypeScript + Tailwind (design tokens as CSS custom properties) for frontend; Vitest (contract tests against the ClassroomProvider interface) + Playwright (+ @axe-core/playwright per wizard step) for testing",
+          "rationale": "Vite's static output doesn't sleep on Render (only the API does), sharpening the cold-start driver; Next.js rejected as adding a second sleeping service for no SSR benefit. Playwright's multi-tab/multi-context control is specifically needed for F12's disconnect-reconnect and F10's account-switching scenarios that Cypress handles more weakly.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:07.000Z"
+        },
+        {
+          "question": "How should the mandated new fixture F12 (interrupt-and-reconnect) be modeled?",
+          "optionChosen": "Reuse F4's 50-post course with an added deterministic per-item slow-mode delay flag, rather than an entirely new course",
+          "rationale": "Gives a reliable interruption window for tests without inventing new seed data unrelated to what F12 actually tests (the reconnect mechanism via /transfer-jobs/active, not a new course shape).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:08.000Z"
+        },
+        {
+          "question": "How should the mandated new fixture F13 (persistent/exhausting 429, distinct from F6's retry-succeeds scope) be modeled?",
+          "optionChosen": "A new, distinct course where one item's mock provider call always returns 429 regardless of attempt count, exhausting all 5 backoff attempts and resolving fallback_shell with a rate-limit-exhaustion note distinct from the canonical attachment-failure note",
+          "rationale": "F6 stays scoped to 'retry succeeds'; F13 exclusively exercises the previously-untested retry-exhaustion-to-fallback path (UX P0-3's settled behavior), closing the exact fixture gap UX's Deltas flagged.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:09.000Z"
+        },
+        {
+          "question": "Cold-start behavior has no fixture in F1-F13 — should the architecture retroactively claim coverage, leave it entirely untestable, or provide an alternative testability mechanism?",
+          "optionChosen": "Honestly flag cold start as outside the F1-F13 canonical manifest; provide a non-fixture, env-gated simulated-delay test harness (COLD_START_SIMULATE_DELAY_MS, inert by default) so it is deterministically testable by Playwright without genuine Render infrastructure; recommend a future formal fixture as a backlog item rather than declaring it into the existing manifest unilaterally",
+          "rationale": "Matches the run's standing warning against phantom fixture citations (already corrected twice upstream); a test harness distinct from the fixture manifest gives real testability without overclaiming QC certification.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:10.000Z"
+        },
+        {
+          "question": "How should the risk of concurrent TransferJob rows for one account (schema-permitted, UI-prevented only) be closed?",
+          "optionChosen": "A partial unique index on TransferJob(accountId) WHERE status IN ('queued','running'), with POST /transfer-jobs returning 409 {existing jobId} instead of erroring on a conflict",
+          "rationale": "A double-click, an impatient retry during a cold-start wait, or two open tabs could otherwise interleave writes into the same target course with no reconciliation-table explanation. Returning the existing jobId makes accidental double-submit self-healing via the same /active rediscovery path used for F12.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:11.000Z"
+        },
+        {
+          "question": "What happens if the Node process itself (not just the browser tab) dies mid-transfer, leaving a TransferJob permanently in 'running' status?",
+          "optionChosen": "A boot-time reconciliation pass in composition-root: on process start, TransferJob rows stuck in 'running' with a stale heartbeat are marked 'interrupted' (never silently auto-resumed, to avoid duplicate-post risk); their pending items are marked 'skipped' with reason 'server_interrupted' so the reconciliation sum still closes",
+          "rationale": "Without this, a reachable state exists where scanned posts resolve to nothing — precisely the silent drop the architecture's core guarantee claims is structurally impossible. Auto-resume was rejected as risking duplicate draft creation for items whose provider call succeeded but whose checkpoint write did not.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:12.000Z"
+        },
+        {
+          "question": "What deployment topology should be used, given the split-origin CORS/cookie complexity it introduces?",
+          "optionChosen": "Two Render services (persistent Node/Express API + static React/Vite frontend) per the source PRD's deployment guide, with SameSite=None; Secure cookies and a pinned CORS origin allowlist resolved explicitly rather than left as an open question",
+          "rationale": "Carried forward as established architect-stage input across all three upstream docs; a same-origin collapse would lose the always-awake static shell that makes the cold-start overlay reliably renderable. The CORS/cookie cost is real but resolved by explicit configuration, not by changing topology.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:13.000Z"
+        },
+        {
+          "question": "How should the rate-limit-exhaustion fallback note (required by UX P0-3 but with no exact string specified upstream) be handled given no content pass has run?",
+          "optionChosen": "Architect-propose the exact string now, centralize both fallback-note strings in a single notes.ts constants module, and have F13's test assert distinctness from the canonical attachment-failure note rather than a hard-coded literal match",
+          "rationale": "Decouples the build from a pending content-pass confirmation — a later copy edit becomes a one-line change rather than a broken test or an unbuilt feature; flagged in Deltas for confirmation, not silently treated as final.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:14.000Z"
+        },
+        {
+          "question": "How should the real Classroom API's lack of a distinct 'Quiz assignment' workType be reconciled with the brief/UX/UI's treatment of it as a fourth first-class coursework type?",
+          "optionChosen": "Model QUIZ_ASSIGNMENT as an explicit mock-only workType enum value in v1, flagged as an Open Question for the real-API follow-on to reconcile (likely: ASSIGNMENT + detected Form attachment)",
+          "rationale": "Matches all three upstream artifacts' consistent treatment of Quiz assignment as a fourth distinct type; honestly flagging the mock/real divergence avoids silently carrying an assumption into the real-API follow-on's scoping.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:15.000Z"
+        },
+        {
+          "question": "Should the theme-7 ADR table and Deltas table be synthesized inline on Sonnet or dispatched to a stronger decision-core model, per the architect skill's optional Code-path step?",
+          "optionChosen": "Dispatched to a single Opus 5 subagent given the full elicited context from themes 1-6/8/9; folded in verbatim, with the synthesis-tier marker recorded immediately above the ADR table",
+          "rationale": "Per architect-Agent-C skill's decision-core-subagent reference — the ADRs and Deltas are bounded synthesis tasks warranting the stronger model, especially given the technical-critic review this artifact will face on Opus.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T08:15:16.000Z"
+        }
+      ],
+      "artifactKind": "architecture"
+    },
+    "engineer": {
+      "status": "approved-complete",
+      "revisions": 2,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/05-implementation.md",
+      "artifactHash": "dc6ffba8e54922a00f40725afa725fd72d352d81705658cc3d8815b68b5d8925",
+      "decisions": [
+        {
+          "question": "P0-1 — how should the phantom D1–D10 citation register be repaired?",
+          "optionChosen": "Add a numbered Design Decision Register (D1–D31) defining every cited label with a pointer to its governing section; renumber architecture Deltas under a distinct Δ prefix and re-label the two rows belonging to 03-ui-direction.md as UI-Δ1/UI-Δ2; retire D7/D8 in place rather than reusing the numbers.",
+          "rationale": "Fourth phantom-citation defect in this run. Retiring rather than reusing D7/D8 stops an old citation silently resolving to a new meaning. A scripted grep now confirms zero unresolved tokens.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:00.000Z"
+        },
+        {
+          "question": "P0-2 — how do we make count(items) == totalPostsScanned definitional rather than conventional?",
+          "optionChosen": "Persist the pre-flight scan as PreflightScan + PreflightScanItem; POST /api/transfer-jobs takes {scanId, resolutions[]} and inserts TransferJobItem rows from the stored scan rows, never from a re-enumeration.",
+          "rationale": "One measurement, two readers. The replacement gate mutates the source course between the scan and the job creation and asserts the item count still matches the scan — an assertion the old tautological gate could not make.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:01.000Z"
+        },
+        {
+          "question": "P0-3 — how is the fall-through from 'pending' closed for non-429 errors?",
+          "optionChosen": "Three mechanisms: a per-item try/catch resolving every error class to a terminal outcome; a sweep asserting zero pending before writing 'completed'; and an executor top-level catch assigning status='failed' plus stale-heartbeat reconciliation on an interval, not only at boot.",
+          "rationale": "PermissionError, NotFoundError and unexpected exceptions had no outcome path, and a job wedged while the process stayed alive would poll a frozen counter forever — boot reconciliation never fires when there is no boot, and the client's 60s ceiling covers unresolved calls, not answered polls reporting no progress.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:02.000Z"
+        },
+        {
+          "question": "P0-4 — how is F13's 'guaranteed draft shell' made reachable?",
+          "optionChosen": "Option (a): scope F13's 429 to attachment-bearing creates so a bare shell (no materials) succeeds; the exhaustion fallback is a distinct call with a distinct payload. If the bare shell also fails, the item resolves honestly to skipped/rate_limit_exhausted.",
+          "rationale": "The fallback was previously issued through the very call that had just refused five times, so the sixth attempt refused identically and the budget was unsatisfiable. Scoping the refusal is also the more faithful simulation — a real 429 is a quota condition, not a permanent per-item refusal.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:03.000Z"
+        },
+        {
+          "question": "P0-5 — how do we stop a post the server created being reported as 'Skipped by you'?",
+          "optionChosen": "Add attemptedAt (written immediately before the provider call) and targetPostId (written in the same statement as outcome='transferred'); reconcile interrupted items by branching on evidence and verifying unknowns against the target course; split skippedByUser/skippedBySystem through the API and the UI while keeping the sum three-term.",
+          "rationale": "Marking an item skipped when its provider call may have succeeded produces the exact duplicate auto-resume was rejected to avoid — through the teacher instead of the executor. The old composition-root gate asserted that bug; the replacement seeds all three classes and asserts skippedByUser stays 0.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:04.000Z"
+        },
+        {
+          "question": "Finding A — which bucket does 'Skip Attachment and Note Draft' resolve to?",
+          "optionChosen": "fallback_shell",
+          "rationale": "The post is created, so 'transferred' is arguable, but a note was injected and the credit rule (deduct only on a 100% clean transfer, auto-refund on any fallback injection) keys off exactly that. The alternative would charge a teacher for a copy carrying a 'could not be linked' note.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:05.000Z"
+        },
+        {
+          "question": "Finding H — where does the 'all posts' merge live?",
+          "optionChosen": "A new post-enumerator module owning the paginated loop over both coursework surfaces, the merge, and the total ordering key (creationTime, sourceType, sourceId), consumed by both preflight-engine and transfer-engine.",
+          "rationale": "The ADR promised this module and the module list omitted it, so two modules sharing no edge would each have open-coded the merge — which is how the two post counts diverge. The tiebreak is load-bearing: creationTime alone is not a total order across two tables.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:06.000Z"
+        },
+        {
+          "question": "Findings D/E/G/F — how far is the provider port shaped to the real API rather than to the mock?",
+          "optionChosen": "Add courseWorkStates to both list-coursework methods and courseStates to listCourses; batch getAttachmentHealth to refs -> Map; replace copyRubric with getRubric + createRubric and model RubricCriterion/RubricLevel. Hold the MOCK to the real API's default so an unfiltered listCourseWork returns PUBLISHED only.",
+          "rationale": "Holding the mock to the real default is the part that matters: a more permissive mock means every test passes while a real adapter silently drops every Draft and Scheduled post. A test asserts the unfiltered call returns fewer items than the filtered one, so the filter is demonstrably load-bearing. The rubric split also answers the PM brief's open question on rubric fidelity.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:07.000Z"
+        },
+        {
+          "question": "Finding B — how are cross-tier types shared?",
+          "optionChosen": "A shared-contracts workspace declaring every DTO once as a zod schema exported as both runtime validator and inferred type; the client parses every response through it and never redeclares a payload shape.",
+          "rationale": "Four cross-tier edges were typed twice, contradicting the document's own single-implementation principle. Runtime validation also means a malformed payload surfaces as an error rather than rendering.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:08.000Z"
+        },
+        {
+          "question": "Finding P — who owns the quality budgets?",
+          "optionChosen": "A quality-budgets module owning server/test/quality and docs/project-profile.md; nine advisory rows landed, each with a command that exists and prints its measured number.",
+          "rationale": "The seven proposed rows had falsifiable targets and commands but no owning module, and nothing owned test/quality or npm run test:perf — a budget that never reaches the profile is measured by nobody.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:09.000Z"
+        },
+        {
+          "question": "Testing stack — Playwright as specified in 04, or an alternative?",
+          "optionChosen": "Vitest + jsdom + axe-core, with F12's reconnect covered as an HTTP-level integration test and contrast covered by a deterministic arithmetic WCAG audit over the token pairings.",
+          "rationale": "DIVERGENCE FROM 04, recorded rather than silent. A real-browser suite needed a download this run could not take on. The honest cost is that jsdom has no layout, so axe's own color-contrast rule cannot evaluate; the arithmetic audit is stronger for contrast specifically but is not a browser pass. Backlogged at high severity.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:10.000Z"
+        },
+        {
+          "question": "Styling — Tailwind as named in the PRD, or plain CSS with the design tokens?",
+          "optionChosen": "Plain CSS with the mockup's stylesheet ported verbatim and the tokens as CSS custom properties.",
+          "rationale": "03-ui-direction.md specifies bespoke tokens as custom properties and ships a plain-CSS mockup as the authoritative reference; adding Tailwind would have meant two styling systems for one screen set and two sources of truth for the palette.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:11.000Z"
+        },
+        {
+          "question": "Delta 1 / finding R — what does this build claim about Render's free-tier filesystem?",
+          "optionChosen": "Nothing. Remove the 'sleep/wake is not in question' scoping, add the spin-down case to the deployment-spike checklist, and state the consequences if the filesystem turns out to be ephemeral rather than asserting Render's policy either way.",
+          "rationale": "The critic explicitly declined to assert Render's current behaviour because it had no instrument to verify it; neither does this stage. What is recorded is that resumability would be intra-process only, boot reconciliation would have nothing to reconcile, the idempotent reseed restores the fixture world and not job state, and the local F12 budget certifies nothing about the deployed environment.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:12.000Z"
+        },
+        {
+          "question": "Local development cookie policy, given SameSite=None; Secure in production?",
+          "optionChosen": "Dev and test use SameSite=Lax without Secure, and the Vite dev server proxies /api to the backend so local dev is same-origin; production behaviour is unchanged.",
+          "rationale": "A browser will not send a Secure cookie over plain http, so shipping the production policy in dev means no cookie is ever sent and every local run looks like a broken-auth bug.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:13.000Z"
+        },
+        {
+          "question": "Fixture manifest — is a fixture needed for the empty-course path?",
+          "optionChosen": "Add F14 (a genuinely empty course, 0 posts). The manifest is now F1–F14; F8/F9/F11 remain properties of F1 and F10 remains the two seeded accounts.",
+          "rationale": "UX section 5 requires the flow to reach Ready-to-Transfer stating '0 posts to copy'; nothing in 04 addressed a zero-item job, an instantly-completing transfer, or the reconciliation line's copy in that case. Cold start still has NO fixture and is not fixture-certified.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:14.000Z"
+        },
+        {
+          "question": "Where do the canonical note strings live, given the client must prove the fallback note renders untruncated?",
+          "optionChosen": "Canonical in shared/src/notes.ts, re-exported by server/src/services/notes.ts.",
+          "rationale": "One string, two readers: the client asserts the rendered note against the same constant the server injects, and notes.ts remains the engine's named home so a content change is still a one-line edit.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:20:15.000Z"
+        },
+        {
+          "question": "P0-1 — how should the total outcome function be made honest as well as total, given the catch-all overwrites correct terminal outcomes after a successful create?",
+          "optionChosen": "Both mechanisms the critic specified: write TransferJobItem.claimedTargetPostId immediately after issueCreate returns (evidence the job owns), and give finish() an optimistic `outcome: 'pending'` predicate so overwriting a terminal outcome is unrepresentable. Plus move getRubric inside copyRubricIfAny's try and wrap the whole post-create block so it degrades to a note.",
+          "rationale": "Recorded as D32. The evidence-aware catch alone would still have lost the clearPause case, where the throw happens before finish() ever runs — only a claim written before anything can throw covers it. Gate: three new post-create injections in totality.budget.test.ts, all three verified RED first against 'Nothing was written to the target course'.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:00.000Z"
+        },
+        {
+          "question": "P0-2 — how should the interval reconciler be prevented from racing a live executor and releasing the single-active-job guard mid-run?",
+          "optionChosen": "An executor lease (TransferJob.executorId claimed at execute() entry, every executor job-row write conditional on it), a reconciler claim-before-touch that nulls executorId in the same conditional statement and skips any job it cannot claim, and heartbeats through buildTopicMap and the hydration enumeration via a new onPage hook on enumeratePosts.",
+          "rationale": "Recorded as D33. Staleness was the reconciler's only predicate and every executor write was unconditional; a slow-but-alive run had activeAccountId pulled out from under it, admitting a second executor into the same target course. New budget executor_lease_mutual_exclusion, verified RED first (status=completed overwriting interrupted; zero heartbeats during topic creation).",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:01.000Z"
+        },
+        {
+          "question": "P0-3 — how should the mock's copyAttachmentToMyDrive stop mutating the source course?",
+          "optionChosen": "Insert a NEW MockAttachment row with parentType='myDrive' (the acting account's Drive, not a course post), leave the source row byte-for-byte unchanged, and have the engine consume the returned newDriveFileId and substitute it into the materials payload. refreshAttachments deleted entirely.",
+          "rationale": "An in-place update of the source attachment made the one method named 'copy' the only write to the source course in the system, healed F3's permission_locked finding within a session, and let the engine depend on a mutation a faithful real adapter would never perform. Parenting the copy to the source post would still have changed the source's attachment list, so 'myDrive' is the only placement that keeps the promise. Contract assertion 'LEAVES THE SOURCE ATTACHMENT UNCHANGED' verified RED first.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:02.000Z"
+        },
+        {
+          "question": "P0-4 — what should interruption recovery match on, given title-only matching manufactures false 'transferred' verdicts?",
+          "optionChosen": "Option (a) plus a hardened (b): resolve primarily from claimedTargetPostId (verified present in the target), and keep the title match only as a fallback for the attemptedAt-to-claim window, scoped to posts created at or after job.startedAt, excluding ids any sibling item already claims, and refusing on ambiguity with a new itemsSkippedAmbiguous counter.",
+          "rationale": "Recorded as D34. Recovery-by-inference needs evidence the job owns, not evidence the world happens to contain. The budget was rewritten to lead with the three false-positive cases; verified RED first, including verifiedTransferred=6 on a dirty target and two items both claiming one post.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:03.000Z"
+        },
+        {
+          "question": "P0-5 — how should the client recover from a lost poll and from a genuinely failed job?",
+          "optionChosen": "Bounded exponential-backoff retry in pollJobStatus (POLL_MAX_RETRIES consecutive failures, reset on any success), a local pollFailed state in TransferProgress whose Retry bumps a restartToken that genuinely re-runs the poll effect, and NO Retry at all when the job reached 'failed' server-side — that case routes to Selection. ErrorState.onRetry became optional so 'no retry' is expressible.",
+          "rationale": "The old onRetry called setStage('transfer') while the stage was already 'transfer' — a React no-op, so the button did nothing, and no test clicked it. Offering a Retry against a terminal server-side failure would be a second button that cannot succeed. Five new client tests, two of which click the button; all verified RED first.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:04.000Z"
+        },
+        {
+          "question": "APPLY-A — what should the engine do with a driveFile whose shareMode cannot be read, given the brief forbids defaulting to VIEW?",
+          "optionChosen": "Treat it as a finding: leave the file unlinked, name it in a note (shareModeUnknownNote), and land the item in fallback_shell — never substitute a shareMode.",
+          "rationale": "Re-sharing someone else's file on a guess is worse than telling the teacher the setting could not be read. The alternative the critic offered (make shareMode non-nullable on the read type) would have pushed the same guess up one layer rather than removing it.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:05.000Z"
+        },
+        {
+          "question": "APPLY-G — how should the mock's rate-limit rules stop firing on any post that merely shares a fixture title?",
+          "optionChosen": "Scope each rule to its fixture SOURCE COURSE, checked against the set of courses the provider instance has actually enumerated.",
+          "rationale": "The create carries no provenance and inventing a provenance field on an API-shaped payload would be a worse divergence than the bug. Every real run enumerates its source before it creates anything, so 'this instance read that course' is the honest available signal. Gated by a contract test asserting a run that never read F13's course does not 429 on a post with F13's title.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:06.000Z"
+        },
+        {
+          "question": "APPLY-D — resolve the mock-invented SCHEDULED CourseWorkState by mapping it at the port boundary, or by flagging it?",
+          "optionChosen": "Flag it (05-implementation.md §7, backlog, and a contract test renamed to name it as a declared divergence rather than assert it as fidelity), and split the two surfaces' state parameters into courseWorkStates / courseWorkMaterialStates. Mapping SCHEDULED to DRAFT+scheduledTime is real-adapter work.",
+          "rationale": "Mapping it now would change fixture behaviour F8 depends on without a real adapter to validate against. The defect worth fixing immediately was that a contract test had pinned the divergence in place as though it were parity — the same mistake QUIZ_ASSIGNMENT was correctly protected from.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:07.000Z"
+        },
+        {
+          "question": "APPLY-L — how should the seed stop accumulating posts created by previous transfers?",
+          "optionChosen": "Default seedOnBoot to false under a production-like NODE_ENV, and add an explicit inverse — pruneGeneratedFixtureRows() — wired to a pruneGeneratedOnBoot flag that is on in dev/demo and off in production.",
+          "rationale": "A seed with no inverse is a seed whose 'idempotent' claim only covers half the table. The prune deletes exactly what the manifest does not name inside seeded courses, so the fixture world is untouched and re-seeding after a prune is still a no-op.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:08.000Z"
+        },
+        {
+          "question": "QA-4 — correct the 'a scripted grep confirms zero unresolved citations' sentence, or commit the script?",
+          "optionChosen": "Commit the script: scripts/check-doc-citations.mjs, wired as npm run check:citations, exiting non-zero on any unresolved D/Δ/UI-Δ token and printing its own exclusions (critic-reports/, inputs/ — received documents).",
+          "rationale": "The result was true and the claim of repeatability was not; making the claim true is worth more than softening it. Excluding received documents is stated on every run rather than being a silent scope narrowing — a critic report may cite a token from a draft that no longer exists, and rewriting a received report to make a checker pass would falsify the record.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T10:30:09.000Z"
+        }
+      ],
+      "artifactKind": "architecture"
+    },
+    "qa": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/06-qa-report.md",
+      "artifactHash": "18211329dd96d69ebbae35c16ec32c4e33a684916d91e58f1d3a2a6764a5fbfb",
+      "decisions": [
+        {
+          "question": "Do the engineer-reported suite numbers (327 tests, build 291.57kB/14.26kB, lint clean, verify 3/3, budgets 9/9) match what QA independently observed?",
+          "optionChosen": "Confirmed exact match on every number: shared 12 / server 148 / client 167 = 327 pass, 0 fail, 0 skip; build output byte-identical (291.57 kB js / 14.26 kB css); lint 0 errors/warnings; agent-c-verify.js 3/3 PASS; agent-c-budgets.js 9/9 PASS.",
+          "rationale": "Re-ran every suite from a clean shell rather than trusting 05-implementation.md's numbers, per Beast Mode QA's core mandate.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:40:00.000Z"
+        },
+        {
+          "question": "Are the five P0 fixes (P0-1 citation register, P0-2 persisted scan, P0-3 total outcome function, P0-4 F13 reachable fallback, P0-5 evidence-based reconciliation) real in code, not just described?",
+          "optionChosen": "All five confirmed genuinely implemented and test-backed by direct code inspection: Design Decision Register D1-D31 (all cited tokens resolve, verified by independent grep); PreflightScan/PreflightScanItem persistence with a mutate-between-scan-and-job test proving the gate can fail; total outcome function with try/catch on every item plus pre-completion sweep plus top-level .catch()->failed; F13 429 scoped to attachment-bearing creates only (enforceRateLimit gates on materialCount>0), verified against a real DRAFT post; attemptedAt+targetPostId evidence-based reconciliation at boot AND via JobReconciler.start() interval, with skippedByUser/skippedBySystem split through API and UI (Completion Summary binds the tile to skippedByUser only).",
+          "rationale": "Read the actual source (transfer-engine.ts, job-reconciler.ts, mock-classroom-provider.ts, reconciliation.ts, CompletionSummary.tsx) and cross-checked against their budget/unit tests rather than trusting the implementation doc's narrative.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:40:00.000Z"
+        },
+        {
+          "question": "Does the built UI conform to the UX/UI spec when actually driven in a browser (spec-fidelity method)?",
+          "optionChosen": "PASS. Drove sign-in -> forced account picker (F10, 2 distinct accounts) -> Selection (archived-source/active-target scoping, source==target validation, duplicate-run notice) -> Action Sheet Modal for F2 (type-aware skip labels, Recommended stamp badge, exact fallback-note string) and F3 (3 options + risk warning, auto-fix toggle producing the combined recommended+selected radio treatment) -> Ready to Transfer -> Completion Summary (reconciliation line balances, type-specific fields column correct per type, tablet-width reflow to 3-column stat grid + horizontal-scroll log table). No visual or behavioral drift from 03-ui-direction.md / mockups found in the flows driven.",
+          "rationale": "Booted npm run dev:server + dev:client against the real mock backend (not a mock-data harness, since none exists) and drove two live end-to-end transfers via the Claude_Browser tool.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:40:00.000Z"
+        },
+        {
+          "question": "Are the engineer's self-disclosed limits (no real-browser E2E, no deployment verification, no live Google integration, no Prisma enums, data-first fixtures/schema, plain CSS not Tailwind, same-origin dev proxy) honestly represented?",
+          "optionChosen": "Yes, all six disclosures verified accurate and not overstated. Additionally found two adjacent items that should have been disclosed with the same rigor but were not: (1) no test exercises JobReconciler.start()'s actual interval firing (only reconcileStaleJobs() called directly/synchronously) despite composition-root's architecture acceptance gate explicitly requiring one; (2) the fallback_shell+rubricDegraded combined-outcome co-occurrence is not unit-tested at all (only transferred+rubricDegraded is), which is narrower than the backlog's own description ('implemented and unit-covered but not fixture-tested').",
+          "rationale": "Cross-checked each disclosure against actual test files rather than accepting the narrative; found two under-disclosed test-coverage gaps in the same defect family the run was watching for.",
+          "source": "beast-mode-auto",
+          "at": "2026-08-14T09:40:00.000Z"
+        }
+      ],
+      "artifactKind": null
+    },
+    "qc": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "docs/product/07-qc-report.md",
+      "artifactHash": "5a9fbca8439d562f174af4eade2f8fee270c9650cbc3e5fc466aa13b298f56cf",
+      "decisions": [],
+      "artifactKind": null
+    }
+  },
+  "pendingFeedback": null,
+  "backlog": [
+    {
+      "id": "e1581d79-3c63-4e04-a7e8-f79ed606d2cd",
+      "stage": "pm",
+      "text": "Real Google integration follow-on: replace the mock Google Classroom + Drive adapter with live APIs — real OAuth (prompt=select_account), consent-screen setup, corrected scope list (add classroom.courseworkmaterials; drive.file for Scenario-3 \"Copy to My Drive\"), Google app verification / restricted-scope security assessment, and a live E2E transfer between two real courses.",
+      "severity": "high",
+      "status": "open",
+      "createdAt": "2026-08-14T07:16:29.006Z"
+    },
+    {
+      "id": "3f4260b9-4bd5-44bf-8c82-62528ed0197c",
+      "stage": "pm",
+      "text": "Granular selection UI: let teachers pick specific topics/posts to copy instead of whole-course-only (v1 copies the entire course's classwork; per-item choices exist only in the pre-flight action sheet).",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T07:16:31.124Z"
+    },
+    {
+      "id": "264e39d8-13f4-49bb-aabf-7f936ffe33bf",
+      "stage": "pm",
+      "text": "Idempotent re-run / duplicate detection: detect when the same source has already been copied into the same target and offer skip/merge instead of creating duplicate drafts (v1 warns pre-transfer and creates duplicates).",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T07:16:32.540Z"
+    },
+    {
+      "id": "e0fa2f90-14ff-449d-baaa-cb55c90daad8",
+      "stage": "pm",
+      "text": "Stripe billing activation on the stubbed credit/subscription middleware (deduct only on 100% clean transfer; auto-refund on fallback injections), plus pricing design once free-launch usage data exists.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T07:16:34.117Z"
+    },
+    {
+      "id": "79495e98-63f2-47e7-9296-578455744bf0",
+      "stage": "pm",
+      "text": "OAuth scope-minimization review before Google verification submission: evaluate drive.metadata.readonly + drive.file in place of restricted drive.readonly to reduce security-assessment burden.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T07:16:35.322Z"
+    },
+    {
+      "id": "819bfbd2-7cf0-462f-ac39-a216de52808f",
+      "stage": "ux",
+      "text": "Mid-transfer cancel control: v1 has no way to cancel a batch transfer once started (partial-cancel semantics for already-created drafts are undefined). Add a cancel affordance with a defined partial-completion contract post-v1.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T07:34:02.207Z"
+    },
+    {
+      "id": "ae8c0983-67ee-46a9-922b-16a6ee005bc1",
+      "stage": "ux",
+      "text": "Downloadable/exportable itemized log from the Completion Summary (e.g. CSV export) so teachers can keep a record outside the app — not in v1 scope but raised as a candidate enhancement during UX elicitation.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T07:34:02.218Z"
+    },
+    {
+      "id": "c44ac179-674b-4a07-a725-0e8c1255d9a6",
+      "stage": "ui",
+      "text": "Define responsive breakpoint strategy for the Completion Summary's 5-tile stat grid and itemized log table (reflow columns / sticky-column horizontal scroll / stacked-card collapse) below the tablet/Chromebook viewport floor — flagged in 03-ui-direction.md Deltas.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T07:42:41.970Z"
+    },
+    {
+      "id": "e0147972-f2c4-4623-aaf8-f4a6e5d607e0",
+      "stage": "ui",
+      "text": "Run an automated WCAG AA contrast audit (axe/Lighthouse/contrast tool) against the final rendered palette from 03-ui-direction.md §2/§6 before treating it as AA-certified — palette is contrast-designed by construction but unverified by tooling at UI stage.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T07:42:43.553Z"
+    },
+    {
+      "id": "7463b7ac-c26b-40ff-ad2f-c9cea063b639",
+      "stage": "ui",
+      "text": "Finalize remaining microcopy not worked as an example in 03-ui-direction.md (generic catch-all error state body copy, any secondary Action Sheet Modal strings) against the established voice/tone register — a content pass in parallel with engineer build.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T07:42:44.735Z"
+    },
+    {
+      "id": "4c6e9a69-5889-40c9-8fa9-07f389d5848b",
+      "stage": "ui",
+      "text": "MANUAL-VERIFY: UI design-system sync to Claude Design (claude.ai/design) was declined under Beast Mode's repository-boundary override. If a hosted, browsable design system is wanted, a human should invoke the UI stage's design-sync offer interactively.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T07:42:45.928Z"
+    },
+    {
+      "id": "f023f48d-ce3e-48a0-bfb1-ce5733bd38be",
+      "stage": "architect",
+      "text": "Verify empirically whether Render free-tier local disk (SQLite file) survives a genuine redeploy (not just sleep/wake) before treating job-history durability across deploys as guaranteed. Architecture already mitigates the downside via idempotent fixture reseed-on-boot regardless of the answer; if durability across redeploys matters, the pre-decided remedy is Postgres (rejected on cost/ops for v1, named as the upgrade path).",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T08:19:11.743Z"
+    },
+    {
+      "id": "09dc7efc-02a0-4a53-bdb9-5b8032b50c04",
+      "stage": "architect",
+      "text": "Confirm/finalize the architect-proposed rate-limit-exhaustion fallback-note string (centralized in server/src/services/notes.ts) with a content pass; F13's test asserts distinctness from the canonical attachment-failure note rather than a literal match, so this is a one-line change whenever copy is confirmed.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T08:19:13.923Z"
+    },
+    {
+      "id": "eb2b9fde-e0af-4bb8-86e4-e4e99439e85e",
+      "stage": "architect",
+      "text": "Formalize a numbered fixture for cold-start behavior (\">15 min idle\" wake) so QC's certification language can cite it the same way it cites F1-F13. v1 architecture provides a non-fixture, env-gated test harness (COLD_START_SIMULATE_DELAY_MS) instead, which is deterministically testable but explicitly not part of the canonical fixture manifest.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T08:19:16.202Z"
+    },
+    {
+      "id": "852f9869-4266-4b58-80a9-6af1572bb43e",
+      "stage": "architect",
+      "text": "Real-API follow-on must reconcile the mock's QUIZ_ASSIGNMENT workType (no equivalent in the real Google Classroom API's literal workType enum) — likely maps to ASSIGNMENT plus a detected Google Form attachment. Also must account for Classroom's asynchronous write consistency (a created draft may not appear in an immediate subsequent list call) and richer real 429 error envelopes (Retry-After, structured reason fields) that the mock's deterministic simulation does not produce.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T08:19:18.879Z"
+    },
+    {
+      "id": "246f7f79-60fe-4472-a358-0d9ce89950f6",
+      "stage": "architect",
+      "text": "Engineer must choose and implement one concrete narrow-viewport (tablet/Chromebook) responsive pattern for the Completion Summary's 5-tile stat grid and itemized log table before/while building the results screen (carried from UI's Delta; architecture offers non-binding guidance favoring horizontal-scroll-with-sticky-column over card-collapse to preserve the ledger/manifest design concept, but does not mandate it).",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T08:19:20.590Z"
+    },
+    {
+      "id": "9d2f8b67-a46e-4bdd-bb02-7278458b0856",
+      "stage": "engineer",
+      "text": "Add real-browser E2E (Playwright + @axe-core/playwright) as 04-architecture.md's testing ADR specifies. The suite shipped as Vitest + jsdom + axe-core because a browser download was out of reach this run. F12's reconnect is covered at the HTTP layer and the wizard walk-through in jsdom, but jsdom has no layout, so axe's own color-contrast rule cannot evaluate and reports as incomplete. Contrast is covered instead by a deterministic arithmetic WCAG audit over every token pairing (client/src/styles/contrast.a11y.test.ts) — stronger for contrast specifically, but not a browser pass. QC must not read wcag_aa_automated_per_step as browser-verified until this lands.",
+      "severity": "high",
+      "status": "open",
+      "createdAt": "2026-08-14T09:23:28.185Z"
+    },
+    {
+      "id": "14b1c84a-7c8e-4645-9672-3607b2b0b0e0",
+      "stage": "engineer",
+      "text": "Deployment spike (Δ1, critic finding R): deploy both Render services, create a transfer job, let the free instance SPIN DOWN (not only redeploy), wake it, and check whether the TransferJob/TransferJobItem rows survive. Run this BEFORE the resumability guarantee is stated as delivered. Nothing in this build asserts Render's current free-tier filesystem policy — if it is ephemeral, resumability is intra-process only, boot reconciliation has nothing to reconcile (a silent drop at the job level), the idempotent reseed restores the fixture world but NOT job state, and fixture_f12_reconnect_fidelity certifies nothing about the deployed environment. Pre-decided remedy: Postgres. Verify at the same time whether Render's own health-check polling of /api/health prevents the instance from ever idling, which would make the cold-start state unobservable in production (DEFER-1).",
+      "severity": "high",
+      "status": "open",
+      "createdAt": "2026-08-14T09:23:34.485Z"
+    },
+    {
+      "id": "0f5c42cc-6bc9-4c10-b840-48cbc51f5bd8",
+      "stage": "engineer",
+      "text": "CSRF surface (critic DEFER-2): with SameSite=None; Secure + credentials:'include', cookies ride cross-origin in production. JSON bodies force a CORS preflight on the state-changing routes and the origin allowlist is pinned, but a bodiless POST /api/auth/sign-out qualifies as a simple request and is cross-site triggerable. Low impact on a mock-only v1 — add a CSRF token or require a custom header on state-changing routes when real OAuth lands.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T09:23:38.714Z"
+    },
+    {
+      "id": "178e8a3d-016d-4e50-813a-e565a179dd9b",
+      "stage": "engineer",
+      "text": "Formalise a numbered fixture for cold start so QC can cite it the way it cites F1–F14. Today cold start is covered by an env-gated harness (COLD_START_SIMULATE_DELAY_MS) that is deliberately NOT part of the manifest and is verified inert under a production-like NODE_ENV. Also carry the D29 relabel forward: the mechanism is latency-triggered, so UX Acceptance Scenario #8's \">15 min idle\" precondition is superseded by \"any unresolved call >2s\" — update 02-ux-workflow.md's scenario text at the next PM/UX pass so QA is not testing a precondition the product does not implement.",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T09:23:44.110Z"
+    },
+    {
+      "id": "3c426552-e9fe-45dd-9637-a94bc3dc6458",
+      "stage": "engineer",
+      "text": "Remaining critic DEFER items and small carried gaps: (a) GET /:id/items?since= for mid-transfer detail — correctly noted-not-built; (b) QUIZ_ASSIGNMENT has no real-API workType equivalent and must be reconciled when RealClassroomProvider ships (likely ASSIGNMENT + a detected Form attachment); (c) session TTL is a 24h default with no product requirement behind it; (d) no fixture combines an attachment failure (F2/F3) with a rubric denial (F7) on the same post, so the combined-outcome rule is implemented and unit-covered but not fixture-tested; (e) route the architect-proposed rate-limit-exhaustion note string through a content pass before ship (Δ2) — F13's gate asserts distinctness, not a literal, so a copy change is a one-line edit and not a broken test.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T09:23:51.965Z"
+    },
+    {
+      "id": "cd6ea2cc-0601-440d-ae6c-645fb51e9ddf",
+      "stage": "qa",
+      "text": "Add a test exercising JobReconciler.start(intervalMs)'s actual setInterval firing (e.g. fake timers) that wedges a job in 'running' with a stale heartbeat and asserts the interval reconciler resolves it WITHOUT a process restart or a direct reconcileStaleJobs() call. This is the specific acceptance gate 04-architecture.md's composition-root module declares (\"A second test asserts the interval reconciler resolves a job wedged in 'running' WITHOUT a process restart\") and it does not currently exist — every existing test (job-reconciler.budget.test.ts, api.integration.test.ts) calls reconcileStaleJobs() synchronously, which exercises the reconciliation logic but not the interval-scheduling mechanism itself (D12's \"not only at boot\" half of the fix).",
+      "severity": "medium",
+      "status": "open",
+      "createdAt": "2026-08-14T09:39:09.073Z"
+    },
+    {
+      "id": "467b41b6-8d38-40d4-b3a1-b1c92f0816df",
+      "stage": "qa",
+      "text": "Add a unit test asserting the combined-outcome rule for outcome=fallback_shell + rubricDegraded=true co-occurring on the same item (02-ux-workflow.md §4 \"combined-outcome rule\": an item can be both a fallback shell AND rubric-degraded, and must count exactly once under fallback_shell in the reconciliation sum). Currently server/src/services/transfer-engine.test.ts only exercises rubricDegraded against outcome=transferred (F7, F1/D24) — the fallback_shell+rubricDegraded combination is untested even at the unit level, which is narrower than 05-implementation.md's backlog description (\"implemented and unit-covered but not fixture-tested\"). The code appears correct by construction (rubricDegraded is set independently of outcome in transfer-engine.ts's finish()), but the specific combination has zero test coverage, fixture or synthetic.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T09:39:12.827Z"
+    },
+    {
+      "id": "88c82fa5-cccd-485c-8103-0d6a8239b0a5",
+      "stage": "qa",
+      "text": "04-architecture.md §8 \"Testability\" (line ~1184) and the UI-Δ2 Deltas row (line ~1403) still describe the resolution mechanism as \"@axe-core/playwright runs on every wizard step in the E2E suite\" — this is stale relative to the Vitest+jsdom+axe-core substitution disclosed accurately in the same document's own \"Implementation reconciliation (engineer stage)\" section. The reconciliation section is the correct, honest account; §8 and the UI-Δ2 row were not updated to match it and should be, so a reader of §8/Deltas alone (without reaching the reconciliation section) would believe real-browser E2E a11y testing shipped. Also: 05-implementation.md's P0-1 claims \"a scripted grep confirms zero unresolved citations\" but no such script is committed anywhere in the repo (checked package.json scripts and grepped for citation-check tooling) — QA independently re-derived the same true result by hand, but the claim of a repeatable, checked-in script is unverifiable/inaccurate as stated.",
+      "severity": "low",
+      "status": "open",
+      "createdAt": "2026-08-14T09:39:22.472Z"
+    }
+  ],
+  "beastMode": {
+    "active": false,
+    "startedFromStage": "pm",
+    "targetStage": "qc",
+    "startedAt": "2026-08-14T07:11:30.211Z",
+    "stagesRun": [
+      "pm",
+      "ux",
+      "ui",
+      "architect",
+      "engineer",
+      "qa",
+      "qc"
+    ],
+    "stagesSkipped": [],
+    "lastError": null,
+    "completedAt": "2026-08-14T10:59:28.622Z"
+  },
+  "updatedAt": "2026-08-14T10:59:16.972Z"
+}

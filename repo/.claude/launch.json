@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "client-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--workspace=client", "--", "--port", "4173", "--strictPort"],
+      "port": 4173
+    }
+  ]
+}

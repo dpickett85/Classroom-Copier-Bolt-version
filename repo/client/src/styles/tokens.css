@@ -1,0 +1,476 @@
+/*
+ * Design-token contract (04-architecture.md §6-D): this file consumes the CSS
+ * custom properties from 03-ui-direction.md §2 verbatim. The :root block below
+ * is copied character-for-character from docs/product/mockups/ui-mockups.html,
+ * which is the authoritative style reference. `contrast.a11y.test.ts` parses
+ * this block and audits every pairing the design uses (UI-Δ2).
+ *
+ * Everything after the :root block is the mockup's component CSS ported to the
+ * running app, plus the responsive strategy decided in UI-Δ1 and the WCAG AA
+ * focus/hit-area rules from 03-ui-direction.md §6.
+ */
+
+:root{
+  --paper-0:#FBF9F4;
+  --paper-1:#F2EEE3;
+  --paper-2:#EAE4D2;
+  --line:#D8D2C2;
+  --line-strong:#B9B29B;
+  --ink-900:#16231F;
+  --ink-700:#3C4A45;
+  --ink-500:#5B6B67;
+  --teal-700:#0F5C56;
+  --teal-600:#147A72;
+  --teal-100:#DCEEEB;
+  --amber-700:#8A5A00;
+  --amber-100:#FBEDD1;
+  --green-700:#1E7A42;
+  --green-100:#E1F3E7;
+  --red-700:#A22C2C;
+  --red-100:#FBE4E4;
+  --slate-600:#5B6B67;
+  --focus:#1857C9;
+  --font-head:'Source Serif 4', Georgia, serif;
+  --font-body:'Public Sans', system-ui, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+  --radius:3px;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0; background:var(--paper-2); color:var(--ink-900);
+  font-family:var(--font-body); line-height:1.5;
+  padding:32px 0 96px;
+}
+
+/* WCAG AA (03-ui-direction.md §6): a 3px --focus outline with offset on every
+   interactive element, never suppressed. Declared once, globally, so no
+   component can quietly drop it. */
+:focus-visible{
+  outline:3px solid var(--focus);
+  outline-offset:2px;
+}
+
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;
+}
+
+/* ---- App frame ---- */
+.frame{
+  max-width:900px; margin:0 auto 40px; background:var(--paper-0);
+  border:1px solid var(--line-strong); border-radius:6px;
+  overflow:hidden; box-shadow:0 1px 2px rgba(22,35,31,.06);
+}
+.screen{ padding:28px 32px; }
+.header-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 32px; border-bottom:1px solid var(--line); background:var(--paper-0);
+  font-size:13px; flex-wrap:wrap; gap:8px;
+}
+.header-account{ display:flex; align-items:center; gap:8px; color:var(--ink-700); }
+.avatar{
+  width:24px; height:24px; border-radius:50%; background:var(--teal-100);
+  color:var(--teal-700); font-weight:600; font-size:11px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-mono);
+}
+.link-btn{
+  background:none; border:none; color:var(--teal-700); font-family:var(--font-body);
+  font-size:13px; font-weight:600; cursor:pointer; padding:4px 6px; border-radius:var(--radius);
+  min-height:44px; min-width:44px;
+}
+.link-btn:hover{ background:var(--teal-100); }
+.link-btn:disabled{ color:var(--ink-500); cursor:not-allowed; background:none; }
+.steps{
+  display:flex; gap:0; padding:12px 32px; border-bottom:1px solid var(--line);
+  font-family:var(--font-mono); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--ink-500); background:var(--paper-1); flex-wrap:wrap;
+}
+.step{ padding-right:22px; position:relative; }
+.step.current{ color:var(--teal-700); font-weight:600; }
+.step.done{ color:var(--ink-700); }
+.step:not(:last-child)::after{ content:'—'; position:absolute; right:8px; color:var(--line-strong); }
+
+h2.screen-title{ font-family:var(--font-head); font-weight:600; font-size:20px; margin:0 0 6px; }
+p.screen-sub{ color:var(--ink-700); font-size:14.5px; margin:0 0 24px; max-width:52ch; }
+
+/* ---- Buttons ---- */
+.btn{
+  font-family:var(--font-body); font-weight:600; font-size:14px;
+  padding:10px 20px; border-radius:var(--radius); border:1px solid transparent;
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:44px;
+}
+.btn-primary{ background:var(--teal-700); color:#fff; }
+.btn-primary:hover{ background:var(--teal-600); }
+.btn-primary:disabled{ background:var(--line-strong); color:var(--paper-0); cursor:not-allowed; }
+.btn-secondary{ background:var(--paper-0); color:var(--ink-900); border-color:var(--line-strong); }
+.btn-secondary:hover{ background:var(--paper-1); }
+.btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+/* ---- Screen 1: Sign in ---- */
+.signin-screen{ text-align:center; padding:64px 32px; }
+.wordmark{ font-family:var(--font-head); font-weight:700; font-size:26px; margin-bottom:4px; }
+.wordmark .seal{ display:inline-block; width:10px;height:10px;border-radius:50%;background:var(--teal-700); margin-right:8px; }
+.signin-tag{ color:var(--ink-700); font-size:15px; max-width:44ch; margin:0 auto 32px; }
+.mock-note{ color:var(--ink-500); font-size:12.5px; margin-top:20px; font-family:var(--font-mono); }
+
+/* Google's own sign-in button (03-ui-direction.md §2, §3.1).
+   The ONE documented exception to the token palette in this stylesheet: these
+   colors are Google's published branding spec, not this product's, because a
+   recognisably-Google button is what makes an unfamiliar teacher trust a
+   credential prompt. The exception is scoped to these two class names and to
+   this button's own foreground/background pair — nothing else. Everything the
+   a11y budget cares about beyond that (real <button>, accessible name,
+   44px hit area, visible focus ring) still applies and is set here. */
+.google-signin-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:12px;
+  min-height:44px; padding:0 20px;
+  font-family:'Roboto', var(--font-body); font-size:14px; font-weight:500;
+  color:#1F1F1F; background:#FFFFFF;
+  border:1px solid #747775; border-radius:20px;
+  cursor:pointer;
+}
+.google-signin-btn:hover{ background:#F7F8F8; }
+.google-signin-btn:disabled{ color:#8E918F; border-color:#DADCE0; cursor:not-allowed; }
+.google-signin-btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+/* Explicit box, belt-and-braces with the svg's own width/height attributes.
+   A viewBox-only <svg> with neither stretches to fill its containing block —
+   which is the actual mechanism behind the 898x898px icon this replaces. */
+.google-g-logo{ width:18px; height:18px; flex:0 0 18px; display:block; }
+
+/* The three sign-in failure states share ONE treatment (03-ui-direction §3.1):
+   none of them lost data and none is more broken than another, so three
+   different colors would imply three severities that do not exist. */
+.signin-error{
+  display:flex; gap:10px; align-items:flex-start; text-align:left;
+  max-width:420px; margin:20px auto 0; padding:12px 14px;
+  background:var(--amber-100); border:1px solid var(--amber-700);
+  border-radius:var(--radius); color:var(--amber-700); font-size:13.5px;
+}
+.signin-error .glyph{ font-family:var(--font-mono); font-weight:700; }
+/* 1g's optional reference code: de-emphasised, never the headline. */
+.signin-error .ref{ display:block; margin-top:6px; color:var(--ink-500); font-family:var(--font-mono); font-size:11.5px; }
+
+/* 1d — the callback landing. Deliberately the same layout as .coldstart, so
+   the global cold-start overlay replacing it at 2s is not a visual jump. */
+.signing-in{ text-align:center; padding:70px 32px; color:var(--ink-700); }
+.signing-in-title{ font-family:var(--font-head); font-weight:600; font-size:17px; color:var(--ink-900); }
+
+/* ---- Cold start ---- */
+.coldstart{ text-align:center; padding:70px 32px; color:var(--ink-700); }
+.spinner{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid var(--line); border-top-color:var(--teal-700);
+  margin:0 auto 18px; animation:spin 1s linear infinite;
+}
+/* Static equivalent chosen by the component when prefers-reduced-motion is set
+   (03-ui-direction.md §6) — a complete ring, not a slowed-down animation. */
+.spinner-static{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid var(--teal-700);
+  margin:0 auto 18px;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.coldstart-title{ font-family:var(--font-head); font-weight:600; font-size:17px; color:var(--ink-900); margin-bottom:4px;}
+.coldstart-sub{ font-size:13px; color:var(--ink-500); }
+
+/* Reduced motion: a static equivalent, not an animation slowed down. */
+@media (prefers-reduced-motion: reduce){
+  .spinner{ animation:none; border-top-color:var(--teal-700); border-right-color:var(--teal-700); }
+  *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+}
+
+/* ---- Account picker ---- */
+.account-list{ max-width:420px; margin:0 auto; text-align:left; }
+.account-row{
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  border:1px solid var(--line); border-radius:var(--radius); margin-bottom:10px;
+  cursor:pointer; background:var(--paper-0); width:100%; min-height:44px;
+  font-family:var(--font-body); text-align:left; color:var(--ink-900);
+}
+.account-row:hover{ border-color:var(--teal-600); background:var(--teal-100); }
+.account-row .radio{ width:16px;height:16px;border-radius:50%;border:2px solid var(--line-strong); flex-shrink:0; }
+.account-avatar{ width:32px; height:32px; border-radius:50%; background:var(--teal-100); color:var(--teal-700); font-family:var(--font-mono); font-weight:600; display:flex;align-items:center;justify-content:center; font-size:12px; flex-shrink:0; }
+.account-name{ font-weight:600; font-size:14px; }
+.account-email{ font-size:12.5px; color:var(--ink-500); font-family:var(--font-mono); }
+.account-actions{ display:flex; justify-content:space-between; margin-top:18px; max-width:420px; margin-left:auto; margin-right:auto; gap:10px; }
+
+/* ---- Screen 3: Source/Target ---- */
+.field-group{ margin-bottom:22px; max-width:520px; }
+label.field-label{ display:block; font-weight:600; font-size:13px; margin-bottom:6px; color:var(--ink-900); }
+select.select-input, .select-input{
+  width:100%; padding:11px 12px; border:1px solid var(--line-strong); border-radius:var(--radius);
+  font-family:var(--font-body); font-size:14px; background:var(--paper-0); color:var(--ink-900);
+  min-height:44px;
+}
+select.select-input:focus-visible{ outline:3px solid var(--focus); outline-offset:1px; }
+.badge{
+  display:inline-block; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+  letter-spacing:.03em; padding:2px 7px; border-radius:2px; border:1px solid currentColor;
+  margin-left:8px; font-weight:600;
+}
+.badge-active{ color:var(--green-700); background:var(--green-100); border-color:var(--green-700); }
+.badge-archived{ color:var(--ink-500); background:var(--paper-1); border-color:var(--line-strong); }
+.badge-sis{ color:var(--teal-700); background:var(--teal-100); border-color:var(--teal-700); }
+.notice{
+  display:flex; gap:10px; padding:12px 14px; background:var(--amber-100);
+  border:1px solid var(--amber-700); border-radius:var(--radius); font-size:13.5px;
+  color:var(--amber-700); max-width:520px; margin-bottom:20px;
+}
+.notice .glyph{ font-family:var(--font-mono); font-weight:700; color:var(--amber-700); }
+/* QA-2 — the duplicate-run notice is reassurance now, not a warning, so it
+   cannot keep `.notice`'s amber: colour is the other half of the same claim.
+   Teal is deliberately the SAME pairing `.outcome-duplicate` uses for "Already
+   in course", so the promise made here and the outcome that keeps it are
+   visibly the same thing. Both directions of the pairing are audited in
+   contrast.a11y.test.ts. */
+.reassurance-banner{
+  display:flex; gap:10px; padding:12px 14px; background:var(--teal-100);
+  border:1px solid var(--teal-700); border-radius:var(--radius); font-size:13.5px;
+  color:var(--teal-700); max-width:520px; margin-bottom:20px;
+}
+.reassurance-banner .glyph{ font-family:var(--font-mono); font-weight:700; color:var(--teal-700); }
+.actions-row{ display:flex; justify-content:flex-end; max-width:520px; gap:10px; }
+.field-error{ color:var(--red-700); font-size:13px; margin:-14px 0 20px; max-width:520px; }
+
+/* ---- Pre-flight scanning ---- */
+.scanning{ text-align:center; padding:70px 32px; }
+.scan-lines{ margin-top:18px; color:var(--ink-700); font-size:13.5px; font-family:var(--font-mono); }
+.scan-lines div{ margin-bottom:4px; }
+.scan-lines .done::before{ content:'✓ '; color:var(--green-700); font-weight:700; }
+.scan-lines .active{ color:var(--teal-700); font-weight:600; }
+
+/* ---- Action sheet modal ---- */
+.modal-backdrop{
+  background:rgba(22,35,31,.55); padding:36px 24px;
+  position:fixed; inset:0; overflow-y:auto; z-index:10;
+}
+.modal{
+  max-width:640px; margin:0 auto; background:var(--paper-0); border:1px solid var(--line-strong);
+  border-radius:6px; box-shadow:0 8px 28px rgba(22,35,31,.25);
+}
+.modal-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding:20px 24px 14px; border-bottom:1px solid var(--line); gap:12px;
+}
+.modal-head h3{ font-family:var(--font-head); font-size:17px; font-weight:600; margin:0; max-width:44ch; }
+.modal-close{ background:none;border:none;color:var(--ink-500);font-size:13px;font-weight:600;cursor:pointer; min-height:44px; min-width:44px; font-family:var(--font-body); }
+.toggle-row{
+  display:flex; align-items:center; gap:10px; padding:14px 24px;
+  background:var(--paper-1); border-bottom:1px solid var(--line); font-size:13.5px;
+  cursor:pointer; min-height:44px; text-align:left; width:100%;
+  font-family:var(--font-body); color:var(--ink-900); border-left:none; border-right:none; border-top:none;
+}
+.switch{ width:36px; height:20px; border-radius:10px; background:var(--line-strong); position:relative; flex-shrink:0; }
+.switch::after{ content:''; position:absolute; width:16px;height:16px;border-radius:50%;background:#fff; top:2px; left:2px; }
+.switch.on{ background:var(--teal-700); }
+.switch.on::after{ left:18px; }
+.toggle-copy{ color:var(--ink-700); }
+.toggle-copy b{ color:var(--ink-900); }
+.issue-row{ padding:16px 24px; border-bottom:1px solid var(--line); }
+.issue-row:last-of-type{ border-bottom:none; }
+.issue-file{ font-weight:600; font-size:14px; }
+.issue-context{ color:var(--ink-500); font-size:12.5px; margin-bottom:2px; }
+.issue-desc{ color:var(--ink-700); font-size:13px; margin-bottom:10px; }
+.option{ display:flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid var(--line); border-radius:var(--radius); margin-bottom:6px; font-size:13.5px; min-height:44px; cursor:pointer; }
+.option .radio{ width:14px;height:14px;border-radius:50%;border:2px solid var(--line-strong); flex-shrink:0; }
+/* "Recommended" is a static per-row label — tint + stamp only, independent of whether the row is chosen. */
+.option.recommended{ border-color:var(--teal-600); background:var(--teal-100); }
+/* "Selected/checked" is the dynamic interaction state — its own shape change (hollow ring -> filled dot),
+   using neutral ink so a chosen non-recommended option is just as visibly confirmed as a chosen recommended one. */
+.option.selected .radio{
+  border-color:var(--ink-900);
+  background: radial-gradient(circle, var(--ink-900) 0 4px, transparent 4.5px);
+}
+/* Recommended AND selected together (teacher accepted the recommendation): the dot picks up the teal
+   treatment plus an outer ring, still a distinct shape from the plain "selected" dot above. */
+.option.recommended.selected .radio{
+  border-color:var(--teal-700);
+  background: radial-gradient(circle, var(--teal-700) 0 4px, transparent 4.5px);
+  box-shadow: inset 0 0 0 2.5px var(--teal-100);
+}
+.option input[type=radio]{ position:absolute; opacity:0; width:1px; height:1px; }
+.option:focus-within{ outline:3px solid var(--focus); outline-offset:2px; }
+.stamp{
+  font-family:var(--font-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--teal-700); border:1px solid var(--teal-700); border-radius:2px; padding:1px 6px;
+  margin-left:auto; font-weight:700;
+}
+.risk-warning{ color:var(--amber-700); font-size:12.5px; margin:0 0 6px 22px; }
+.modal-foot{ display:flex; justify-content:flex-end; padding:16px 24px; }
+
+/* ---- Ready to transfer ---- */
+.ready-card{
+  max-width:560px; padding:22px 24px; border:1px solid var(--line-strong); border-radius:var(--radius);
+  background:var(--paper-1);
+}
+.ready-card p{ margin:0 0 14px; font-size:14.5px; color:var(--ink-900); }
+.ready-card .reassure{ color:var(--green-700); font-weight:600; }
+.ready-actions{ display:flex; justify-content:space-between; margin-top:6px; gap:10px; }
+
+/* ---- Batch transfer progress ---- */
+.progress-wrap{ max-width:560px; }
+.progress-count{ font-family:var(--font-mono); font-size:15px; font-weight:600; margin-bottom:10px; font-variant-numeric:tabular-nums; }
+.progress-track{ height:10px; background:var(--paper-1); border:1px solid var(--line-strong); border-radius:2px; overflow:hidden; margin-bottom:20px; }
+.progress-fill{ height:100%; background:repeating-linear-gradient(90deg, var(--teal-700) 0 8px, var(--teal-600) 8px 9px); }
+.ticker{ border:1px solid var(--line); border-radius:var(--radius); }
+.ticker-row{ display:flex; gap:10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--line); font-size:13.5px; }
+.ticker-row:last-child{ border-bottom:none; }
+.ticker-icon{ font-family:var(--font-mono); font-weight:700; width:16px; text-align:center; }
+.icon-ok{ color:var(--green-700); }
+.icon-note{ color:var(--amber-700); }
+.icon-skip{ color:var(--slate-600); }
+.icon-duplicate{ color:var(--teal-700); }
+.rate-banner{
+  display:flex; gap:10px; align-items:center; padding:12px 14px; background:var(--amber-100);
+  border:1px solid var(--amber-700); border-radius:var(--radius); font-size:13.5px; color:var(--amber-700); margin-top:14px;
+}
+.cancel-row{ margin-top:18px; }
+.cancel-confirm-body{ display:block; }
+.cancel-confirm-question{ margin:0 0 6px; font-weight:600; color:var(--ink-900); }
+.cancel-confirm-detail{ margin:0 0 12px; color:var(--amber-700); }
+.cancel-confirm-actions{ display:flex; gap:10px; }
+
+/* ---- Completion summary ---- */
+.stat-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:18px; }
+.stat-tile{ border:1px solid var(--line-strong); border-radius:var(--radius); padding:12px 10px; background:var(--paper-1); text-align:center; }
+.stat-num{ font-family:var(--font-mono); font-size:22px; font-weight:600; color:var(--ink-900); font-variant-numeric:tabular-nums; }
+.stat-label{ font-size:10.5px; color:var(--ink-500); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+/* UI-Δ1, decided: 5-across -> 3+2 at the ~1024px tablet/Chromebook floor ->
+   2-column below ~768px. */
+@media (max-width: 1024px){ .stat-grid{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width: 768px){ .stat-grid{ grid-template-columns:repeat(2,1fr); } }
+
+/* ---- Completion Summary: the two labelled ledger sections (§3.2) ----
+   Seven tiles do not belong in one row: at repeat(7,1fr) every tile would be
+   narrower than any tile in v1's shipped 5-across, at exactly the moment two
+   of them carry the longest labels in the product. Splitting the row is also
+   the better expression of the idea — it shows by LAYOUT which numbers sum to
+   the total below and which do not, before a teacher reads a word. */
+.stat-groups{ display:flex; flex-direction:column; gap:20px; margin-bottom:18px; }
+.stat-group-label{
+  font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+  letter-spacing:.03em; color:var(--ink-500); margin-bottom:8px;
+}
+.stat-group-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.stat-group-grid.topics-group{
+  grid-template-columns:repeat(3,1fr); padding-top:18px; border-top:1px solid var(--line);
+}
+/* Reuses the system's existing 768px tier ONLY — not v1's 1024px tier, and no
+   new pixel value. That 1024px step exists to rescue FIVE equal tiles from
+   becoming cramped; four and three tiles are not yet cramped there, so
+   stepping down would shrink tiles that do not need it. */
+@media (max-width: 768px){
+  .stat-group-grid, .stat-group-grid.topics-group{ grid-template-columns:repeat(2,1fr); }
+}
+/* Deliberately NOT styled like the green `.reconcile` strip: that treatment
+   means "the item ledger balances", and reusing it here would visually claim
+   topics are part of that balance — the exact thing this callout denies. */
+.topics-callout{ color:var(--ink-700); font-size:13px; margin-top:10px; }
+
+/* ---- Disclosure (§3.4) — native details/summary ---- */
+.disclosure{ border:1px solid var(--line-strong); border-radius:var(--radius); margin-bottom:14px; background:var(--paper-0); }
+.disclosure > summary{
+  list-style:none; cursor:pointer; padding:12px 14px; font-size:13.5px; font-weight:600;
+  color:var(--ink-900); display:flex; align-items:center; gap:8px; min-height:44px;
+}
+.disclosure > summary::-webkit-details-marker{ display:none; }
+.disclosure > summary::before{ content:'\25B8'; color:var(--teal-700); font-size:11px; }
+.disclosure[open] > summary::before{ content:'\25BE'; }
+.disclosure > summary:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+/* The triangle is decoration. Per the never-icon-only rule the real
+   "[expand]"/"[collapse]" text carries the state, swapped by CSS on [open]
+   rather than by JavaScript holding a second copy of the DOM's own state. */
+.disclosure-toggle{ margin-left:auto; font-family:var(--font-mono); font-size:11.5px; font-weight:400; color:var(--ink-500); }
+.disclosure .disclosure-collapse{ display:none; }
+.disclosure[open] .disclosure-expand{ display:none; }
+.disclosure[open] .disclosure-collapse{ display:inline; }
+.disclosure-body{ border-top:1px solid var(--line); padding:4px 14px 10px; font-size:13px; color:var(--ink-700); }
+.disclosure-row{ padding:7px 0; border-bottom:1px solid var(--line); }
+.disclosure-row:last-child{ border-bottom:none; }
+.disclosure-ambiguity{ color:var(--amber-700); font-size:12.5px; margin-top:2px; }
+
+/* ---- Mid-transfer interrupt banners (§3.5) ----
+   Same amber family as `.rate-banner` — nothing here is destructive, so red
+   stays reserved for real errors — but a bordered, padded card rather than a
+   slim strip, because `.rate-banner` is informational and self-resolving while
+   this one needs the teacher to act. It cannot reuse `.error-state`: that
+   replaces the whole screen, and the frozen progress bar has to stay visible. */
+.interrupt-banner{
+  display:flex; flex-direction:column; gap:10px; align-items:flex-start;
+  padding:16px 18px; background:var(--amber-100); border:1px solid var(--amber-700);
+  border-radius:var(--radius); margin-top:14px;
+}
+.interrupt-banner .interrupt-head{ display:flex; gap:8px; align-items:center; font-weight:700; color:var(--amber-700); font-size:14px; }
+.interrupt-banner p{ margin:0; color:var(--ink-900); font-size:13.5px; }
+
+.system-skip-line{
+  display:flex; gap:10px; align-items:flex-start; padding:10px 14px; margin-bottom:18px;
+  background:var(--paper-0); border:1px dashed var(--line-strong); border-left:3px solid var(--slate-600);
+  border-radius:var(--radius); font-size:13px; color:var(--ink-700);
+}
+.reconcile{
+  font-family:var(--font-mono); font-size:12.5px; padding:10px 14px; background:var(--green-100);
+  border:1px solid var(--green-700); border-radius:var(--radius); color:#0F4A28; margin-bottom:22px;
+  font-variant-numeric:tabular-nums;
+  /* Never truncates: the reconciliation line wraps rather than clipping or
+     ellipsizing, at any viewport width. */
+  white-space:normal; overflow-wrap:break-word;
+}
+.log-filter{ display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13px; }
+/* UI-Δ1, decided: the log table horizontal-scrolls inside this wrapper with a
+   sticky first (Title) column. It never collapses to cards. */
+.log-scroll{ overflow-x:auto; }
+table.log-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:760px; }
+table.log-table th{
+  text-align:left; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+  letter-spacing:.03em; color:var(--ink-500); padding:8px 10px; border-bottom:2px solid var(--line-strong);
+}
+table.log-table td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.log-table tr:nth-child(even) td{ background:var(--paper-1); }
+table.log-table td.note-cell{ max-width:230px; white-space:normal; word-break:break-word; }
+/* UI-Δ1: sticky Title column. Opaque token background so rows slide beneath
+   it while scrolling, plus a hairline right border consistent with the
+   ledger/manifest aesthetic separating the pinned column from the scroll
+   region. Keyed off .log-title-col (always the Title column) rather than
+   :first-child, so the pin doesn't silently follow a future column reorder. */
+table.log-table th.log-title-col, table.log-table td.log-title-col{
+  position:sticky; left:0; background:var(--paper-0); z-index:1;
+  border-right:1px solid var(--line-strong);
+}
+table.log-table tr:nth-child(even) td.log-title-col{ background:var(--paper-1); }
+/* Row hover must survive the sticky column: both the scrolling cells and the
+   pinned Title cell pick up the same tint together, so the row still reads
+   as one unit under the pin. */
+table.log-table tbody tr:hover td{ background:var(--teal-100); }
+table.log-table tbody tr:hover td.log-title-col{ background:var(--teal-100); }
+.outcome-pill{ font-family:var(--font-mono); font-size:11px; padding:2px 7px; border-radius:2px; font-weight:600; }
+.outcome-transferred{ color:var(--green-700); background:var(--green-100); }
+.outcome-fallback{ color:var(--amber-700); background:var(--amber-100); }
+.outcome-skipped{ color:var(--slate-600); background:var(--paper-1); border:1px solid var(--line-strong); }
+/* Decision G — the duplicate treatment. Teal, reused not invented: it is the
+   exact text/fill/border triple of `.badge-sis`, and teal was chosen in v1 to
+   read as "verified", which is precisely what a duplicate match is — the
+   product verified this item is already there. Colour is never alone: the pill
+   text and the icon glyph both differ too (03-ui-direction.md §6). */
+.outcome-duplicate{ color:var(--teal-700); background:var(--teal-100); border:1px solid var(--teal-700); }
+.summary-actions{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+
+/* ---- Generic error state ---- */
+.error-state{ padding:56px 32px; text-align:center; }
+.error-state h2{ font-family:var(--font-head); font-weight:600; font-size:20px; margin:0 0 8px; }
+.error-state p{ color:var(--ink-700); font-size:14.5px; margin:0 auto 22px; max-width:48ch; }
+.error-state .error-glyph{
+  display:inline-block; font-family:var(--font-mono); font-weight:700; color:var(--red-700);
+  background:var(--red-100); border:1px solid var(--red-700); border-radius:var(--radius);
+  padding:2px 9px; margin-bottom:14px;
+}
+.error-actions{ display:flex; gap:10px; justify-content:center; }
+/* Fix 1 — a stale/already-used scan is not a true failure (red-700 is
+   reserved for those); it reuses the error-state layout with the amber
+   "attention" treatment instead. */
+.error-state .error-glyph.notice-glyph{
+  color:var(--amber-700); background:var(--amber-100); border-color:var(--amber-700);
+}

@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "rig-2026-08-14T08:25:07.861Z-0f56",
+      "type": "rigorous",
+      "joinKey": {
+        "project": "Pickett Classroom",
+        "featureSlug": "classroom-copier",
+        "mdbHash": "0ff04f3f93a765cf6e4494a2a81a0d107d8d1dc69a7faaf707b522d3686d0835"
+      },
+      "perStage": [
+        {
+          "stage": "engineer",
+          "range": {
+            "low": 36.9,
+            "high": 87.6,
+            "basis": "estimated"
+          },
+          "escalationTail": "Sum of the per-module ranges above. Engineer runs on opus with a haiku->sonnet->opus worker ladder per module — the low end assumes most modules land on a haiku or sonnet worker on the first or second try; the high end assumes the harder modules (transfer-engine, fixture-seed-data, auth-module, data-model) each need at least one full opus-rung escalation. The MDB structurally cannot declare migration/scaffolding/doc-sync work, quality-budget test authoring, or a second escalation round on more than 2-3 modules simultaneously — any of those would push meaningfully above the high end."
+        },
+        {
+          "stage": "qa",
+          "range": {
+            "low": 3,
+            "high": 9,
+            "basis": "estimated"
+          },
+          "escalationTail": "QA derives acceptance criteria from the PM/UX/UI/architecture artifacts, then runs the spec-fidelity method (boot the real UI, drive every flow, check every element for presence and styling, verify the reconciliation invariant across all 13 fixtures, check accessibility). This range is for one QA pass only — a FAIL verdict that sends work back to engineer for a fix-verify loop is not priced here and would add a second, smaller QA dispatch plus the fix cost on whichever engineer module regressed. No model is specified for QA in this run's context, so this assumes the sonnet-tier rate seen for pm/ux/ui/architect in this same run, not opus."
+        },
+        {
+          "stage": "qc",
+          "range": {
+            "low": 1.5,
+            "high": 4,
+            "basis": "estimated"
+          },
+          "escalationTail": "QC reads QA's report and independently re-runs the build/lint/test suite and app logs to corroborate — a lighter, corroboration-scoped pass rather than a fresh spec derivation. Same sonnet-tier model assumption as QA, unstated in this run's context."
+        }
+      ],
+      "perModule": [
+        {
+          "moduleId": "classroom-provider-interface",
+          "band": "XS",
+          "range": {
+            "low": 0.3,
+            "high": 0.6,
+            "basis": "estimated"
+          },
+          "escalationTail": "Type-only interface, no runtime code — cheapest module in the plan. Tail risk: a shape mismatch discovered while building mock-classroom-provider forces a late revision here, but that shows up as re-work cost on the dependent module, not this one."
+        },
+        {
+          "moduleId": "cold-start-health",
+          "band": "XS",
+          "range": {
+            "low": 0.3,
+            "high": 0.6,
+            "basis": "estimated"
+          },
+          "escalationTail": "A single trivial health route. Near-zero escalation risk; only grows if the cold-start-behavior fixture gap noted in architect decisions turns out to need real logic here rather than a stub."
+        },
+        {
+          "moduleId": "monetization-middleware",
+          "band": "S",
+          "range": {
+            "low": 0.8,
+            "high": 2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Single, narrow concern gating on data-model. Tail: if the monetization rule set turns out richer than the architecture doc implies, this climbs toward a sonnet-then-opus re-pass."
+        },
+        {
+          "moduleId": "composition-root",
+          "band": "S",
+          "range": {
+            "low": 1,
+            "high": 2.8,
+            "basis": "estimated"
+          },
+          "escalationTail": "Two small wiring files, but they integrate 8 upstream modules (mock-classroom-provider, preflight-engine, transfer-engine, courses-api, transfer-job-api, auth-module, monetization-middleware, cold-start-health). The code itself is short; diagnosing a wiring failure across 8 dependencies is where an opus-rung pass gets burned even though nothing here is individually hard."
+        },
+        {
+          "moduleId": "ui-sign-in-account-picker",
+          "band": "S",
+          "range": {
+            "low": 0.9,
+            "high": 2.2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Forced-picker interaction (never skipped, never remembered) is a real UX detail to get exactly right, but scoped to one feature folder."
+        },
+        {
+          "moduleId": "courses-api",
+          "band": "S",
+          "range": {
+            "low": 1,
+            "high": 2.5,
+            "basis": "estimated"
+          },
+          "escalationTail": "One route file over preflight-engine + auth-module. Cost mostly tracks whether those two upstream modules land cleanly first."
+        },
+        {
+          "moduleId": "ui-completion-summary",
+          "band": "S",
+          "range": {
+            "low": 0.8,
+            "high": 2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Displays the settled reconciliation counts; small once transfer-job-api's response shape is fixed. Escalates only if the \"non-additive subset tag\" display rule trips up a first pass."
+        },
+        {
+          "moduleId": "app-shell",
+          "band": "S",
+          "range": {
+            "low": 1,
+            "high": 2.8,
+            "basis": "estimated"
+          },
+          "escalationTail": "Thin routing/composition layer over 5 UI feature modules — same integration-risk profile as composition-root: short code, but wiring bugs across 5 features can cost an extra diagnosis-and-fix round."
+        },
+        {
+          "moduleId": "data-model",
+          "band": "M",
+          "range": {
+            "low": 1.8,
+            "high": 4.5,
+            "basis": "estimated"
+          },
+          "escalationTail": "Foundational — the CourseWork/CourseWorkMaterial split, the single-valued outcome enum, and Session table are all load-bearing decisions from the architecture. A schema mistake here ripples into every downstream module's build, so a caught error is worth an opus-rung retry rather than letting it propagate."
+        },
+        {
+          "moduleId": "mock-classroom-provider",
+          "band": "M",
+          "range": {
+            "low": 1.8,
+            "high": 4.2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Depends on 3 other modules landing correctly first (interface, data-model, fixture-seed-data); a late interface or fixture reshape forces a rewrite here."
+        },
+        {
+          "moduleId": "auth-module",
+          "band": "M",
+          "range": {
+            "low": 2,
+            "high": 5,
+            "basis": "estimated"
+          },
+          "escalationTail": "Session-cookie security detail (httpOnly, SameSite=None, revocable session, always-fresh sign-in) is exactly the edge-case-dense code that a haiku or sonnet worker tends to get subtly wrong, making an opus-rung pass fairly likely rather than exceptional here."
+        },
+        {
+          "moduleId": "preflight-engine",
+          "band": "M",
+          "range": {
+            "low": 2,
+            "high": 5,
+            "basis": "estimated"
+          },
+          "escalationTail": "Single file but carries real domain judgment — mapping the brief's per-type transformation table and degraded-rubric detection correctly the first time is not guaranteed; a wrong read forces a rebuild."
+        },
+        {
+          "moduleId": "transfer-job-api",
+          "band": "M",
+          "range": {
+            "low": 1.8,
+            "high": 4,
+            "basis": "estimated"
+          },
+          "escalationTail": "Thin routing layer over transfer-engine (POST/status/active/items). Risk is mostly integration with transfer-engine's actual return shapes, not fresh authorship."
+        },
+        {
+          "moduleId": "frontend-api-client",
+          "band": "M",
+          "range": {
+            "low": 1.8,
+            "high": 4.2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Typed wrapper over 4 backend route modules. Cost tracks how much the backend contracts shift while this is being written — a later backend change is a revision here, not a fresh build."
+        },
+        {
+          "moduleId": "ui-shared-components",
+          "band": "M",
+          "range": {
+            "low": 2,
+            "high": 4.8,
+            "basis": "estimated"
+          },
+          "escalationTail": "Breadth, not depth — many small components plus the CSS design-token system. Risk is under-scoping on the first pass and having to add components piecemeal as later UI modules discover they need one that was not built."
+        },
+        {
+          "moduleId": "ui-selection",
+          "band": "M",
+          "range": {
+            "low": 1.8,
+            "high": 4.2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Selection-flow UI; cost tracks how much of UX's selection/wizard flow must be implemented versus assumed."
+        },
+        {
+          "moduleId": "ui-preflight-actionsheet",
+          "band": "M",
+          "range": {
+            "low": 1.8,
+            "high": 4.2,
+            "basis": "estimated"
+          },
+          "escalationTail": "Surfacing degraded-rubric warnings correctly is UX-critical (a settled P0) and easy to under-build on a first pass, which is the main driver of the top of this range."
+        },
+        {
+          "moduleId": "fixture-seed-data",
+          "band": "L",
+          "range": {
+            "low": 4.5,
+            "high": 10,
+            "basis": "estimated"
+          },
+          "escalationTail": "13 fixtures (F1-F13) including two with no precedent to copy from — F12's deterministic per-item slow-mode delay flag and F13's persistent/exhausting 429 course distinct from F6's retry-succeeds scope. Wide output volume (lots of seed data to author) rather than deep reasoning; the largest realistic tail is misjudging what F12/F13 actually need mechanically and rewriting seed.ts."
+        },
+        {
+          "moduleId": "transfer-engine",
+          "band": "L",
+          "range": {
+            "low": 6,
+            "high": 14,
+            "basis": "estimated"
+          },
+          "escalationTail": "The single riskiest module in the plan: 5-attempt backoff, the zero-silent-drops reconciliation invariant (schema-enforced via the single-valued outcome enum), the fallback-shell/non-additive-subset-tag distinction, and the F13 exhaustion path all live here. This is exactly the kind of module a haiku or sonnet worker is likely to get subtly wrong on outcome bookkeeping, and a bug here fails QA's reconciliation acceptance test in a way that is expensive to trace back to this module. Multiple escalation rounds through the full haiku->sonnet->opus ladder are plausible, not a tail case."
+        },
+        {
+          "moduleId": "ui-transfer-progress",
+          "band": "L",
+          "range": {
+            "low": 3.5,
+            "high": 8,
+            "basis": "estimated"
+          },
+          "escalationTail": "Polling UI, aria-live accessibility handling (a named UX driver), and reconnect-after-refresh (F12) all concentrate here. Of the frontend modules, this is the one most likely to need a QA-driven revision loop after the first build."
+        }
+      ],
+      "basis": "estimated",
+      "reviewRounds": [],
+      "supersedes": null,
+      "executingRunId": "2026-08-14T07:11:30.211Z",
+      "notes": "COLD START: no calibration history exists for this project (first run on this track) and no coverage exists to ground a band-to-dollar mapping in the estimator skill's tshirt-mode sense. Rigorous mode still requires a range, so every figure below is a reasoned, ungrounded estimate — never treat it as a calibrated number. Grounding used: (1) manual reasoning over the parsed Module Declaration Block — file-target count, dependsOn depth/width, and domain-risk judgment per module (e.g. transfer-engine carries the zero-silent-drops reconciliation invariant and is treated as the highest-risk module in the plan); (2) published Anthropic API list pricing as of this estimate (Claude Opus 5 $5/$25 per MTok input/output; Claude Sonnet 5 $3/$15 list, $2/$10 introductory through 2026-08-31; Claude Haiku 4.5 $1/$5) applied to a rough token-volume-per-band judgment, NOT a measured $/token conversion for this project; (3) this run's own measured token volumes for the pm/ux/ui/architect stage dispatches (roughly 99k-239k tokens per sonnet dispatch, plus 97k-128k per critic pass) as a loose scale reference for what one agent dispatch costs in this environment, used only to sanity-check magnitude, not as a calibrated per-module figure. This run's own cost-engine spend figures (pm/ux/ui/architect/critic token counts) are explicitly flagged by the orchestrator as unmeasured in dollars (usageSource: caller-scoped, $0.00 reported) because the token analyzer cannot find a readable session transcript at this project path. Those figures were used only as an order-of-magnitude token-volume reference, never as a dollar-per-token calibration source. The calibration ledgers checked for a cross-project proxy (docs/features/cost-estimation/calibration.json and docs/features/cfo-dashboard/calibration.json in the Agent-C repo itself) both have empty calibration[] arrays — no usable actual-spend history exists anywhere in this environment for this kind of estimate. This is therefore a true cold start, not a cross-project proxy. No requiredReviews are declared in docs/product/state.json for the engineer, qa, or qc stages, and none are named in the architecture document. This estimate does not add separate line items for reviews beyond the QA and QC stages themselves. If Beast Mode or a human later configures a review (e.g. engineering:code-review or technical-critic against the built code) for the engineer stage, that is additional real spend this estimate does not capture. Total banded range for all remaining work (engineer + qa + qc): approximately $41 - $101, driven overwhelmingly by the engineer stage (~$37-$88) because it runs on opus with a worker ladder against 20 modules, materially more expensive per token than the sonnet-tier stages already spent in this run.",
+      "createdAt": "2026-08-14T08:25:07.865Z",
+      "executingStampedAt": "2026-08-14T08:35:47.673Z"
+    }
+  ],
+  "repairedAt": null,
+  "updatedAt": "2026-08-14T08:35:47.674Z"
+}
