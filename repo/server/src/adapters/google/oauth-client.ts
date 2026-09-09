@@ -191,6 +191,11 @@ export async function buildAuthorizedClient(
   if (account.accessTokenExpiresAt.getTime() <= Date.now()) {
     throw new AuthExpiredError('Your Google connection expired. Sign in again to continue.')
   }
+  const grantedScopes = new Set(account.scopesGranted.split(' ').filter(Boolean))
+  const missingScopes = GOOGLE_SCOPES.filter((scope) => !grantedScopes.has(scope))
+  if (missingScopes.length > 0) {
+    throw new AuthExpiredError('Your Google permissions changed. Sign in again to approve the updated access.')
+  }
   // decryptToken raises AuthExpiredError itself on a rotated/corrupt key (S4).
   const accessToken = decryptToken(
     {

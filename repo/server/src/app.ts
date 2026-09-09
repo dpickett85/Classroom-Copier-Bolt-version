@@ -11,6 +11,7 @@ import { MockClassroomProvider, type MockProviderOptions } from './adapters/mock
 import { GoogleClassroomProvider } from './adapters/google/google-classroom-provider.js'
 import type { ClassroomProvider } from './adapters/classroom-provider.interface.js'
 import {
+  AuthExpiredError,
   LicenseBlockedError,
   NotFoundError,
   PermissionError,
@@ -168,6 +169,10 @@ export function buildApp(deps: AppDeps): BuiltApp {
   // One error-handling middleware normalises provider errors into consistent
   // HTTP responses.
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    if (error instanceof AuthExpiredError) {
+      res.status(401).json({ error: { code: 'reauth_required', message: error.message } })
+      return
+    }
     if (error instanceof RateLimitError) {
       res.status(429).json({ error: { code: 'rate_limited', message: error.message } })
       return
