@@ -16,7 +16,6 @@ export {
   cancelledByUserNote,
   duplicateSkipNote,
   attachmentNotVisibleNote,
-  formNotSupportedNote,
   postCreatedFollowUpFailedNote,
   rateLimitExhaustionNote,
   rubricDegradedNote,

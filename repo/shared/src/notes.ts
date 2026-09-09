@@ -25,18 +25,13 @@ export function rateLimitExhaustionNote(attempts: number): string {
   return `[Classroom Copier Note: Google was rate-limiting requests. This post could not be copied in full after ${attempts} attempts, so a draft shell was created here instead. Re-attach any files and check the details before publishing.]`
 }
 
-/** Google's create endpoint does not accept Form attachments. The form is named so the teacher can re-attach it. */
-export function formNotSupportedNote(attachmentName: string): string {
-  return `[Classroom Copier Note: Original attachment '${attachmentName}' was a Google Form, which cannot be copied automatically. Re-attach the form in the target course.]`
-}
-
 export function attachmentNotVisibleNote(): string {
   return '[Classroom Copier Note: One or more original attachments were not visible to the connected Google account. A draft shell was created; check and re-attach those files before publishing.]'
 }
 
-/** F7 — rubric could not be copied because the mock licence tier blocks it. */
+/** Rubric creation can be refused by licensing, permissions, or the OAuth client used to create the assignment. */
 export function rubricDegradedNote(): string {
-  return `[Classroom Copier Note: The rubric on this assignment could not be copied because the target course's Workspace licence does not include rubrics. Everything else transferred.]`
+  return '[Classroom Copier Note: The rubric could not be added to this assignment because Google refused rubric creation for the target course or account. The assignment itself transferred; check the target course permissions and rubric availability.]'
 }
 
 /** F5 — attachments beyond the 20-attachment cap, appended as description links. */

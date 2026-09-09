@@ -1148,8 +1148,6 @@ export class TransferEngine {
     overflow: ProviderAttachment[]
     /** APPLY-A — driveFiles whose shareMode could not be read. */
     unlinkable: ProviderAttachment[]
-    /** Google's create endpoint rejects Form attachments. */
-    formsDropped: ProviderAttachment[]
   } {
     // D22 — ordered by sortOrder, so WHICH 20 survive the cap is a total order.
     const usable = [...attachments]
@@ -1161,7 +1159,6 @@ export class TransferEngine {
 
     const materials: Material[] = []
     const unlinkable: ProviderAttachment[] = []
-    const formsDropped: ProviderAttachment[] = []
     for (const a of linked) {
       switch (a.kind) {
         case 'driveFile': {
@@ -1194,13 +1191,13 @@ export class TransferEngine {
           })
           break
         case 'form':
-          formsDropped.push(a)
+          if (a.url) materials.push({ kind: 'link', url: a.url, title: a.title })
           break
         default:
           materials.push({ kind: 'link', url: a.url ?? '', title: a.title })
       }
     }
-    return { materials, overflow, unlinkable, formsDropped }
+    return { materials, overflow, unlinkable }
   }
 
   private composeDescription(
@@ -1248,7 +1245,7 @@ export class TransferEngine {
       copiedDriveFileIds.set(attachmentId, newDriveFileId)
     }
 
-    const { materials, overflow, unlinkable, formsDropped } = this.buildMaterials(
+    const { materials, overflow, unlinkable } = this.buildMaterials(
       post.attachments,
       drop,
       copiedDriveFileIds,
@@ -1260,9 +1257,6 @@ export class TransferEngine {
     }
     for (const attachment of unlinkable) {
       notes.push(shareModeUnknownNote(attachment.title))
-    }
-    for (const attachment of formsDropped) {
-      notes.push(formNotSupportedNote(attachment.title))
     }
     const overflowNote = overflow.length > 0 ? attachmentOverflowNote(overflow.length) : null
     if (overflowNote) notes.push(overflowNote)

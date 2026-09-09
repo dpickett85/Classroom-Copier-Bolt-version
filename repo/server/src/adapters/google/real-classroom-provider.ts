@@ -148,7 +148,7 @@ export function mapGoogleError(error: unknown): ProviderError {
     // string is the only thing that separates them, and they have genuinely
     // different outcomes (a licence denial degrades to a note, an access denial
     // fails the item).
-    if (reason.includes('rubric') || reason.includes('license') || reason.includes('licence')) {
+    if (reason.includes('license') || reason.includes('licence')) {
       return new LicenseBlockedError('This course’s Google Workspace tier does not allow rubrics.')
     }
     return new PermissionError('Google refused access to this resource.')
