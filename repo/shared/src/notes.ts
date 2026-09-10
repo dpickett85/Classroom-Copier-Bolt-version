@@ -29,7 +29,10 @@ export function attachmentNotVisibleNote(): string {
   return '[Classroom Copier Note: One or more original attachments were not visible to the connected Google account. A draft shell was created; check and re-attach those files before publishing.]'
 }
 
-export function rubricDegradedNote(reason: 'license' | 'permission' | 'oauth' | 'unknown' = 'unknown'): string {
+export function rubricDegradedNote(
+  reason: 'license' | 'permission' | 'oauth' | 'unknown' = 'unknown',
+  sheetUrl?: string,
+): string {
   const detail =
     reason === 'license'
       ? 'the Workspace account or target course does not have rubric creation enabled'
@@ -38,7 +41,10 @@ export function rubricDegradedNote(reason: 'license' | 'permission' | 'oauth' | 
         : reason === 'permission'
           ? 'the connected teacher account is not allowed to create rubrics in the target course'
           : 'Google refused rubric creation for the target course or account'
-  return `[Classroom Copier Note: The rubric could not be added because ${detail}. The assignment itself transferred; check the target course and reconnect Google if needed.]`
+  const sheetGuidance = sheetUrl
+    ? ` A spreadsheet with the rubric criteria has been created in your Google Drive: ${sheetUrl} — open the assignment in Google Classroom, click the rubric button, and select "Import from Sheets" to add it.`
+    : ''
+  return `[Classroom Copier Note: The rubric could not be added because ${detail}. The assignment itself transferred; check the target course and reconnect Google if needed.${sheetGuidance}]`
 }
 
 /** F5 — attachments beyond the 20-attachment cap, appended as description links. */

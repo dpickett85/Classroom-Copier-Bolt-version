@@ -743,11 +743,65 @@ export class RealClassroomProvider implements ClassroomProvider {
         })),
       },
     )
-    // A null here means Google answered 404 for the create path, which is not
-    // "no rubric" — it is a create that did not happen.
     if (!data) throw new NotFoundError('Google could not attach a rubric to this assignment.')
     return { id: data.id ?? '' }
   }
+
+  async createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string }> {
+    const csv = buildRubricCsv(rubric)
+    const fileName = `Rubric — ${assignmentTitle}.csv`
+    const res = await call(() =>
+      this.clients.drive.files.create({
+        requestBody: {
+          name: fileName,
+          mimeType: 'application/vnd.google-apps.spreadsheet',
+        },
+        media: {
+          mimeType: 'text/csv',
+          body: csv,
+        },
+        fields: 'id,webViewLink',
+      }),
+    )
+    const url = res.data.webViewLink ?? `https://docs.google.com/spreadsheets/d/${res.data.id}`
+    return { sheetUrl: url }
+  }
+}
+
+/**
+ * Builds a CSV in Google Classroom's "Import from Sheets" rubric format.
+ *
+ * Layout (per the Google Classroom community spec):
+ * - Row 1: blank
+ * - A2: "v1.0-s"
+ * - For each criterion, 5 rows:
+ *   - Criterion title (col A)
+ *   - Criterion description (col A)
+ *   - Point values (cols B, C, D, ...)
+ *   - Level titles (cols B, C, D, ...)
+ *   - Level descriptions (cols B, C, D, ...)
+ */
+function buildRubricCsv(rubric: RubricBody): string {
+  const rows: string[][] = []
+  rows.push([])
+  rows.push(['v1.0-s'])
+  for (const criterion of rubric.criteria) {
+    rows.push([criterion.title])
+    rows.push([criterion.description ?? ''])
+    rows.push(['', ...criterion.levels.map((l) => String(l.points))])
+    rows.push(['', ...criterion.levels.map((l) => l.title)])
+    rows.push(['', ...criterion.levels.map((l) => l.description ?? '')])
+  }
+  return rows
+    .map((row) => row.map(csvEscape).join(','))
+    .join('\n')
+}
+
+function csvEscape(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
 }
 
 interface RawCriterion {

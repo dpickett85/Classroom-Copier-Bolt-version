@@ -18,9 +18,8 @@ export declare function attachmentFallbackNote(attachmentName: string): string;
  * hard-coded literal (Δ2).
  */
 export declare function rateLimitExhaustionNote(attempts: number): string;
-/** F7 — rubric could not be copied because the mock licence tier blocks it. */
-export declare function rubricDegradedNote(reason?: 'license' | 'permission' | 'oauth' | 'unknown'): string;
 export declare function attachmentNotVisibleNote(): string;
+export declare function rubricDegradedNote(reason?: 'license' | 'permission' | 'oauth' | 'unknown', sheetUrl?: string): string;
 /** F5 — attachments beyond the 20-attachment cap, appended as description links. */
 export declare function attachmentOverflowNote(overflowCount: number): string;
 /** Scenario 3, "Skip Attachment and Note Draft" (D15 -> fallback_shell). */

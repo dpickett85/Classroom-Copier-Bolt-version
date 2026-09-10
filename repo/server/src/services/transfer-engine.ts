@@ -1314,10 +1314,12 @@ export class TransferEngine {
 
     let rubricDegraded = false
     let rubricReason: 'license' | 'permission' | 'oauth' | 'unknown' = 'unknown'
+    let rubricSheetUrl: string | undefined
     try {
       const result = await this.copyRubricIfAny(post, created.id)
       rubricDegraded = result.degraded
       if (result.reason) rubricReason = result.reason
+      rubricSheetUrl = result.sheetUrl
     } catch (error) {
       followUpFailures.push('rubric copy')
       logger.warn('rubric step failed after the post was created; degrading to a note', {
@@ -1330,7 +1332,7 @@ export class TransferEngine {
     if (rubricDegraded) {
       const amended = this.composeDescription(post.description, {
         overflow,
-        notes: [...notes, rubricDegradedNote(rubricReason)],
+        notes: [...notes, rubricDegradedNote(rubricReason, rubricSheetUrl)],
       })
       if (amended != null) {
         try {
@@ -1533,7 +1535,7 @@ export class TransferEngine {
   private async copyRubricIfAny(
     post: EnumeratedPost,
     targetPostId: string,
-  ): Promise<{ degraded: boolean; reason: 'license' | 'permission' | 'oauth' | 'unknown' | null }> {
+  ): Promise<{ degraded: boolean; reason: 'license' | 'permission' | 'oauth' | 'unknown' | null; sheetUrl?: string }> {
     if (post.sourceType !== 'courseWork' || !post.hasRubric) {
       return { degraded: false, reason: null }
     }
@@ -1544,10 +1546,22 @@ export class TransferEngine {
       return { degraded: false, reason: null }
     } catch (error) {
       if (error instanceof LicenseBlockedError) {
-        logger.warn('rubric copy blocked by licence; degrading to a note', {
+        logger.warn('rubric copy blocked by licence; attempting spreadsheet fallback', {
           targetPostId,
           error: error instanceof Error ? error.message : String(error),
         })
+        try {
+          const rubric = await this.provider.getRubric(post.sourceId)
+          if (rubric) {
+            const { sheetUrl } = await this.provider.createRubricSheet(rubric, post.title)
+            return { degraded: true, reason: 'license', sheetUrl }
+          }
+        } catch (sheetError) {
+          logger.warn('rubric spreadsheet fallback also failed', {
+            targetPostId,
+            error: sheetError instanceof Error ? sheetError.message : String(sheetError),
+          })
+        }
         return { degraded: true, reason: 'license' }
       }
       const reason = error instanceof PermissionError ? 'permission' : 'unknown'

@@ -111,4 +111,11 @@ export interface ClassroomProvider {
   getRubric(courseWorkId: string): Promise<RubricBody | null>
   /** May throw a provider error when Google refuses rubric creation for licensing, permissions, or OAuth-client reasons. */
   createRubric(targetCourseWorkId: string, rubric: RubricBody): Promise<{ id: string }>
+
+  /**
+   * Creates a Google Sheet in the teacher's Drive, formatted for Classroom's
+   * "Import from Sheets" rubric feature. Used as a fallback when `createRubric`
+   * is blocked by the Workspace tier.
+   */
+  createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string }>
 }

@@ -22,12 +22,21 @@ export function attachmentFallbackNote(attachmentName) {
 export function rateLimitExhaustionNote(attempts) {
     return `[Classroom Copier Note: Google was rate-limiting requests. This post could not be copied in full after ${attempts} attempts, so a draft shell was created here instead. Re-attach any files and check the details before publishing.]`;
 }
-/** Rubric creation can be refused by licensing, permissions, or the OAuth client used to create the assignment. */
-export function rubricDegradedNote() {
-    return '[Classroom Copier Note: The rubric could not be added to this assignment because Google refused rubric creation for the target course or account. The assignment itself transferred; check the target course permissions and rubric availability.]';
-}
 export function attachmentNotVisibleNote() {
     return '[Classroom Copier Note: One or more original attachments were not visible to the connected Google account. A draft shell was created; check and re-attach those files before publishing.]';
+}
+export function rubricDegradedNote(reason = 'unknown', sheetUrl) {
+    const detail = reason === 'license'
+        ? 'the Workspace account or target course does not have rubric creation enabled'
+        : reason === 'oauth'
+            ? 'Google requires the same app connection that created the new assignment'
+            : reason === 'permission'
+                ? 'the connected teacher account is not allowed to create rubrics in the target course'
+                : 'Google refused rubric creation for the target course or account';
+    const sheetGuidance = sheetUrl
+        ? ` A spreadsheet with the rubric criteria has been created in your Google Drive: ${sheetUrl} — open the assignment in Google Classroom, click the rubric button, and select "Import from Sheets" to add it.`
+        : '';
+    return `[Classroom Copier Note: The rubric could not be added because ${detail}. The assignment itself transferred; check the target course and reconnect Google if needed.${sheetGuidance}]`;
 }
 /** F5 — attachments beyond the 20-attachment cap, appended as description links. */
 export function attachmentOverflowNote(overflowCount) {

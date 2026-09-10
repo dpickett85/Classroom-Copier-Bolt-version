@@ -654,4 +654,8 @@ export class MockClassroomProvider implements ClassroomProvider {
     }
     return { id: rubricId }
   }
+
+  async createRubricSheet(_rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string }> {
+    return { sheetUrl: `https://docs.google.com/spreadsheets/d/mock-sheet-${encodeURIComponent(assignmentTitle)}` }
+  }
 }
