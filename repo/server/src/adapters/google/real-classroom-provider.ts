@@ -289,7 +289,13 @@ function attachmentsOf(
       kind: material.kind,
       title: material.title,
       driveFileId: material.kind === 'driveFile' ? material.driveFileId : null,
-      url: material.kind === 'link' ? material.url : material.kind === 'form' ? material.formUrl : null,
+      url: material.kind === 'link'
+        ? material.url
+        : material.kind === 'form'
+          ? material.formUrl
+          : material.kind === 'youTubeVideo'
+            ? `https://www.youtube.com/watch?v=${material.videoId}`
+            : null,
       shareMode: material.kind === 'driveFile' ? material.shareMode : null,
       sortOrder: index,
       ownerAccountId,

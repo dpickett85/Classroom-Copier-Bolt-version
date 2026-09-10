@@ -1195,7 +1195,9 @@ export class TransferEngine {
         case 'youTubeVideo':
           materials.push({
             kind: 'youTubeVideo',
-            videoId: a.url?.split('v=').pop() ?? a.id,
+            videoId: a.url
+              ? new URL(a.url).searchParams.get('v') ?? a.id
+              : a.id,
             title: a.title,
           })
           break
