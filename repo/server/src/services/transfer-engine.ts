@@ -952,11 +952,21 @@ export class TransferEngine {
 
     let created = 0
     let reused = 0
+    const allTopics: { id: string; name: string }[] = []
     let pageToken: string | null = null
     do {
       const page = await this.provider.listTopics(sourceCourseId, { pageToken })
       await this.heartbeat(lease)
-      for (const topic of page.items) {
+      for (const topic of page.items) allTopics.push({ id: topic.id, name: topic.name })
+      pageToken = page.nextPageToken
+    } while (pageToken != null)
+
+    // Google's Topics API returns topics newest-first, but Classroom displays
+    // them oldest-first. Reverse so the target course matches the source's
+    // visible order rather than its API order.
+    allTopics.reverse()
+
+    for (const topic of allTopics) {
         if (alreadyMapped.has(topic.id)) continue
 
         const reuseTarget = reuseBySourceTopicId.get(topic.id)
@@ -973,10 +983,8 @@ export class TransferEngine {
         // total silence, which is long enough to look dead. The map now rides
         // along on that same write, so it is durable per topic rather than only
         // at the end of the loop.
-        await this.heartbeat(lease, { topicMapJson: JSON.stringify(Object.fromEntries(map)) })
-      }
-      pageToken = page.nextPageToken
-    } while (pageToken != null)
+      await this.heartbeat(lease, { topicMapJson: JSON.stringify(Object.fromEntries(map)) })
+    }
 
     return { map, created, reused }
   }

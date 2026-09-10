@@ -724,7 +724,7 @@ export class RealClassroomProvider implements ClassroomProvider {
     const courseId = this.courseIdFor(targetCourseWorkId)
     const data = await this.rubricsRequest<{ id?: string }>(
       'POST',
-      `/courses/${courseId}/courseWork/${targetCourseWorkId}/rubrics`,
+      `/courses/${courseId}/courseWork/${targetCourseWorkId}/rubrics?updateMask=criteria`,
       {
         criteria: rubric.criteria.map((criterion) => ({
           title: criterion.title,
