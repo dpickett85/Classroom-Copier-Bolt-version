@@ -54,6 +54,7 @@ import {
   AttachmentNotVisibleError,
   AuthExpiredError,
   LicenseBlockedError,
+  PermissionError,
   RateLimitError,
   TransientError,
   type CourseWorkPayload,
@@ -1310,8 +1311,11 @@ export class TransferEngine {
     const followUpFailures: string[] = []
 
     let rubricDegraded = false
+    let rubricReason: 'license' | 'permission' | 'oauth' | 'unknown' = 'unknown'
     try {
-      rubricDegraded = await this.copyRubricIfAny(post, created.id)
+      const result = await this.copyRubricIfAny(post, created.id)
+      rubricDegraded = result.degraded
+      if (result.reason) rubricReason = result.reason
     } catch (error) {
       followUpFailures.push('rubric copy')
       logger.warn('rubric step failed after the post was created; degrading to a note', {
@@ -1324,7 +1328,7 @@ export class TransferEngine {
     if (rubricDegraded) {
       const amended = this.composeDescription(post.description, {
         overflow,
-        notes: [...notes, rubricDegradedNote()],
+        notes: [...notes, rubricDegradedNote(rubricReason)],
       })
       if (amended != null) {
         try {
@@ -1524,22 +1528,32 @@ export class TransferEngine {
    * permission failure on the rubric READ propagated out of a post that had
    * already been created and took the whole item down with it.
    */
-  private async copyRubricIfAny(post: EnumeratedPost, targetPostId: string): Promise<boolean> {
-    if (post.sourceType !== 'courseWork' || !post.hasRubric) return false
+  private async copyRubricIfAny(
+    post: EnumeratedPost,
+    targetPostId: string,
+  ): Promise<{ degraded: boolean; reason: 'license' | 'permission' | 'oauth' | 'unknown' | null }> {
+    if (post.sourceType !== 'courseWork' || !post.hasRubric) {
+      return { degraded: false, reason: null }
+    }
     try {
       const rubric = await this.provider.getRubric(post.sourceId)
-      if (!rubric) return false
+      if (!rubric) return { degraded: false, reason: null }
       await this.provider.createRubric(targetPostId, rubric)
-      return false
+      return { degraded: false, reason: null }
     } catch (error) {
-      if (error instanceof LicenseBlockedError) return true
-      // A non-licence rubric failure must not take the post down — the post
-      // itself transferred. Degrade the same way and log.
+      if (error instanceof LicenseBlockedError) {
+        logger.warn('rubric copy blocked by licence; degrading to a note', {
+          targetPostId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return { degraded: true, reason: 'license' }
+      }
+      const reason = error instanceof PermissionError ? 'permission' : 'unknown'
       logger.warn('rubric copy failed for a non-licence reason; degrading to a note', {
         targetPostId,
         error: error instanceof Error ? error.message : String(error),
       })
-      return true
+      return { degraded: true, reason }
     }
   }
 
