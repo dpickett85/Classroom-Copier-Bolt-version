@@ -52,6 +52,7 @@ export interface EnumeratedPost {
   quizFormLink: string | null
   topicId: string | null
   creationTime: Date
+  updateTime: Date
   attachments: ProviderAttachment[]
   hasRubric: boolean
   /** Position in the total order. Assigned here, once, and carried downstream. */
@@ -65,21 +66,24 @@ export interface EnumerationResult {
 }
 
 interface Orderable {
-  creationTime: Date
+  updateTime: Date
   sourceType: SourceType
   sourceId: string
 }
 
 /**
- * `(creationTime ASC, sourceType ASC, sourceId ASC)`.
+ * `(updateTime ASC, sourceType ASC, sourceId ASC)`.
  *
- * The tiebreak is not decoration: seeded fixtures routinely share timestamps,
- * and `creationTime` alone is not a total order across two tables. Without the
- * tiebreak "oldest-first" is only well-defined up to ties, and two callers
- * sorting the same set could legitimately produce different sequences.
+ * `updateTime` is Google's "last edited" timestamp, which bumps when a teacher
+ * drags a post into a new position — so it tracks the on-screen Classwork order
+ * that `creationTime` cannot. The tiebreak is not decoration: seeded fixtures
+ * routinely share timestamps, and `updateTime` alone is not a total order across
+ * two tables. Without the tiebreak "oldest-first" is only well-defined up to
+ * ties, and two callers sorting the same set could legitimately produce
+ * different sequences.
  */
 export function orderingKey(a: Orderable, b: Orderable): number {
-  const byTime = a.creationTime.getTime() - b.creationTime.getTime()
+  const byTime = a.updateTime.getTime() - b.updateTime.getTime()
   if (byTime !== 0) return byTime
   if (a.sourceType !== b.sourceType) return a.sourceType < b.sourceType ? -1 : 1
   if (a.sourceId !== b.sourceId) return a.sourceId < b.sourceId ? -1 : 1
@@ -154,6 +158,7 @@ export async function enumeratePosts(
       quizFormLink: w.quizFormLink,
       topicId: w.topicId,
       creationTime: w.creationTime,
+      updateTime: w.updateTime,
       attachments: w.attachments,
       hasRubric: w.hasRubric,
     })),
@@ -171,6 +176,7 @@ export async function enumeratePosts(
       quizFormLink: null,
       topicId: m.topicId,
       creationTime: m.creationTime,
+      updateTime: m.updateTime,
       attachments: m.attachments,
       hasRubric: false,
     })),

@@ -135,13 +135,17 @@ export interface ProviderCourseWork {
   quizFormLink: string | null
   topicId: string | null
   /**
-   * APPLY-J — `creationTime` is the ordering key the port promises. The mock
-   * tables' `createdOrder` column is a per-table seed ordinal and is
-   * deliberately NOT carried here: it is not comparable across the two
-   * surfaces, so it could never have been the tiebreak the schema comment
-   * claimed. `post-enumerator` orders on (creationTime, sourceType, sourceId).
+   * APPLY-J — `updateTime` is the ordering key the port promises: it is the
+   * "last edited" timestamp Google bumps when a teacher drags a post into a
+   * new position, so it tracks the on-screen Classwork order that
+   * `creationTime` cannot. The mock tables' `createdOrder` column is a
+   * per-table seed ordinal and is deliberately NOT carried here: it is not
+   * comparable across the two surfaces, so it could never have been the
+   * tiebreak the schema comment claimed. `post-enumerator` orders on
+   * (updateTime, sourceType, sourceId).
    */
   creationTime: Date
+  updateTime: Date
   attachments: ProviderAttachment[]
   hasRubric: boolean
 }
@@ -154,6 +158,7 @@ export interface ProviderCourseWorkMaterial {
   state: CourseWorkState
   topicId: string | null
   creationTime: Date
+  updateTime: Date
   attachments: ProviderAttachment[]
 }
 

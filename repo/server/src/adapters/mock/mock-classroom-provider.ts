@@ -284,7 +284,7 @@ export class MockClassroomProvider implements ClassroomProvider {
     this.enumeratedCourses.add(courseId)
     const rows = await this.prisma.mockCourseWork.findMany({
       where: { courseId, state: { in: states } },
-      orderBy: [{ creationTime: 'asc' }, { id: 'asc' }],
+      orderBy: [{ updateTime: 'asc' }, { id: 'asc' }],
     })
     const attachments = await this.attachmentsFor(
       'courseWork',
@@ -311,6 +311,7 @@ export class MockClassroomProvider implements ClassroomProvider {
       quizFormLink: r.quizFormLink,
       topicId: r.topicId,
       creationTime: r.creationTime,
+      updateTime: r.updateTime,
       attachments: attachments.get(r.id) ?? [],
       hasRubric: rubricIds.has(r.id),
     }))
@@ -326,7 +327,7 @@ export class MockClassroomProvider implements ClassroomProvider {
     this.enumeratedCourses.add(courseId)
     const rows = await this.prisma.mockCourseWorkMaterial.findMany({
       where: { courseId, state: { in: states } },
-      orderBy: [{ creationTime: 'asc' }, { id: 'asc' }],
+      orderBy: [{ updateTime: 'asc' }, { id: 'asc' }],
     })
     const attachments = await this.attachmentsFor(
       'courseWorkMaterial',
@@ -340,6 +341,7 @@ export class MockClassroomProvider implements ClassroomProvider {
       state: r.state as CourseWorkState,
       topicId: r.topicId,
       creationTime: r.creationTime,
+      updateTime: r.updateTime,
       attachments: attachments.get(r.id) ?? [],
     }))
     return this.paginate(mapped, decodeToken(req.pageToken), this.pageSize(req.pageSize))
@@ -532,6 +534,7 @@ export class MockClassroomProvider implements ClassroomProvider {
         quizFormLink: payload.quizFormLink ?? null,
         topicId: payload.topicId ?? null,
         creationTime: new Date(),
+        updateTime: new Date(),
         createdOrder: count,
       },
     })
@@ -558,6 +561,7 @@ export class MockClassroomProvider implements ClassroomProvider {
         state: 'DRAFT',
         topicId: payload.topicId ?? null,
         creationTime: new Date(),
+        updateTime: new Date(),
         createdOrder: count,
       },
     })

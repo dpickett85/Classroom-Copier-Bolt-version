@@ -58,10 +58,10 @@ describe('post-enumerator (D16) — the single owner of "all posts"', () => {
     )
   })
 
-  it('orders oldest-first', async () => {
+  it('orders oldest-first by last-edited time', async () => {
     const provider = new MockClassroomProvider(db.prisma)
     const { posts } = await enumeratePosts(provider, FIXTURE_KEYS.F1)
-    const times = posts.map((p) => p.creationTime.getTime())
+    const times = posts.map((p) => p.updateTime.getTime())
     expect([...times].sort((a, b) => a - b)).toEqual(times)
   })
 
@@ -75,9 +75,9 @@ describe('post-enumerator (D16) — the single owner of "all posts"', () => {
 describe('the ordering key is a TOTAL order (D16)', () => {
   it('breaks ties on sourceType then sourceId, so equal timestamps still sort deterministically', () => {
     const t = new Date('2025-01-01T00:00:00.000Z')
-    const a = { creationTime: t, sourceType: 'courseWork' as const, sourceId: 'b' }
-    const b = { creationTime: t, sourceType: 'courseWork' as const, sourceId: 'a' }
-    const c = { creationTime: t, sourceType: 'courseWorkMaterial' as const, sourceId: 'a' }
+    const a = { updateTime: t, sourceType: 'courseWork' as const, sourceId: 'b' }
+    const b = { updateTime: t, sourceType: 'courseWork' as const, sourceId: 'a' }
+    const c = { updateTime: t, sourceType: 'courseWorkMaterial' as const, sourceId: 'a' }
     const sorted = [a, b, c].sort(orderingKey)
     expect(sorted.map((x) => `${x.sourceType}:${x.sourceId}`)).toEqual([
       'courseWork:a',
@@ -85,7 +85,7 @@ describe('the ordering key is a TOTAL order (D16)', () => {
       'courseWorkMaterial:a',
     ])
     // Reversing the input must not change the output — that is what "total"
-    // means, and creationTime alone does not give it across two tables.
+    // means, and updateTime alone does not give it across two tables.
     const reversed = [c, b, a].sort(orderingKey)
     expect(reversed).toEqual(sorted)
   })

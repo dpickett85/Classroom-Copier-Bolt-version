@@ -100,10 +100,14 @@ model MockCourseWork {
   quizFormLink   String?
   topicId        String?
   creationTime   DateTime
+  /// Google's "last edited" timestamp — bumped when a teacher drags a post into
+  /// a new position, so it tracks the on-screen Classwork order. This is the
+  /// ordering key the port promises; `createdOrder` below is a seed ordinal only.
+  updateTime     DateTime @default(now())
   /// Seed-authoring ordinal for this table only. It is NOT the enumerator's
   /// tiebreak: `post-enumerator` merges two tables, and a per-table ordinal is
   /// not comparable across them, so the total order is
-  /// (creationTime, sourceType, sourceId) and this column is deliberately not
+  /// (updateTime, sourceType, sourceId) and this column is deliberately not
   /// carried on the port's read types (APPLY-J — the previous comment claimed
   /// a role the code never gave it).
   createdOrder   Int
@@ -113,7 +117,7 @@ model MockCourseWork {
   rubric MockRubric?
 
   @@index([courseId, state])
-  @@index([courseId, creationTime])
+  @@index([courseId, updateTime])
   @@map("mock_course_work")
 }
 
@@ -128,6 +132,8 @@ model MockCourseWorkMaterial {
   state        String
   topicId      String?
   creationTime DateTime
+  /// Google's "last edited" timestamp — see MockCourseWork.updateTime.
+  updateTime   DateTime @default(now())
   /// Seed-authoring ordinal for this table only — see MockCourseWork.createdOrder.
   createdOrder Int
 
@@ -135,7 +141,7 @@ model MockCourseWorkMaterial {
   topic  MockTopic? @relation(fields: [topicId], references: [id])
 
   @@index([courseId, state])
-  @@index([courseId, creationTime])
+  @@index([courseId, updateTime])
   @@map("mock_course_work_material")
 }
 
@@ -340,7 +346,7 @@ model PreflightScanItem {
   answerConfig String?
   topicId      String?
   topicName    String?
-  /// Position in post-enumerator's total order (creationTime, sourceType, sourceId).
+  /// Position in post-enumerator's total order (updateTime, sourceType, sourceId).
   createdOrder Int
 
   /// Decision C — set when this post's title already exists on the DESTINATION

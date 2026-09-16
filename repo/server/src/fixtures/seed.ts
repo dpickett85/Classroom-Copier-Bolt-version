@@ -131,6 +131,7 @@ async function seedCourse(prisma: PrismaClient, course: SeedCourse): Promise<voi
       quizFormLink: cw.quizFormLink ?? null,
       topicId: cw.topicId ?? null,
       creationTime: new Date(cw.creationTime),
+      updateTime: new Date(cw.creationTime),
       createdOrder: cw.createdOrder,
     }
     await prisma.mockCourseWork.upsert({
@@ -152,6 +153,7 @@ async function seedCourse(prisma: PrismaClient, course: SeedCourse): Promise<voi
       state: cwm.state,
       topicId: cwm.topicId ?? null,
       creationTime: new Date(cwm.creationTime),
+      updateTime: new Date(cwm.creationTime),
       createdOrder: cwm.createdOrder,
     }
     await prisma.mockCourseWorkMaterial.upsert({

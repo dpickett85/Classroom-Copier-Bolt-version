@@ -485,6 +485,7 @@ export class RealClassroomProvider implements ClassroomProvider {
         quizFormLink: quizFormLinkOf(work),
         topicId: work.topicId ?? null,
         creationTime: toDate(work.creationTime),
+        updateTime: toDate(work.updateTime),
         attachments,
         // Google does not report rubric presence on the courseWork resource, and
         // a rubrics call per post during enumeration is exactly the N+1 the port
@@ -534,6 +535,7 @@ export class RealClassroomProvider implements ClassroomProvider {
         state: (material.state as CourseWorkState | null) ?? 'PUBLISHED',
         topicId: material.topicId ?? null,
         creationTime: toDate(material.creationTime),
+        updateTime: toDate(material.updateTime),
         attachments,
       } satisfies ProviderCourseWorkMaterial
     })
