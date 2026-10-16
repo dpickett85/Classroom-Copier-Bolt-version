@@ -474,3 +474,10 @@ table.log-table tbody tr:hover td.log-title-col{ background:var(--teal-100); }
 .error-state .error-glyph.notice-glyph{
   color:var(--amber-700); background:var(--amber-100); border-color:var(--amber-700);
 }
+
+/* ---- Topic picker (copy-some step) ---- */
+.topic-list{ display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+.topic-row{ display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid var(--line); border-radius:var(--radius); cursor:pointer; }
+.topic-row:hover{ background:var(--paper-1); }
+.topic-row input[type="checkbox"]{ width:16px; height:16px; accent-color:var(--teal-700); flex-shrink:0; }
+.topic-row span{ font-size:14.5px; color:var(--ink-900); line-height:1.4; }

@@ -255,6 +255,7 @@ export async function createTransferJob(
           // a destination a co-teacher may have edited since.
           topicReuseJson: scan.topicReuseJson,
           topicDateUpdatesJson: input.updateTopicDates ? scan.topicDateUpdatesJson : '[]',
+          topicScopeJson: scan.topicScopeJson,
         },
       }),
       prisma.transferJobItem.createMany({
@@ -370,6 +371,18 @@ interface CreateContext {
 }
 
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
+
+/** `TransferJob.topicScopeJson` — the scan's selected topic ids, or null. */
+function parseTopicScope(json: string | null): Set<string> {
+  if (!json) return new Set()
+  try {
+    const parsed = JSON.parse(json) as unknown
+    if (!Array.isArray(parsed)) return new Set()
+    return new Set(parsed.filter((id): id is string => typeof id === 'string'))
+  } catch {
+    return new Set()
+  }
+}
 
 /** `TransferJob.topicMapJson` — Record<sourceTopicId, destinationTopicId>. */
 function parseTopicMap(json: string | null): Record<string, string> {
@@ -695,6 +708,7 @@ export class TransferEngine {
         topicMapJson: job.topicMapJson,
         topicReuseJson: job.topicReuseJson,
         topicDateUpdatesJson: job.topicDateUpdatesJson,
+        topicScopeJson: job.topicScopeJson,
       })
       topicMap = topics.map
       await this.heartbeat(lease, {
@@ -967,12 +981,15 @@ export class TransferEngine {
     lease: Lease,
     sourceCourseId: string,
     targetCourseId: string,
-    persisted: { topicMapJson: string | null; topicReuseJson: string | null; topicDateUpdatesJson: string | null },
+    persisted: { topicMapJson: string | null; topicReuseJson: string | null; topicDateUpdatesJson: string | null; topicScopeJson: string | null },
   ): Promise<{ map: Map<string, string>; created: number; reused: number }> {
     const map = new Map<string, string>(Object.entries(parseTopicMap(persisted.topicMapJson)))
     const alreadyMapped = new Set(map.keys())
     const reuseBySourceTopicId = parseTopicReuse(persisted.topicReuseJson)
     const dateUpdates = parseTopicDateUpdates(persisted.topicDateUpdatesJson)
+    // Topic-scoped copy: only the teacher-selected topics are created on the
+    // destination. Empty/absent = all topics.
+    const scope = parseTopicScope(persisted.topicScopeJson)
 
     let created = 0
     let reused = 0
@@ -989,8 +1006,9 @@ export class TransferEngine {
     // them oldest-first. Reverse so the target course matches the source's
     // visible order rather than its API order.
     allTopics.reverse()
+    const scopedTopics = scope.size > 0 ? allTopics.filter((t) => scope.has(t.id)) : allTopics
 
-    for (const topic of allTopics) {
+    for (const topic of scopedTopics) {
         if (alreadyMapped.has(topic.id)) continue
 
         const reuseTarget = reuseBySourceTopicId.get(topic.id)

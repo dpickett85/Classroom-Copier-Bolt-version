@@ -210,6 +210,7 @@ export async function createTransferJob(prisma, input) {
                     // a destination a co-teacher may have edited since.
                     topicReuseJson: scan.topicReuseJson,
                     topicDateUpdatesJson: input.updateTopicDates ? scan.topicDateUpdatesJson : '[]',
+                    topicScopeJson: scan.topicScopeJson,
                 },
             }),
             prisma.transferJobItem.createMany({
@@ -272,6 +273,20 @@ export async function createTransferJob(prisma, input) {
     return { jobId };
 }
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+/** `TransferJob.topicScopeJson` — the scan's selected topic ids, or null. */
+function parseTopicScope(json) {
+    if (!json)
+        return new Set();
+    try {
+        const parsed = JSON.parse(json);
+        if (!Array.isArray(parsed))
+            return new Set();
+        return new Set(parsed.filter((id) => typeof id === 'string'));
+    }
+    catch {
+        return new Set();
+    }
+}
 /** `TransferJob.topicMapJson` — Record<sourceTopicId, destinationTopicId>. */
 function parseTopicMap(json) {
     if (!json)
@@ -586,6 +601,7 @@ export class TransferEngine {
                 topicMapJson: job.topicMapJson,
                 topicReuseJson: job.topicReuseJson,
                 topicDateUpdatesJson: job.topicDateUpdatesJson,
+                topicScopeJson: job.topicScopeJson,
             });
             topicMap = topics.map;
             await this.heartbeat(lease, {
@@ -838,6 +854,9 @@ export class TransferEngine {
         const alreadyMapped = new Set(map.keys());
         const reuseBySourceTopicId = parseTopicReuse(persisted.topicReuseJson);
         const dateUpdates = parseTopicDateUpdates(persisted.topicDateUpdatesJson);
+        // Topic-scoped copy: only the teacher-selected topics are created on the
+        // destination. Empty/absent = all topics.
+        const scope = parseTopicScope(persisted.topicScopeJson);
         let created = 0;
         let reused = 0;
         const allTopics = [];
@@ -853,7 +872,8 @@ export class TransferEngine {
         // them oldest-first. Reverse so the target course matches the source's
         // visible order rather than its API order.
         allTopics.reverse();
-        for (const topic of allTopics) {
+        const scopedTopics = scope.size > 0 ? allTopics.filter((t) => scope.has(t.id)) : allTopics;
+        for (const topic of scopedTopics) {
             if (alreadyMapped.has(topic.id))
                 continue;
             const reuseTarget = reuseBySourceTopicId.get(topic.id);

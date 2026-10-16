@@ -293,6 +293,9 @@ export class PreflightEngine {
         findingsJson: JSON.stringify(findings),
         topicReuseJson: JSON.stringify(topicReuse),
         topicDateUpdatesJson: JSON.stringify(topicDateUpdates),
+        // Topic-scoped copy: remember what the teacher picked so the transfer
+        // creates only those topics on the destination.
+        topicScopeJson: JSON.stringify(selectedTopicIds ?? []),
         items: { create: scanItems.map(({ scanId: _scanId, ...rest }) => rest) },
       },
     })

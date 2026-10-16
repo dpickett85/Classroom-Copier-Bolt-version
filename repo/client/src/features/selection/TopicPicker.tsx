@@ -59,7 +59,8 @@ export function TopicPicker({ source, onError, onBack, onProceed }: TopicPickerP
     getCourseTopics(source.id)
       .then((res) => {
         setTopics(res.topics)
-        setSelected(new Set(res.topics.map((t) => t.id)))
+        // Unchecked by default: the teacher opts IN to each topic they copy.
+        setSelected(new Set())
       })
       .catch((error: unknown) => {
         if (!isAbortError(error)) onError?.(error)
@@ -92,7 +93,8 @@ export function TopicPicker({ source, onError, onBack, onProceed }: TopicPickerP
             </p>
           )}
           <NarrationBanner glyph="i" variant="reassurance">
-            Classwork without a topic is only copied when you choose “Copy all topics.”
+            Only the topics you check will be copied. Classwork without a topic is only copied with
+            “Copy all topics.”
           </NarrationBanner>
           <div className="ready-actions">
             <Button variant="secondary" onClick={() => setShowList(false)}>

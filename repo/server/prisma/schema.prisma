@@ -340,6 +340,10 @@ model PreflightScan {
   /// JSON TopicDateUpdate[] — source topics whose names contain dates from the
   /// previous school year, with the shifted names for the current year.
   topicDateUpdatesJson String @default("[]")
+  /// JSON string[] — the topic-scoped copy's selected source topic ids.
+  /// Empty array = copy all topics. Written at scan time so the transfer
+  /// creates only the topics the teacher actually picked.
+  topicScopeJson    String   @default("[]")
   scannedAt         DateTime @default(now())
 
   items PreflightScanItem[]
@@ -430,6 +434,9 @@ model TransferJob {
   /// JSON TopicDateUpdate[], copied from the scan at job creation. Applied
   /// when the teacher chose to shift topic dates to the current school year.
   topicDateUpdatesJson  String?
+  /// JSON string[] — the scan's selected topic ids. Non-empty = topic-scoped
+  /// copy: the engine creates only these topics on the destination.
+  topicScopeJson        String?
   /// topics THIS JOB has already resolved, written in the same lease-checked
   /// update as the per-topic heartbeat.
   ///
