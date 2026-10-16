@@ -256,6 +256,25 @@ export const TopicReuseDisclosureSchema = z.object({
 })
 export type TopicReuseDisclosure = z.infer<typeof TopicReuseDisclosureSchema>
 
+/**
+ * A source topic whose name contains dates from the previous school year.
+ * The teacher is asked whether to shift those dates to the current school
+ * year; if they say yes, `updatedTopicName` is used instead of the original
+ * when creating the topic in the destination.
+ */
+export const TopicDateUpdateSchema = z.object({
+  sourceTopicId: z.string(),
+  sourceTopicName: z.string(),
+  updatedTopicName: z.string(),
+  shifts: z.array(
+    z.object({
+      original: z.string(),
+      updated: z.string(),
+    }),
+  ),
+})
+export type TopicDateUpdate = z.infer<typeof TopicDateUpdateSchema>
+
 export const PreflightRequestSchema = z.object({ targetId: z.string().min(1) })
 export type PreflightRequest = z.infer<typeof PreflightRequestSchema>
 
@@ -291,6 +310,9 @@ export const PreflightResponseSchema = z.object({
    */
   duplicates: z.array(DuplicateDisclosureSchema),
   topicReuse: z.array(TopicReuseDisclosureSchema),
+  /** Source topics whose names contain dates from the previous school year.
+   *  Empty when no topic has stale dates. */
+  topicDateUpdates: z.array(TopicDateUpdateSchema),
 })
 export type PreflightResponse = z.infer<typeof PreflightResponseSchema>
 
@@ -314,6 +336,9 @@ export type Resolution = z.infer<typeof ResolutionSchema>
 export const CreateTransferJobRequestSchema = z.object({
   scanId: z.string().min(1),
   resolutions: z.array(ResolutionSchema),
+  /** Whether the teacher chose to shift topic dates to the current school
+   *  year. Defaults to false (keep original names). */
+  updateTopicDates: z.boolean().optional(),
 })
 export type CreateTransferJobRequest = z.infer<typeof CreateTransferJobRequestSchema>
 

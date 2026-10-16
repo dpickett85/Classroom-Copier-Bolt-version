@@ -206,6 +206,8 @@ export async function createTransferJob(
     /** APPLY-I. Pass `null` to disable the freshness check (tests, tooling). */
     scanTtlMs?: number | null
     now?: Date
+    /** Whether the teacher chose to shift topic dates to the current school year. */
+    updateTopicDates?: boolean
   },
 ): Promise<{ jobId: string }> {
   const scan = await prisma.preflightScan.findUnique({
@@ -252,6 +254,7 @@ export async function createTransferJob(
           // shown at pre-flight rather than re-resolving names mid-run against
           // a destination a co-teacher may have edited since.
           topicReuseJson: scan.topicReuseJson,
+          topicDateUpdatesJson: input.updateTopicDates ? scan.topicDateUpdatesJson : '[]',
         },
       }),
       prisma.transferJobItem.createMany({
@@ -398,6 +401,24 @@ function parseTopicReuse(json: string | null): Map<string, string> {
     }
   } catch {
     // A malformed snapshot must not stop a transfer; it only costs topic reuse.
+  }
+  return map
+}
+
+/** `TransferJob.topicDateUpdatesJson` — Map<sourceTopicId, updatedTopicName>. */
+function parseTopicDateUpdates(json: string | null): Map<string, string> {
+  const map = new Map<string, string>()
+  if (!json) return map
+  try {
+    const parsed = JSON.parse(json) as { sourceTopicId?: unknown; updatedTopicName?: unknown }[]
+    if (!Array.isArray(parsed)) return map
+    for (const row of parsed) {
+      if (typeof row?.sourceTopicId === 'string' && typeof row.updatedTopicName === 'string') {
+        map.set(row.sourceTopicId, row.updatedTopicName)
+      }
+    }
+  } catch {
+    // A malformed snapshot must not stop a transfer; it only costs the date shift.
   }
   return map
 }
@@ -673,6 +694,7 @@ export class TransferEngine {
       const topics = await this.buildTopicMap(lease, sourceCourseId, targetCourseId, {
         topicMapJson: job.topicMapJson,
         topicReuseJson: job.topicReuseJson,
+        topicDateUpdatesJson: job.topicDateUpdatesJson,
       })
       topicMap = topics.map
       await this.heartbeat(lease, {
@@ -945,11 +967,12 @@ export class TransferEngine {
     lease: Lease,
     sourceCourseId: string,
     targetCourseId: string,
-    persisted: { topicMapJson: string | null; topicReuseJson: string | null },
+    persisted: { topicMapJson: string | null; topicReuseJson: string | null; topicDateUpdatesJson: string | null },
   ): Promise<{ map: Map<string, string>; created: number; reused: number }> {
     const map = new Map<string, string>(Object.entries(parseTopicMap(persisted.topicMapJson)))
     const alreadyMapped = new Set(map.keys())
     const reuseBySourceTopicId = parseTopicReuse(persisted.topicReuseJson)
+    const dateUpdates = parseTopicDateUpdates(persisted.topicDateUpdatesJson)
 
     let created = 0
     let reused = 0
@@ -975,7 +998,8 @@ export class TransferEngine {
           map.set(topic.id, reuseTarget)
           reused += 1
         } else {
-          const createdTopic = await this.provider.createTopic(targetCourseId, topic.name)
+          const updatedName = dateUpdates.get(topic.id) ?? topic.name
+          const createdTopic = await this.provider.createTopic(targetCourseId, updatedName)
           map.set(topic.id, createdTopic.topicId)
           created += 1
         }

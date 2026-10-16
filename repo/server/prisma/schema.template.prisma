@@ -318,6 +318,9 @@ model PreflightScan {
   /// map is built once, at scan time, so the transfer reuses exactly the topics
   /// the teacher was shown rather than re-resolving names mid-run.
   topicReuseJson    String   @default("[]")
+  /// JSON TopicDateUpdate[] — source topics whose names contain dates from the
+  /// previous school year, with the shifted names for the current year.
+  topicDateUpdatesJson String @default("[]")
   scannedAt         DateTime @default(now())
 
   items PreflightScanItem[]
@@ -405,7 +408,9 @@ model TransferJob {
   /// JSON TopicReuseDisclosure[], copied from the scan at job creation, so the
   /// transfer reuses exactly the topics the teacher was shown at pre-flight.
   topicReuseJson        String?
-  /// P0 (§4.3 fix 2) — JSON Record<sourceTopicId, destinationTopicId> of the
+  /// JSON TopicDateUpdate[], copied from the scan at job creation. Applied
+  /// when the teacher chose to shift topic dates to the current school year.
+  topicDateUpdatesJson  String?
   /// topics THIS JOB has already resolved, written in the same lease-checked
   /// update as the per-topic heartbeat.
   ///

@@ -92,6 +92,7 @@ export function transferJobsRouter(
           scanId: parsed.data.scanId,
           resolutions: parsed.data.resolutions,
           scanTtlMs: config.scanTtlMs,
+          updateTopicDates: parsed.data.updateTopicDates ?? false,
         })
         // 202 — the work is never done inline in the request.
         res.status(202).json({ jobId })

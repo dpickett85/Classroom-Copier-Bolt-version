@@ -273,6 +273,22 @@ export declare const TopicReuseDisclosureSchema: z.ZodObject<{
     ambiguous: z.ZodBoolean;
 }, z.core.$strip>;
 export type TopicReuseDisclosure = z.infer<typeof TopicReuseDisclosureSchema>;
+/**
+ * A source topic whose name contains dates from the previous school year.
+ * The teacher is asked whether to shift those dates to the current school
+ * year; if they say yes, `updatedTopicName` is used instead of the original
+ * when creating the topic in the destination.
+ */
+export declare const TopicDateUpdateSchema: z.ZodObject<{
+    sourceTopicId: z.ZodString;
+    sourceTopicName: z.ZodString;
+    updatedTopicName: z.ZodString;
+    shifts: z.ZodArray<z.ZodObject<{
+        original: z.ZodString;
+        updated: z.ZodString;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
+export type TopicDateUpdate = z.infer<typeof TopicDateUpdateSchema>;
 export declare const PreflightRequestSchema: z.ZodObject<{
     targetId: z.ZodString;
 }, z.core.$strip>;
@@ -338,6 +354,15 @@ export declare const PreflightResponseSchema: z.ZodObject<{
         destinationTopicName: z.ZodString;
         ambiguous: z.ZodBoolean;
     }, z.core.$strip>>;
+    topicDateUpdates: z.ZodArray<z.ZodObject<{
+        sourceTopicId: z.ZodString;
+        sourceTopicName: z.ZodString;
+        updatedTopicName: z.ZodString;
+        shifts: z.ZodArray<z.ZodObject<{
+            original: z.ZodString;
+            updated: z.ZodString;
+        }, z.core.$strip>>;
+    }, z.core.$strip>>;
 }, z.core.$strip>;
 export type PreflightResponse = z.infer<typeof PreflightResponseSchema>;
 /**
@@ -379,6 +404,7 @@ export declare const CreateTransferJobRequestSchema: z.ZodObject<{
         kind: z.ZodLiteral<"skip_attachment_and_note_draft">;
         findingId: z.ZodString;
     }, z.core.$strip>], "kind">>;
+    updateTopicDates: z.ZodOptional<z.ZodBoolean>;
 }, z.core.$strip>;
 export type CreateTransferJobRequest = z.infer<typeof CreateTransferJobRequestSchema>;
 export declare const CreateTransferJobResponseSchema: z.ZodObject<{

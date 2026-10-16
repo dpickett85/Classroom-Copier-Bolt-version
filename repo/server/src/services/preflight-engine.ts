@@ -23,8 +23,9 @@ import type {
   PreflightResponse,
   DuplicateDisclosure,
   TopicReuseDisclosure,
+  TopicDateUpdate,
 } from '@classroom-copier/shared'
-import { normalizeTitle } from '@classroom-copier/shared'
+import { normalizeTitle, findTopicsWithStaleDates } from '@classroom-copier/shared'
 import type { ClassroomProvider } from '../adapters/classroom-provider.interface.js'
 import type { AttachmentRef, HealthState, ProviderCourse } from '../adapters/types.js'
 import { NotFoundError } from '../adapters/types.js'
@@ -191,6 +192,10 @@ export class PreflightEngine {
       })
     }
 
+    const topicDateUpdates = findTopicsWithStaleDates(
+      [...topicNames.entries()].map(([id, name]) => ({ id, name })),
+    )
+
     const scanId = `scan-${crypto.randomUUID()}`
     const findings: PreflightFinding[] = []
     const duplicates: DuplicateDisclosure[] = []
@@ -265,6 +270,7 @@ export class PreflightEngine {
         totalPostsScanned: scanItems.length,
         findingsJson: JSON.stringify(findings),
         topicReuseJson: JSON.stringify(topicReuse),
+        topicDateUpdatesJson: JSON.stringify(topicDateUpdates),
         items: { create: scanItems.map(({ scanId: _scanId, ...rest }) => rest) },
       },
     })
@@ -281,6 +287,7 @@ export class PreflightEngine {
       findings,
       duplicates,
       topicReuse,
+      topicDateUpdates,
     }
   }
 }
