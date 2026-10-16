@@ -1,19 +1,13 @@
 /**
- * Topic date-shifting — detects dates in topic names that belong to the
- * previous school year and computes the equivalent dates for the current
- * school year.
+ * Topic date-shifting — detects dates in topic names that belong to any past
+ * school year and computes the equivalent dates for the current school year.
  *
  * The typical US school year runs August through June. A topic named
- * "May 11-15" or "Nov. 3-7" carries a date range that, if it came from the
+ * "May 11-15" or "Nov. 3-7" carries a date range that, if it came from a
  * previous school year, should be shifted to the current school year's
  * calendar. The calendar shifts roughly one day earlier each year, so we
- * subtract 7 days from each date to land on the same weekday in the new
- * school year.
- *
- * "Previous school year" is defined relative to the current date: if today
- * is in the first half of a school year (Aug–Dec), the previous school year
- * started in the prior calendar year. If today is in the second half
- * (Jan–Jun), the previous school year started two calendar years ago.
+ * shift each date forward by 364 days (52 weeks) per year of gap to land
+ * on the same weekday in the current school year.
  */
 import type { TopicDateUpdate } from './api-types.js';
 /**
@@ -25,9 +19,10 @@ export declare function currentSchoolYear(now?: Date): {
     endYear: number;
 };
 /**
- * The school year that is "previous" relative to `now`.
+ * Returns the school year that is `n` years before the current one.
+ * n=1 gives the immediately previous school year, n=2 gives two years ago, etc.
  */
-export declare function previousSchoolYear(now?: Date): {
+export declare function schoolYearNYearsAgo(n: number, now?: Date): {
     startYear: number;
     endYear: number;
 };
@@ -46,21 +41,18 @@ interface DateRange {
 /**
  * Finds all date ranges in a topic name. Supports formats like:
  *   "May 11-15", "May 11 - 15", "Nov. 3-7", "November 3 - 7"
- *   "May 11 to 15", "Sept. 8-12"
- *
- * Does NOT support cross-month ranges like "May 28 - Jun 1" (those are
- * ambiguous and rare in topic names — the month prefix applies to both
- * days, so "May 28 - Jun 1" would be misread as May 28 - May 1).
+ *   "May 11 to 15", "Sept. 8-12", "May 28 - Jun 1"
  */
 export declare function findDateRanges(topicName: string): DateRange[];
 /**
- * Scans a set of source topics for date ranges that belong to the previous
- * school year, and for each one that has them, produces an updated topic
- * name with the dates shifted to the current school year (7 days earlier).
+ * Scans a set of source topics for date ranges that belong to any past school
+ * year, and for each one that has them, produces an updated topic name with
+ * the dates shifted forward to the current school year. A topic from two
+ * years ago gets shifted forward two years; one from three years ago gets
+ * three years, and so on.
  *
- * Topics with no date ranges, or whose dates are already in the current
- * school year, are NOT included in the result — the caller only needs to
- * know about the ones that changed.
+ * Topics with no date ranges, or whose dates are already in the current (or
+ * a future) school year, are NOT included in the result.
  */
 export declare function findTopicsWithStaleDates(topics: Array<{
     id: string;

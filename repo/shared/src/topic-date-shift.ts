@@ -1,19 +1,13 @@
 /**
- * Topic date-shifting — detects dates in topic names that belong to the
- * previous school year and computes the equivalent dates for the current
- * school year.
+ * Topic date-shifting — detects dates in topic names that belong to any past
+ * school year and computes the equivalent dates for the current school year.
  *
  * The typical US school year runs August through June. A topic named
- * "May 11-15" or "Nov. 3-7" carries a date range that, if it came from the
+ * "May 11-15" or "Nov. 3-7" carries a date range that, if it came from a
  * previous school year, should be shifted to the current school year's
  * calendar. The calendar shifts roughly one day earlier each year, so we
- * subtract 7 days from each date to land on the same weekday in the new
- * school year.
- *
- * "Previous school year" is defined relative to the current date: if today
- * is in the first half of a school year (Aug–Dec), the previous school year
- * started in the prior calendar year. If today is in the second half
- * (Jan–Jun), the previous school year started two calendar years ago.
+ * shift each date forward by 364 days (52 weeks) per year of gap to land
+ * on the same weekday in the current school year.
  */
 
 import type { TopicDateUpdate } from './api-types.js'
@@ -24,13 +18,13 @@ const MONTH_NAMES: Record<string, number> = {
   march: 2, mar: 2,
   april: 3, apr: 3,
   may: 4,
-  june: 4, jun: 4,
-  july: 5, jul: 5,
-  august: 6, aug: 6,
-  september: 7, sep: 7, sept: 7,
-  october: 8, oct: 8,
-  november: 9, nov: 9,
-  december: 10, dec: 10,
+  june: 5, jun: 5,
+  july: 6, jul: 6,
+  august: 7, aug: 7,
+  september: 8, sep: 8, sept: 8,
+  october: 9, oct: 9,
+  november: 10, nov: 10,
+  december: 11, dec: 11,
 }
 
 /**
@@ -46,11 +40,12 @@ export function currentSchoolYear(now: Date = new Date()): { startYear: number; 
 }
 
 /**
- * The school year that is "previous" relative to `now`.
+ * Returns the school year that is `n` years before the current one.
+ * n=1 gives the immediately previous school year, n=2 gives two years ago, etc.
  */
-export function previousSchoolYear(now: Date = new Date()): { startYear: number; endYear: number } {
+export function schoolYearNYearsAgo(n: number, now: Date = new Date()): { startYear: number; endYear: number } {
   const current = currentSchoolYear(now)
-  return { startYear: current.startYear - 1, endYear: current.endYear - 1 }
+  return { startYear: current.startYear - n, endYear: current.endYear - n }
 }
 
 interface ParsedDate {
@@ -102,11 +97,7 @@ function parseDay(s: string): { day: number; consumed: number } | null {
 /**
  * Finds all date ranges in a topic name. Supports formats like:
  *   "May 11-15", "May 11 - 15", "Nov. 3-7", "November 3 - 7"
- *   "May 11 to 15", "Sept. 8-12"
- *
- * Does NOT support cross-month ranges like "May 28 - Jun 1" (those are
- * ambiguous and rare in topic names — the month prefix applies to both
- * days, so "May 28 - Jun 1" would be misread as May 28 - May 1).
+ *   "May 11 to 15", "Sept. 8-12", "May 28 - Jun 1"
  */
 export function findDateRanges(topicName: string): DateRange[] {
   const ranges: DateRange[] = []
@@ -133,15 +124,25 @@ export function findDateRanges(topicName: string): DateRange[] {
       continue
     }
     const afterSep = afterStartDay + sepMatch[0].length
-    const endDayResult = parseDay(s.slice(afterSep))
+
+    // The end of the range may have its own month prefix, e.g. "May 28 - Jun 1"
+    const endMonthResult = parseMonthName(s.slice(afterSep))
+    let endMonth = monthResult.month
+    let endConsumed = 0
+    if (endMonthResult) {
+      endMonth = endMonthResult.month
+      endConsumed = endMonthResult.consumed
+    }
+
+    const endDayResult = parseDay(s.slice(afterSep + endConsumed))
     if (!endDayResult) {
       i += 1
       continue
     }
-    const rawEnd = afterSep + endDayResult.consumed
+    const rawEnd = afterSep + endConsumed + endDayResult.consumed
     ranges.push({
       start: { month: monthResult.month, day: dayResult.day },
-      end: { month: monthResult.month, day: endDayResult.day },
+      end: { month: endMonth, day: endDayResult.day },
       raw: s.slice(i, rawEnd),
       index: i,
     })
@@ -162,46 +163,64 @@ function datesForSchoolYear(
   range: DateRange,
   schoolYear: { startYear: number; endYear: number },
 ): { start: Date; end: Date } | null {
-  const year = range.start.month >= 7 ? schoolYear.startYear : schoolYear.endYear
-  const start = new Date(year, range.start.month, range.start.day)
-  const end = new Date(year, range.end.month, range.end.day)
+  const startYear = range.start.month >= 7 ? schoolYear.startYear : schoolYear.endYear
+  const endYear = range.end.month >= 7 ? schoolYear.startYear : schoolYear.endYear
+  const start = new Date(startYear, range.start.month, range.start.day)
+  const end = new Date(endYear, range.end.month, range.end.day)
   if (isNaN(start.getTime()) || isNaN(end.getTime())) return null
   return { start, end }
 }
 
 /**
- * Determines whether a date range belongs to the previous school year
- * relative to `now`.
+ * Determines how many school years a date range is behind the current one.
+ * Returns 0 if the date is in the current school year (not stale),
+ * 1 if it's one year behind, 2 if two years behind, etc.
+ * Returns -1 if the date is in a future school year (no shift needed).
  */
-function isInPreviousSchoolYear(
-  range: DateRange,
-  now: Date,
-): boolean {
-  const prev = previousSchoolYear(now)
-  const dates = datesForSchoolYear(range, prev)
-  if (!dates) return false
-  // The date must be valid and within the previous school year's span.
-  // We check that it falls between Aug 1 of the start year and Jul 31 of
-  // the end year.
-  const schoolStart = new Date(prev.startYear, 7, 1)
-  const schoolEnd = new Date(prev.endYear, 6, 31)
-  return dates.start >= schoolStart && dates.start <= schoolEnd
+function yearsBehindCurrent(range: DateRange, now: Date): number {
+  const current = currentSchoolYear(now)
+  const currentStart = new Date(current.startYear, 7, 1)
+  const currentEnd = new Date(current.endYear, 6, 31)
+
+  // Try each past school year, starting from the most recent.
+  for (let n = 1; n <= 10; n++) {
+    const sy = schoolYearNYearsAgo(n, now)
+    const dates = datesForSchoolYear(range, sy)
+    if (!dates) continue
+    const syStart = new Date(sy.startYear, 7, 1)
+    const syEnd = new Date(sy.endYear, 6, 31)
+    if (dates.start >= syStart && dates.start <= syEnd) {
+      return n
+    }
+  }
+
+  // Check if it's in the current school year
+  const currentDates = datesForSchoolYear(range, current)
+  if (currentDates && currentDates.start >= currentStart && currentDates.start <= currentEnd) {
+    return 0
+  }
+
+  // Check if it's in a future school year
+  const futureDates = datesForSchoolYear(range, {
+    startYear: current.startYear + 1,
+    endYear: current.endYear + 1,
+  })
+  if (futureDates && futureDates.start > currentEnd) {
+    return -1
+  }
+
+  return -1
 }
 
 /**
- * Shifts a date backward by 7 days (one calendar week), so the same weekday
- * is preserved in the new school year.
+ * Shifts a date forward by `n * 364` days (n * 52 weeks), so the same weekday
+ * is preserved and the date lands in the same calendar week n years later.
  */
-function shiftDateBack7Days(date: Date): Date {
+function shiftDateForwardNYears(date: Date, n: number): Date {
   const result = new Date(date)
-  result.setDate(result.getDate() - 7)
+  result.setDate(result.getDate() + 364 * n)
   return result
 }
-
-const MONTH_DISPLAY: string[] = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
 
 /**
  * Formats a date as it would appear in a topic name: "May 11", "Nov. 3".
@@ -220,13 +239,14 @@ function formatDate(d: Date): string {
 }
 
 /**
- * Scans a set of source topics for date ranges that belong to the previous
- * school year, and for each one that has them, produces an updated topic
- * name with the dates shifted to the current school year (7 days earlier).
+ * Scans a set of source topics for date ranges that belong to any past school
+ * year, and for each one that has them, produces an updated topic name with
+ * the dates shifted forward to the current school year. A topic from two
+ * years ago gets shifted forward two years; one from three years ago gets
+ * three years, and so on.
  *
- * Topics with no date ranges, or whose dates are already in the current
- * school year, are NOT included in the result — the caller only needs to
- * know about the ones that changed.
+ * Topics with no date ranges, or whose dates are already in the current (or
+ * a future) school year, are NOT included in the result.
  */
 export function findTopicsWithStaleDates(
   topics: Array<{ id: string; name: string }>,
@@ -235,21 +255,29 @@ export function findTopicsWithStaleDates(
   const result: TopicDateUpdate[] = []
   for (const topic of topics) {
     const ranges = findDateRanges(topic.name)
-    const staleRanges = ranges.filter((r) => isInPreviousSchoolYear(r, now))
-    if (staleRanges.length === 0) continue
+    if (ranges.length === 0) continue
+
+    // Pair each range with how many years it needs to shift (0 or -1 = skip).
+    const rangeShifts: Array<{ range: DateRange; n: number }> = []
+    for (const range of ranges) {
+      const n = yearsBehindCurrent(range, now)
+      if (n > 0) rangeShifts.push({ range, n })
+    }
+    if (rangeShifts.length === 0) continue
 
     // Build the updated name by replacing each stale range's raw text with
     // the shifted dates, working right-to-left so indices don't shift.
     let updatedName = topic.name
     const shifts: Array<{ original: string; updated: string }> = []
-    for (let i = staleRanges.length - 1; i >= 0; i--) {
-      const range = staleRanges[i]
-      if (!range) continue
-      const prev = previousSchoolYear(now)
-      const dates = datesForSchoolYear(range, prev)
+    for (let i = rangeShifts.length - 1; i >= 0; i--) {
+      const entry = rangeShifts[i]
+      if (!entry) continue
+      const { range, n } = entry
+      const sy = schoolYearNYearsAgo(n, now)
+      const dates = datesForSchoolYear(range, sy)
       if (!dates) continue
-      const newStart = shiftDateBack7Days(dates.start)
-      const newEnd = shiftDateBack7Days(dates.end)
+      const newStart = shiftDateForwardNYears(dates.start, n)
+      const newEnd = shiftDateForwardNYears(dates.end, n)
       const replacement = `${formatDate(newStart)}-${formatDate(newEnd)}`
       updatedName =
         updatedName.slice(0, range.index) +
