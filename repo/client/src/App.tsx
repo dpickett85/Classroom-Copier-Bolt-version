@@ -38,6 +38,7 @@ import {
 import type { ScanConflictKind, StepNumber } from './components/shared'
 import { AuthFlow, type AuthStage } from './features/auth/AuthFlow'
 import { SelectionScreen } from './features/selection/SelectionScreen'
+import { TopicPicker } from './features/selection/TopicPicker'
 import { PreflightScreen } from './features/preflight/PreflightScreen'
 import { ReadyToTransfer } from './features/preflight/ReadyToTransfer'
 import { TransferProgress } from './features/transfer/TransferProgress'
@@ -56,10 +57,11 @@ import {
   useColdStart,
 } from './lib/api-client'
 
-type Stage = 'auth' | 'selection' | 'preflight' | 'ready' | 'transfer' | 'summary'
+type Stage = 'auth' | 'selection' | 'topics' | 'preflight' | 'ready' | 'transfer' | 'summary'
 
 const STEP_FOR: Record<Exclude<Stage, 'auth'>, StepNumber> = {
   selection: 1,
+  topics: 1,
   preflight: 2,
   ready: 2,
   transfer: 3,
@@ -135,6 +137,8 @@ function Wizard() {
   const [source, setSource] = useState<CourseSummary | null>(null)
   const [target, setTarget] = useState<CourseSummary | null>(null)
   const [scan, setScan] = useState<PreflightResponse | null>(null)
+  /** null = copy all topics; a list = copy only these. Consumed by preflight. */
+  const [selectedTopicIds, setSelectedTopicIds] = useState<string[] | null>(null)
   const [resolutions, setResolutions] = useState<Resolution[]>([])
   const [jobId, setJobId] = useState<string | null>(null)
   const [summary, setSummary] = useState<{
@@ -159,6 +163,7 @@ function Wizard() {
   const clearRun = useCallback(() => {
     setSource(null)
     setTarget(null)
+    setSelectedTopicIds(null)
     setScan(null)
     setResolutions([])
     setJobId(null)
@@ -398,6 +403,18 @@ function Wizard() {
           onContinue={(nextSource, nextTarget) => {
             setSource(nextSource)
             setTarget(nextTarget)
+            setSelectedTopicIds(null)
+            setStage('topics')
+          }}
+        />
+      ) : null}
+
+      {stage === 'topics' && source ? (
+        <TopicPicker
+          source={source}
+          onBack={() => setStage('selection')}
+          onProceed={(topicIds) => {
+            setSelectedTopicIds(topicIds)
             setStage('preflight')
           }}
         />
@@ -407,6 +424,7 @@ function Wizard() {
         <PreflightScreen
           sourceId={source.id}
           targetId={target.id}
+          topicIds={selectedTopicIds ?? undefined}
           onReady={(result, chosen) => {
             setScan(result)
             setResolutions(chosen)

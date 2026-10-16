@@ -102,6 +102,14 @@ export class PreflightEngine {
         if (!owns(targetCourse))
             throw new NotFoundError(`Target course ${input.targetCourseId} not found`);
         const { posts } = await enumeratePosts(this.provider, input.sourceCourseId);
+        // Topic-scoped copy: the scan (and therefore the job built from it) only
+        // ever sees posts under the teacher-selected topics. Filtering HERE means
+        // every downstream consumer — findings, duplicates, counts, the transfer
+        // engine — inherits the scope for free, from one stored picture.
+        const selectedTopicIds = input.topicIds && input.topicIds.length > 0 ? new Set(input.topicIds) : null;
+        const scopedPosts = selectedTopicIds
+            ? posts.filter((post) => post.topicId != null && selectedTopicIds.has(post.topicId))
+            : posts;
         // Decision C — the DESTINATION reads, and the only place they happen. They
         // are inside the pre-flight call on purpose: the selection screen pays for
         // every course the teacher owns, this pays for the one pair they picked.
@@ -125,7 +133,7 @@ export class PreflightEngine {
         // duplicate never enters findings[] whatever its attachments look like, so
         // checking their health would buy a result that is thrown away — and on a
         // re-run of a large course that is most of the batch.
-        const refs = posts
+        const refs = scopedPosts
             .filter((post) => duplicateFor(post) == null)
             .flatMap((post) => post.attachments.map((a) => ({
             id: a.id,
@@ -137,6 +145,10 @@ export class PreflightEngine {
         for (const topic of (await this.provider.listTopics(input.sourceCourseId)).items) {
             topicNames.set(topic.id, topic.name);
         }
+        // Only the selected topics participate in the date-shift disclosure.
+        const scopeTopicNames = selectedTopicIds
+            ? [...topicNames.entries()].filter(([id]) => selectedTopicIds.has(id))
+            : [...topicNames.entries()];
         // Topic reuse — the same normalized-name match, WITHOUT a surface or state
         // clause (a topic has neither). On more than one match the first by API
         // return order is reused and the disclosure says it was ambiguous, rather
@@ -163,11 +175,11 @@ export class PreflightEngine {
                 ambiguous: match.count > 1,
             });
         }
-        const topicDateUpdates = findTopicsWithStaleDates([...topicNames.entries()].map(([id, name]) => ({ id, name })));
+        const topicDateUpdates = findTopicsWithStaleDates(scopeTopicNames.map(([id, name]) => ({ id, name })));
         const scanId = `scan-${crypto.randomUUID()}`;
         const findings = [];
         const duplicates = [];
-        const scanItems = posts.map((post) => ({
+        const scanItems = scopedPosts.map((post) => ({
             id: `${scanId}-i${post.createdOrder}`,
             scanId,
             sourceType: post.sourceType,
@@ -186,8 +198,12 @@ export class PreflightEngine {
             duplicateOfTitle: duplicateFor(post)?.title ?? null,
             duplicateOfState: duplicateFor(post)?.state ?? null,
         }));
-        for (const post of posts) {
-            const scanItem = scanItems[post.createdOrder];
+        // Iterate in lockstep with the map above: scanItems[i] IS scopedPosts[i]'s
+        // stored row (the old `scanItems[post.createdOrder]` index only worked
+        // because the unfiltered post list was complete and createdOrder-ordered).
+        let scopedIndex = 0;
+        for (const post of scopedPosts) {
+            const scanItem = scanItems[scopedIndex++];
             const duplicate = duplicateFor(post);
             if (duplicate) {
                 duplicates.push({

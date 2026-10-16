@@ -80,7 +80,7 @@ export function allDuplicateNote(total: number): string {
   const one = total === 1
   return (
     `All ${total} item${one ? '' : 's'} already exist${one ? 's' : ''} in the destination — ` +
-    `there's nothing new to copy. Running this will skip everything and won't create any duplicates.`
+    `there's nothing new to copy. Running this will skip everything and won’t create any duplicates.`
   )
 }
 

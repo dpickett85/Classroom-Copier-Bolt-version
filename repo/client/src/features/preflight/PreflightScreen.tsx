@@ -16,6 +16,8 @@ export const SCAN_LINES = ['Checking topics…', 'Verifying attachments…', 'Ch
 interface PreflightScreenProps {
   sourceId: string
   targetId: string
+  /** Topic-scoped copy: only these topics are scanned when provided. */
+  topicIds?: string[]
   onReady: (scan: PreflightResponse, resolutions: Resolution[]) => void
   onCancel: () => void
   onError?: (error: unknown) => void
@@ -28,6 +30,7 @@ interface PreflightScreenProps {
 export function PreflightScreen({
   sourceId,
   targetId,
+  topicIds,
   onReady,
   onCancel,
   onError,
@@ -44,7 +47,7 @@ export function PreflightScreen({
   useEffect(() => {
     let live = true
     const controller = new AbortController() // APPLY-M
-    runPreflight(sourceId, targetId, controller.signal)
+    runPreflight(sourceId, targetId, controller.signal, topicIds)
       .then((result) => {
         if (live) setScan(result)
       })
@@ -55,7 +58,7 @@ export function PreflightScreen({
       live = false
       controller.abort()
     }
-  }, [sourceId, targetId, onError])
+  }, [sourceId, targetId, topicIds, onError])
 
   // Cycle the status lines while the scan is outstanding.
   useEffect(() => {

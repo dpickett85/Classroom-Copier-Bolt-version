@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PreflightRequestSchema } from '@classroom-copier/shared';
+import { PreflightRequestSchema, CourseTopicsResponseSchema } from '@classroom-copier/shared';
 import { runForAccount } from '../adapters/acting-account.js';
 import { NotFoundError, PermissionError } from '../adapters/types.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -67,6 +67,29 @@ export function coursesRouter(prisma, provider) {
             next(error);
         }
     });
+    router.get('/courses/:courseId/topics', auth, async (req, res, next) => {
+        const courseId = typeof req.params.courseId === 'string' ? req.params.courseId : '';
+        const accountId = req.auth.accountId;
+        try {
+            const course = await runForAccount(provider, accountId, () => provider.getCourse(courseId));
+            if (course == null || course.ownerAccountId !== accountId) {
+                res.status(404).json({ error: { code: 'not_found', message: 'Course not found.' } });
+                return;
+            }
+            const topics = [];
+            let pageToken = null;
+            do {
+                const page = await runForAccount(provider, accountId, () => provider.listTopics(courseId, pageToken ? { pageToken } : undefined));
+                topics.push(...page.items.map((t) => ({ id: t.id, name: t.name })));
+                pageToken = page.nextPageToken;
+            } while (pageToken != null);
+            const parsed = CourseTopicsResponseSchema.parse({ topics });
+            res.json(parsed);
+        }
+        catch (error) {
+            next(error);
+        }
+    });
     router.post('/courses/:sourceId/preflight', auth, async (req, res, next) => {
         const parsed = PreflightRequestSchema.safeParse(req.body);
         if (!parsed.success) {
@@ -86,6 +109,7 @@ export function coursesRouter(prisma, provider) {
                 accountId,
                 sourceCourseId: sourceId,
                 targetCourseId: parsed.data.targetId,
+                topicIds: parsed.data.topicIds,
             }));
             res.json(result);
         }

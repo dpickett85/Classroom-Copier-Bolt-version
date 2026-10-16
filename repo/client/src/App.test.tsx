@@ -181,6 +181,12 @@ describe('the linear wizard', () => {
     await userEvent.selectOptions(target, TARGET.id)
     await userEvent.click(screen.getByRole('button', { name: /Continue/ }))
 
+    // --- Step 1b: topic scope (still under "1 Select"). Choose "all".
+    await screen.findByRole('button', { name: 'Copy all topics' })
+    expect(currentStep()).toBe('1 Select')
+    expect(backButton()).toBeEnabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Copy all topics' }))
+
     // --- Step 2: Pre-flight, then Ready to Transfer with Back enabled.
     await waitFor(() => expect(currentStep()).toBe('2 Pre-flight'))
     await screen.findByText(/Ready to copy/, undefined, { timeout: 4000 })
@@ -379,6 +385,7 @@ describe('the linear wizard', () => {
       await userEvent.selectOptions(source, SOURCE.id)
       await userEvent.selectOptions(target, TARGET.id)
       await userEvent.click(screen.getByRole('button', { name: /Continue/ }))
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy all topics' }))
       await screen.findByText(/Ready to copy/, undefined, { timeout: 4000 })
     }
 
@@ -398,7 +405,7 @@ describe('the linear wizard', () => {
       await userEvent.click(screen.getByRole('button', { name: /Scan again/i }))
 
       // Back on Pre-flight, re-scanning the SAME courses (no return to Selection).
-      await waitFor(() => expect(api.runPreflight).toHaveBeenCalledWith(SOURCE.id, TARGET.id, expect.anything()))
+      await waitFor(() => expect(api.runPreflight).toHaveBeenCalledWith(SOURCE.id, TARGET.id, expect.anything(), undefined))
       expect(screen.queryByLabelText('Copy from (source)')).toBeNull()
     })
 
@@ -416,7 +423,7 @@ describe('the linear wizard', () => {
       vi.mocked(api.runPreflight).mockClear()
       await userEvent.click(screen.getByRole('button', { name: /Scan again/i }))
 
-      await waitFor(() => expect(api.runPreflight).toHaveBeenCalledWith(SOURCE.id, TARGET.id, expect.anything()))
+      await waitFor(() => expect(api.runPreflight).toHaveBeenCalledWith(SOURCE.id, TARGET.id, expect.anything(), undefined))
       expect(screen.queryByLabelText('Copy from (source)')).toBeNull()
     })
   })

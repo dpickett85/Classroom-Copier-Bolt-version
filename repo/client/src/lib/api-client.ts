@@ -21,6 +21,7 @@ import {
   ApiErrorSchema,
   CancelTransferJobResponseSchema,
   CourseListResponseSchema,
+  CourseTopicsResponseSchema,
   CreateTransferJobResponseSchema,
   HealthResponseSchema,
   PreflightResponseSchema,
@@ -35,6 +36,7 @@ import type {
   CancelTransferJobResponse,
   CourseListResponse,
   CourseRole,
+  CourseTopicsResponse,
   CreateTransferJobRequest,
   HealthResponse,
   GoogleAuthUrlResponse,
@@ -402,11 +404,29 @@ export function runPreflight(
   sourceId: string,
   targetId: string,
   signal?: AbortSignal,
+  topicIds?: string[],
 ): Promise<PreflightResponse> {
   return request(
     `/api/courses/${encodeURIComponent(sourceId)}/preflight`,
     PreflightResponseSchema,
-    { method: 'POST', body: { targetId }, signal, timeoutMs: 180_000 },
+    {
+      method: 'POST',
+      body: { targetId, ...(topicIds && topicIds.length > 0 ? { topicIds } : {}) },
+      signal,
+      timeoutMs: 180_000,
+    },
+  )
+}
+
+/** The source course's topics, for the copy-all-or-some picker. */
+export function getCourseTopics(
+  courseId: string,
+  signal?: AbortSignal,
+): Promise<CourseTopicsResponse> {
+  return request(
+    `/api/courses/${encodeURIComponent(courseId)}/topics`,
+    CourseTopicsResponseSchema,
+    { signal },
   )
 }
 
