@@ -275,8 +275,17 @@ export const TopicDateUpdateSchema = z.object({
 })
 export type TopicDateUpdate = z.infer<typeof TopicDateUpdateSchema>
 
-export const PreflightRequestSchema = z.object({ targetId: z.string().min(1) })
+export const PreflightRequestSchema = z.object({
+  targetId: z.string().min(1),
+  /** Topic-scoped copy: only posts under these topics are scanned (and
+   *  therefore only they can be transferred). Absent/empty = all topics. */
+  topicIds: z.array(z.string()).optional(),
+})
 export type PreflightRequest = z.infer<typeof PreflightRequestSchema>
+
+/** `GET /api/courses/:id/topics` — the topic picker's list. */
+export const CourseTopicsResponseSchema = z.object({ topics: z.array(z.object({ id: z.string(), name: z.string() })) })
+export type CourseTopicsResponse = z.infer<typeof CourseTopicsResponseSchema>
 
 export const PreflightResponseSchema = z.object({
   scanId: z.string(),
