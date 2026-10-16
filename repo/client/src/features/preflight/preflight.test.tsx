@@ -92,6 +92,7 @@ function scan(overrides: Partial<PreflightResponse> = {}): PreflightResponse {
     findings: [],
     duplicates: [],
     topicReuse: [],
+    topicDateUpdates: [],
     ...overrides,
   }
 }

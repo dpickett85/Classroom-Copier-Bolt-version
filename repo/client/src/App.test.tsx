@@ -125,6 +125,7 @@ beforeEach(() => {
     findings: [],
     duplicates: [],
     topicReuse: [],
+    topicDateUpdates: [],
   })
   vi.mocked(api.createTransferJob).mockResolvedValue({ conflict: false, jobId: 'job-1' })
   vi.mocked(api.getActiveJob).mockResolvedValue(null)

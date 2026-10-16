@@ -151,6 +151,7 @@ describe('courses & pre-flight', () => {
         findings: [],
         duplicates: [],
         topicReuse: [],
+        topicDateUpdates: [],
       }),
     )
     const res = await runPreflight('c1', 'c2')

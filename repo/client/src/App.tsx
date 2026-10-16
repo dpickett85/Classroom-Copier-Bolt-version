@@ -246,9 +246,9 @@ function Wizard() {
       })
   }
 
-  const startTransfer = () => {
+  const startTransfer = (updateTopicDates: boolean) => {
     if (!scan) return
-    createTransferJob({ scanId: scan.scanId, resolutions })
+    createTransferJob({ scanId: scan.scanId, resolutions, updateTopicDates })
       .then((result) => {
         // A 409 is not a failure: attach to the job already running (D5).
         setJobId(result.jobId)
@@ -423,7 +423,7 @@ function Wizard() {
           // Back re-validates by returning to Selection rather than trusting a
           // scan that may no longer describe the courses (02-ux-workflow.md §2).
           onBack={() => setStage('selection')}
-          onStart={startTransfer}
+          onStart={(updateTopicDates) => startTransfer(updateTopicDates)}
         />
       ) : null}
 

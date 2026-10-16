@@ -7,6 +7,7 @@
  * rather than the screen quietly reporting success for a copy that never had
  * anything to copy.
  */
+import { useState } from 'react'
 import type { PreflightResponse } from '@classroom-copier/shared'
 import { Button, DUPLICATE_RUN_NOTICE, Disclosure, NarrationBanner } from '../../components/shared'
 
@@ -31,7 +32,7 @@ export function scannedAtLabel(scannedAt: string): string {
 interface ReadyToTransferProps {
   scan: PreflightResponse
   onBack: () => void
-  onStart: () => void
+  onStart: (updateTopicDates: boolean) => void
   backDisabled?: boolean
 }
 
@@ -79,7 +80,7 @@ export function allDuplicateNote(total: number): string {
   const one = total === 1
   return (
     `All ${total} item${one ? '' : 's'} already exist${one ? 's' : ''} in the destination — ` +
-    `there’s nothing new to copy. Running this will skip everything and won’t create any duplicates.`
+    `there's nothing new to copy. Running this will skip everything and won't create any duplicates.`
   )
 }
 
@@ -87,7 +88,9 @@ export function ReadyToTransfer({ scan, onBack, onStart, backDisabled = false }:
   const empty = scan.totalPostsScanned === 0
   const duplicates = scan.duplicates ?? []
   const topicReuse = scan.topicReuse ?? []
+  const topicDateUpdates = scan.topicDateUpdates ?? []
   const copyable = copyableCount(scan)
+  const [updateDates, setUpdateDates] = useState(true)
   // Distinct from `empty`, which is D26's "the source course has no classwork".
   // Same zero on screen, two different facts, two different sentences.
   const allDuplicates = !empty && copyable === 0
@@ -162,11 +165,51 @@ export function ReadyToTransfer({ scan, onBack, onStart, backDisabled = false }:
             ))}
           </Disclosure>
         ) : null}
+
+        {topicDateUpdates.length > 0 ? (
+          <Disclosure
+            data-testid="topic-date-update-prompt"
+            summary={`${topicDateUpdates.length} topic${
+              topicDateUpdates.length === 1 ? '' : 's'
+            } ha${topicDateUpdates.length === 1 ? 's' : 've'} dates from last school year`}
+            defaultOpen
+          >
+            <p>
+              Some topics reference dates from the previous school year. Would you like to
+              update them to this school year&apos;s calendar?
+            </p>
+            {topicDateUpdates.map((t) => (
+              <div className="disclosure-row" key={t.sourceTopicId}>
+                <b>{t.sourceTopicName}</b> &rarr; <b>{t.updatedTopicName}</b>
+              </div>
+            ))}
+            <div className="ready-actions" style={{ marginTop: '0.75rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="topicDateUpdate"
+                  checked={updateDates}
+                  onChange={() => setUpdateDates(true)}
+                />
+                Yes, update dates
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="topicDateUpdate"
+                  checked={!updateDates}
+                  onChange={() => setUpdateDates(false)}
+                />
+                No, keep original
+              </label>
+            </div>
+          </Disclosure>
+        ) : null}
         <div className="ready-actions">
           <Button variant="secondary" onClick={onBack} disabled={backDisabled}>
             ← Back
           </Button>
-          <Button onClick={onStart}>Start Transfer</Button>
+          <Button onClick={() => onStart(updateDates)}>Start Transfer</Button>
         </div>
       </div>
     </div>
