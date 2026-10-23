@@ -150,40 +150,29 @@ function datesForSchoolYear(range, schoolYear) {
 }
 /**
  * Determines how many school years a date range is behind the current one.
- * Returns 0 if the date is in the current school year (not stale),
+ * Returns 0 if the date belongs to the current school year (not stale),
  * 1 if it's one year behind, 2 if two years behind, etc.
- * Returns -1 if the date is in a future school year (no shift needed).
+ * Returns -1 only when no valid candidate school year exists.
+ *
+ * A fall date like "Oct 26-30" is representable in BOTH the previous school
+ * year and the current one — the calendar alone cannot disambiguate. Resolved
+ * by PROXIMITY: the candidate school year whose start date is closest to
+ * today wins. A topic named for this week is current; one whose only close
+ * match is on a previous year's calendar is stale.
  */
 function yearsBehindCurrent(range, now) {
-    const current = currentSchoolYear(now);
-    const currentStart = new Date(current.startYear, 7, 1);
-    const currentEnd = new Date(current.endYear, 6, 31);
-    // Try each past school year, starting from the most recent.
-    for (let n = 1; n <= 10; n++) {
-        const sy = schoolYearNYearsAgo(n, now);
+    let best = null;
+    for (let n = 0; n <= 10; n++) {
+        const sy = n === 0 ? currentSchoolYear(now) : schoolYearNYearsAgo(n, now);
         const dates = datesForSchoolYear(range, sy);
         if (!dates)
             continue;
-        const syStart = new Date(sy.startYear, 7, 1);
-        const syEnd = new Date(sy.endYear, 6, 31);
-        if (dates.start >= syStart && dates.start <= syEnd) {
-            return n;
-        }
+        const distance = Math.abs(dates.start.getTime() - now.getTime());
+        // Strict `<` keeps the smaller n on a tie, preferring the more recent year.
+        if (best == null || distance < best.distance)
+            best = { n, distance };
     }
-    // Check if it's in the current school year
-    const currentDates = datesForSchoolYear(range, current);
-    if (currentDates && currentDates.start >= currentStart && currentDates.start <= currentEnd) {
-        return 0;
-    }
-    // Check if it's in a future school year
-    const futureDates = datesForSchoolYear(range, {
-        startYear: current.startYear + 1,
-        endYear: current.endYear + 1,
-    });
-    if (futureDates && futureDates.start > currentEnd) {
-        return -1;
-    }
-    return -1;
+    return best ? best.n : -1;
 }
 /**
  * Shifts a date forward by `n * 364` days (n * 52 weeks), so the same weekday
