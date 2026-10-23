@@ -113,9 +113,23 @@ export interface ClassroomProvider {
   createRubric(targetCourseWorkId: string, rubric: RubricBody): Promise<{ id: string }>
 
   /**
+   * Creates a rubric on the target assignment by importing a Google Sheet
+   * (Classroom's "Import from Sheets" format) via `rubrics.create` with
+   * `sourceSpreadsheetId`. A second, distinct failure surface from
+   * `createRubric`: Google sometimes accepts the sheet import on tiers where
+   * the direct criteria create is refused.
+   */
+  createRubricFromSheet(
+    targetCourseWorkId: string,
+    spreadsheetId: string,
+    rubric: RubricBody,
+  ): Promise<{ id: string }>
+
+  /**
    * Creates a Google Sheet in the teacher's Drive, formatted for Classroom's
    * "Import from Sheets" rubric feature. Used as a fallback when `createRubric`
-   * is blocked by the Workspace tier.
+   * is blocked; returns the spreadsheet id so `createRubricFromSheet` can
+   * import it onto the assignment.
    */
-  createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string }>
+  createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string; spreadsheetId: string }>
 }

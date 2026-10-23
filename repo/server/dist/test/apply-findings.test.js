@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { OVERFLOW_LINKS_HEADER, rateLimitExhaustionNote, rubricDegradedNote, shareModeUnknownNote, } from '@classroom-copier/shared';
+import { OVERFLOW_LINKS_HEADER, rateLimitExhaustionNote, shareModeUnknownNote, } from '@classroom-copier/shared';
 import { FIXTURE_KEYS } from '../src/fixtures/index.js';
 import { pruneGeneratedFixtureRows, seedFixtures } from '../src/fixtures/seed.js';
 import { MAX_ATTEMPTS } from '../src/services/backoff.js';
@@ -202,7 +202,10 @@ describe('QA-2 — the combined outcome, which was correct by construction and u
         const shell = await db.prisma.mockCourseWork.findUniqueOrThrow({
             where: { id: item.targetPostId },
         });
-        expect(shell.description).toContain(rubricDegradedNote());
+        // TARGET_DANA's licence blocks rubric creation, so the engine degrades to
+        // the licence wording plus the Drive sheet for manual import.
+        expect(shell.description).toContain('The rubric could not be added because the Workspace account or target course does not have rubric creation enabled');
+        expect(shell.description).toContain('Import from Sheets');
     });
 });
 /* ================================================================== *

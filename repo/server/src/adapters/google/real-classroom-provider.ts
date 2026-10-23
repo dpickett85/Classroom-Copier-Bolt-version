@@ -749,7 +749,7 @@ export class RealClassroomProvider implements ClassroomProvider {
     return { id: data.id ?? '' }
   }
 
-  async createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string }> {
+  async createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string; spreadsheetId: string }> {
     const csv = buildRubricCsv(rubric)
     const fileName = `Rubric — ${assignmentTitle}.csv`
     const res = await call(() =>
@@ -765,8 +765,24 @@ export class RealClassroomProvider implements ClassroomProvider {
         fields: 'id,webViewLink',
       }),
     )
-    const url = res.data.webViewLink ?? `https://docs.google.com/spreadsheets/d/${res.data.id}`
-    return { sheetUrl: url }
+    const spreadsheetId = res.data.id ?? ''
+    const url = res.data.webViewLink ?? `https://docs.google.com/spreadsheets/d/${spreadsheetId}`
+    return { sheetUrl: url, spreadsheetId }
+  }
+
+  async createRubricFromSheet(
+    targetCourseWorkId: string,
+    spreadsheetId: string,
+    _rubric: RubricBody,
+  ): Promise<{ id: string }> {
+    const courseId = this.courseIdFor(targetCourseWorkId)
+    const data = await this.rubricsRequest<{ id?: string }>(
+      'POST',
+      `/courses/${courseId}/courseWork/${targetCourseWorkId}/rubrics`,
+      { sourceSpreadsheetId: spreadsheetId },
+    )
+    if (!data) throw new NotFoundError('Google could not import a rubric from this sheet.')
+    return { id: data.id ?? '' }
   }
 }
 

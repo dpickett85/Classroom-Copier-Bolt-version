@@ -168,7 +168,15 @@ export class GoogleClassroomProvider implements ClassroomProvider {
     return (await this.bound()).createRubric(targetCourseWorkId, rubric)
   }
 
-  async createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string }> {
+  async createRubricSheet(rubric: RubricBody, assignmentTitle: string): Promise<{ sheetUrl: string; spreadsheetId: string }> {
     return (await this.bound()).createRubricSheet(rubric, assignmentTitle)
+  }
+
+  async createRubricFromSheet(
+    targetCourseWorkId: string,
+    spreadsheetId: string,
+    rubric: RubricBody,
+  ): Promise<{ id: string }> {
+    return (await this.bound()).createRubricFromSheet(targetCourseWorkId, spreadsheetId, rubric)
   }
 }

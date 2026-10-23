@@ -117,4 +117,7 @@ export class GoogleClassroomProvider {
     async createRubricSheet(rubric, assignmentTitle) {
         return (await this.bound()).createRubricSheet(rubric, assignmentTitle);
     }
+    async createRubricFromSheet(targetCourseWorkId, spreadsheetId, rubric) {
+        return (await this.bound()).createRubricFromSheet(targetCourseWorkId, spreadsheetId, rubric);
+    }
 }

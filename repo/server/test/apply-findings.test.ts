@@ -229,7 +229,12 @@ describe('QA-2 — the combined outcome, which was correct by construction and u
     const shell = await db.prisma.mockCourseWork.findUniqueOrThrow({
       where: { id: item.targetPostId! },
     })
-    expect(shell.description).toContain(rubricDegradedNote())
+    // TARGET_DANA's licence blocks rubric creation, so the engine degrades to
+    // the licence wording plus the Drive sheet for manual import.
+    expect(shell.description).toContain(
+      'The rubric could not be added because the Workspace account or target course does not have rubric creation enabled',
+    )
+    expect(shell.description).toContain('Import from Sheets')
   })
 })
 

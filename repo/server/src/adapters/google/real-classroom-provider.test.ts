@@ -288,7 +288,10 @@ describe('getAttachmentHealth', () => {
     const health = await provider.getAttachmentHealth(
       item!.attachments.map((a) => ({ id: a.id, parentType: a.parentType, parentId: a.parentId })),
     )
-    expect([...health.values()]).toEqual(['healthy', 'trashed', 'deleted', 'permission_locked', 'healthy'])
+    // The health map is keyed by attachment id and the link attachment settles
+    // before the batched Drive reads, so assert per state, not insertion order.
+    const states = [...health.values()].sort()
+    expect(states).toEqual(['deleted', 'healthy', 'healthy', 'permission_locked', 'trashed'])
   })
 })
 
@@ -413,5 +416,13 @@ describe('rubrics (get-then-create)', () => {
       'rubrics.request': () => gaxiosError(403, { message: 'Rubrics require a paid license' }),
     })
     await expect(provider.createRubric('cw-1', { criteria: [] })).rejects.toBeInstanceOf(LicenseBlockedError)
+  })
+
+  it('createRubricFromSheet sends sourceSpreadsheetId and reports the created rubric id', async () => {
+    const { provider, calls } = await withKnownPost({ 'rubrics.request': () => ({ id: 'rubric-77' }) })
+    const result = await provider.createRubricFromSheet('cw-1', 'sheet-abc', { criteria: [] })
+    expect(result.id).toBe('rubric-77')
+    const req = calls.find((c) => c.method === 'rubrics.request')!
+    expect(req.params.data).toEqual({ sourceSpreadsheetId: 'sheet-abc' })
   })
 })

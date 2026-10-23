@@ -121,6 +121,11 @@ describe('carried gap (d) — fallback_shell (via a resolved trashed attachment)
       where: { id: item.targetPostId! },
     })
     expect(shell.description).toContain(attachmentFallbackNote(TRASHED_ATTACHMENT_TITLE))
-    expect(shell.description).toContain(rubricDegradedNote())
+    // Rubric creation is licence-blocked on this target, so the note carries
+    // the licence wording plus the Drive sheet for manual import.
+    expect(shell.description).toContain(
+      'The rubric could not be added because the Workspace account or target course does not have rubric creation enabled',
+    )
+    expect(shell.description).toContain('Import from Sheets')
   })
 })

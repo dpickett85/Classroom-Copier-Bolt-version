@@ -62,6 +62,17 @@ const DRIVE_CALLS = [
         capability: 'create a copy of a Drive file in the acting account',
         grantedBy: [`${DRIVE}.file`, DRIVE],
     },
+    {
+        /** `createRubricSheet()` — the licence-blocked rubric fallback. */
+        method: 'files.create',
+        /**
+         * A NEW spreadsheet this app itself creates in the acting teacher's Drive —
+         * `drive.file`'s own case (files created by the app), the same grant
+         * `files.copy`'s write half relies on.
+         */
+        capability: 'create a rubric spreadsheet in the acting account',
+        grantedBy: [`${DRIVE}.file`, DRIVE],
+    },
 ];
 /** Every `this.clients.drive.<resource>.<method>(` the provider source contains. */
 function driveMethodsCalledInSource() {

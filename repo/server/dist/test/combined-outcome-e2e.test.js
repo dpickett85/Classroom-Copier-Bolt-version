@@ -24,7 +24,7 @@
  * the same way `apply-findings.test.ts` does it.
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { attachmentFallbackNote, rubricDegradedNote } from '@classroom-copier/shared';
+import { attachmentFallbackNote } from '@classroom-copier/shared';
 import { MockClassroomProvider } from '../src/adapters/mock/mock-classroom-provider.js';
 import { FIXTURE_KEYS } from '../src/fixtures/index.js';
 import { PreflightEngine } from '../src/services/preflight-engine.js';
@@ -111,6 +111,9 @@ describe('carried gap (d) — fallback_shell (via a resolved trashed attachment)
             where: { id: item.targetPostId },
         });
         expect(shell.description).toContain(attachmentFallbackNote(TRASHED_ATTACHMENT_TITLE));
-        expect(shell.description).toContain(rubricDegradedNote());
+        // Rubric creation is licence-blocked on this target, so the note carries
+        // the licence wording plus the Drive sheet for manual import.
+        expect(shell.description).toContain('The rubric could not be added because the Workspace account or target course does not have rubric creation enabled');
+        expect(shell.description).toContain('Import from Sheets');
     });
 });

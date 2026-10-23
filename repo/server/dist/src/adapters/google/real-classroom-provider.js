@@ -637,8 +637,16 @@ export class RealClassroomProvider {
             },
             fields: 'id,webViewLink',
         }));
-        const url = res.data.webViewLink ?? `https://docs.google.com/spreadsheets/d/${res.data.id}`;
-        return { sheetUrl: url };
+        const spreadsheetId = res.data.id ?? '';
+        const url = res.data.webViewLink ?? `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+        return { sheetUrl: url, spreadsheetId };
+    }
+    async createRubricFromSheet(targetCourseWorkId, spreadsheetId, _rubric) {
+        const courseId = this.courseIdFor(targetCourseWorkId);
+        const data = await this.rubricsRequest('POST', `/courses/${courseId}/courseWork/${targetCourseWorkId}/rubrics`, { sourceSpreadsheetId: spreadsheetId });
+        if (!data)
+            throw new NotFoundError('Google could not import a rubric from this sheet.');
+        return { id: data.id ?? '' };
     }
 }
 /**

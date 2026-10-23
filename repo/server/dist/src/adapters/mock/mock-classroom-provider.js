@@ -519,6 +519,19 @@ export class MockClassroomProvider {
         return { id: rubricId };
     }
     async createRubricSheet(_rubric, assignmentTitle) {
-        return { sheetUrl: `https://docs.google.com/spreadsheets/d/mock-sheet-${encodeURIComponent(assignmentTitle)}` };
+        const spreadsheetId = `mock-sheet-${encodeURIComponent(assignmentTitle)}`;
+        return { sheetUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`, spreadsheetId };
+    }
+    async createRubricFromSheet(targetCourseWorkId, spreadsheetId, rubric) {
+        const courseWork = await this.prisma.mockCourseWork.findUnique({
+            where: { id: targetCourseWorkId },
+            include: { course: true },
+        });
+        if (!courseWork)
+            throw new NotFoundError(`CourseWork ${targetCourseWorkId} not found`);
+        if (!courseWork.course.rubricsLicensed || spreadsheetId.length === 0) {
+            throw new LicenseBlockedError(`Rubrics are not available on course ${courseWork.courseId}'s licence tier`);
+        }
+        return this.createRubric(targetCourseWorkId, rubric);
     }
 }

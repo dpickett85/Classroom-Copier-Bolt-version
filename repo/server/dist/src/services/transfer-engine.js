@@ -1378,15 +1378,28 @@ export class TransferEngine {
         }
         catch (error) {
             if (error instanceof LicenseBlockedError) {
-                logger.warn('rubric copy blocked by licence; attempting spreadsheet fallback', {
+                logger.warn('rubric copy blocked by licence; attempting spreadsheet import', {
                     targetPostId,
                     error: error instanceof Error ? error.message : String(error),
                 });
                 try {
                     const rubric = await this.provider.getRubric(post.sourceId);
                     if (rubric) {
-                        const { sheetUrl } = await this.provider.createRubricSheet(rubric, post.title);
-                        return { degraded: true, reason: 'license', sheetUrl };
+                        const { sheetUrl, spreadsheetId } = await this.provider.createRubricSheet(rubric, post.title);
+                        // The sheet alone is a dead letter — Classroom must IMPORT it onto
+                        // the assignment. Only when that import is also refused does the
+                        // teacher get a manual note instead of a real rubric.
+                        try {
+                            await this.provider.createRubricFromSheet(targetPostId, spreadsheetId, rubric);
+                            return { degraded: false, reason: null, sheetUrl };
+                        }
+                        catch (importError) {
+                            logger.warn('sheet import also refused; keeping the manual-import note', {
+                                targetPostId,
+                                error: importError instanceof Error ? importError.message : String(importError),
+                            });
+                            return { degraded: true, reason: 'license', sheetUrl };
+                        }
                     }
                 }
                 catch (sheetError) {
