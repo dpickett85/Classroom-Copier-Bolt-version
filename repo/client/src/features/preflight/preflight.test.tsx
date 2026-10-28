@@ -416,7 +416,7 @@ describe('Ready to Transfer', () => {
     expect(freshness).toHaveTextContent(
       at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     )
-    expect(freshness).toHaveTextContent(/scan again/)
+    expect(freshness).toHaveTextContent(/scan it again/i)
   })
 
   it('renders the explicit 0-posts state rather than silently succeeding (D26)', async () => {

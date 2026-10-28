@@ -147,8 +147,7 @@ export function ActionSheetModal({
         >
           <span className={autoFix ? 'switch on' : 'switch'} aria-hidden="true" />
           <span className="toggle-copy">
-            <b>{AUTO_FIX_LABEL}</b> — off by default. Review each item, or turn this on to accept the
-            recommended option for every row.
+            <b>{AUTO_FIX_LABEL}</b> — applies the recommended option to every row.
           </span>
         </button>
 

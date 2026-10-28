@@ -26,7 +26,7 @@ export function scannedAtLabel(scannedAt: string): string {
   const at = new Date(scannedAt)
   if (Number.isNaN(at.getTime())) return 'Scanned just now.'
   const time = at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  return `Scanned at ${time}. If the source course has changed since, go back and scan again.`
+  return `Scanned at ${time}. Source changed? Scan it again.`
 }
 
 interface ReadyToTransferProps {
@@ -80,7 +80,7 @@ export function allDuplicateNote(total: number): string {
   const one = total === 1
   return (
     `All ${total} item${one ? '' : 's'} already exist${one ? 's' : ''} in the destination — ` +
-    `there's nothing new to copy. Running this will skip everything and won’t create any duplicates.`
+    `nothing new to copy, and running this won’t create any duplicates.`
   )
 }
 
@@ -175,8 +175,7 @@ export function ReadyToTransfer({ scan, onBack, onStart, backDisabled = false }:
             defaultOpen
           >
             <p>
-              Some topics reference dates from the previous school year. Would you like to
-              update them to this school year&apos;s calendar?
+              Update these dates to this school year&apos;s calendar?
             </p>
             {topicDateUpdates.map((t) => (
               <div className="disclosure-row" key={t.sourceTopicId}>
@@ -191,7 +190,7 @@ export function ReadyToTransfer({ scan, onBack, onStart, backDisabled = false }:
                   checked={updateDates}
                   onChange={() => setUpdateDates(true)}
                 />
-                Yes, update dates
+                Yes, update
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                 <input

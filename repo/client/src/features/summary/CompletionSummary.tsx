@@ -205,8 +205,10 @@ export function CompletionSummary({
     `✓ ${status.transferred} + ${status.fallbackShell} + ${status.skippedDuplicate} + ` +
     `${status.skippedByUser}` +
     (status.skippedBySystem > 0 ? ` + ${status.skippedBySystem} interrupted` : '') +
-    ` = ${status.totalItems} of ${status.totalPostsScanned} posts scanned — ` +
-    `every post resolved to a transfer, fallback, or skip.`
+    ` = ${status.totalItems} of ${status.totalPostsScanned} posts scanned` +
+    (status.skippedBySystem > 0
+      ? '.'
+      : ' — every post resolved to a transfer, fallback, or skip.')
 
   const topicsReferenced = status.topicsCreatedCount + status.topicsReusedCount
 
@@ -226,8 +228,8 @@ export function CompletionSummary({
             !
           </span>
           <span>
-            You cancelled this transfer. The post in progress finished; every post still waiting
-            was skipped and counted below. Drafts already created stay as they are.
+            You cancelled this transfer. Drafts already created stay; everything still waiting was
+            skipped and counted below.
           </span>
         </div>
       ) : null}
@@ -257,10 +259,10 @@ export function CompletionSummary({
             <StatTile value={status.rubricNotesAdded} label="Rubric notes added" />
           </div>
           <p className="topics-callout" data-testid="topics-callout">
-            Topics are reported separately and never counted in the item total above — reusing an
-            existing topic is not an item outcome. {status.topicsCreatedCount} created +{' '}
+            Topics are never counted in the item total above — {status.topicsCreatedCount} created +
+            {' '}
             {status.topicsReusedCount} reused = {topicsReferenced} topic
-            {topicsReferenced === 1 ? '' : 's'} referenced by this transfer.
+            {topicsReferenced === 1 ? '' : 's'} referenced.
           </p>
           {status.topicsReusedCount > 0 ? (
             <Disclosure
@@ -270,8 +272,8 @@ export function CompletionSummary({
               } already existed and ${status.topicsReusedCount === 1 ? 'was' : 'were'} reused`}
             >
               <div className="disclosure-row">
-                Items filed into these topics were added to the topic already in the destination
-                course, rather than into a second topic with the same name.
+                Items were filed into the topic already in the destination course, not a second
+                topic with the same name.
               </div>
             </Disclosure>
           ) : null}
