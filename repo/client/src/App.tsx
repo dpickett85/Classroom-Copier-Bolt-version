@@ -356,6 +356,9 @@ function Wizard() {
 
   return (
     <div className="frame">
+      <div className="logo-bar">
+        <img src="/Classroom_Copier_logo.jpg" alt="Classroom Copier" className="logo-bar-img" />
+      </div>
       {account && stage !== 'auth' ? (
         <div className="header-bar" data-testid="account-header">
           <div className="header-account">

@@ -33,6 +33,15 @@
       header {
         padding: 32px 40px 20px; border-bottom: 1px solid var(--line);
       }
+      .logo-strip {
+        padding: 16px 40px 0; border-bottom: 1px solid var(--line);
+      }
+      .logo-strip img {
+        display: block; height: 64px; width: auto;
+      }
+      @media (max-width: 640px) {
+        .logo-strip { padding-left: 22px; padding-right: 22px; }
+      }
       h1 {
         font-family: 'Source Serif 4', Georgia, serif; font-weight: 600;
         font-size: 30px; letter-spacing: -0.01em; margin: 0 0 6px;
@@ -62,6 +71,9 @@
   </head>
   <body>
     <div class="frame">
+      <div class="logo-strip">
+        <img src="/Classroom_Copier_logo.jpg" alt="Classroom Copier" />
+      </div>
       <header>
         <h1>Terms of Service for Classroom Copier</h1>
         <p class="updated">Last Updated: November 10, 2026</p>

@@ -67,6 +67,16 @@ body{
   border:1px solid var(--line); border-radius:var(--radius-lg);
   overflow:hidden; box-shadow:var(--shadow-2);
 }
+/* Brand mark, top-left of the frame on every screen. The source image is
+   portrait with the wordmark baked in, so the height (not width) drives the
+   crop-free display size and `object-fit` keeps its proportions. */
+.logo-bar{
+  display:flex; align-items:center; padding:10px 20px 6px;
+  border-bottom:1px solid var(--line); background:var(--paper-0);
+}
+.logo-bar-img{
+  display:block; height:64px; width:auto; object-fit:contain; object-position:left center;
+}
 .screen{ padding:28px 32px; }
 .header-bar{
   display:flex; align-items:center; justify-content:space-between;
