@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — Classroom Copier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap"
+    />
+    <style>
+      /* Mirrors client/src/styles/tokens.css so the page reads as part of the
+         app without importing the app bundle. */
+      :root {
+        --paper-0: #FAFAF8; --paper-1: #F0F2F1;
+        --ink-900: #161C1A; --ink-700: #333B38; --ink-500: #6B7572;
+        --teal-700: #1F5B50; --teal-100: #E2EFEC;
+        --line: #DCDFDD; --line-strong: #B9BFBC;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--paper-1); color: var(--ink-900);
+        font-family: 'Public Sans', system-ui, sans-serif; line-height: 1.5;
+      }
+      .frame {
+        max-width: 760px; margin: 40px auto; padding: 0;
+        background: var(--paper-0); border: 1px solid var(--line);
+        border-radius: 16px; box-shadow: 0 8px 24px rgba(22, 28, 26, 0.08);
+        overflow: hidden;
+      }
+      header {
+        padding: 32px 40px 20px; border-bottom: 1px solid var(--line);
+      }
+      h1 {
+        font-family: 'Source Serif 4', Georgia, serif; font-weight: 600;
+        font-size: 30px; letter-spacing: -0.01em; margin: 0 0 6px;
+      }
+      .updated { color: var(--ink-500); font-size: 14px; margin: 0; }
+      main { padding: 32px 40px 40px; }
+      h2 {
+        font-family: 'Source Serif 4', Georgia, serif; font-weight: 600;
+        font-size: 19px; margin: 32px 0 8px;
+      }
+      h2:first-child { margin-top: 0; }
+      p, li { font-size: 15px; margin: 0 0 10px; }
+      ul { margin: 0 0 10px; padding-left: 22px; }
+      a { color: var(--teal-700); font-weight: 600; text-decoration: underline; }
+      strong { font-weight: 600; }
+      footer {
+        padding: 18px 40px; border-top: 1px solid var(--line);
+        background: var(--paper-1); font-size: 13px;
+      }
+      footer a { text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
+      @media (max-width: 640px) {
+        .frame { margin: 12px; border-radius: 10px; }
+        header, main { padding-left: 22px; padding-right: 22px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <header>
+        <h1>Privacy Policy for Classroom Copier</h1>
+        <p class="updated">Last Updated: November 5, 2026</p>
+      </header>
+      <main>
+        <h2>1. Introduction</h2>
+        <p>
+          Welcome to Classroom Copier ("we," "our," or "us"). We respect your privacy and are
+          committed to protecting the information you share with us when using our web application
+          to duplicate and manage Google Classroom courses and related Google Drive resources.
+        </p>
+
+        <h2>2. Information We Access and Collect</h2>
+        <p>
+          Classroom Copier integrates directly with your Google Account using official Google APIs.
+          We access only the minimum information necessary to provide our service:
+        </p>
+        <ul>
+          <li>
+            <strong>Account Information:</strong> Basic profile details (such as your Google account
+            email address and name) provided during sign-in to identify your session.
+          </li>
+          <li>
+            <strong>Google Classroom Data:</strong> Access to your Google Classroom courses,
+            coursework, assignments, and topics strictly to read source course content and duplicate
+            it to target courses per your request.
+          </li>
+          <li>
+            <strong>Google Drive Data:</strong> Temporary access to Google Drive files attached to
+            your Classroom courses strictly for the purpose of copying and linking those resources
+            to your newly created courses.
+          </li>
+        </ul>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>
+          We use your data exclusively to execute the operations you explicitly request, including:
+        </p>
+        <ul>
+          <li>Authenticating your account.</li>
+          <li>
+            Fetching existing course structures and duplicating them into new Google Classroom
+            courses.
+          </li>
+          <li>
+            Copying attached Google Drive materials to organize them for your new classes.
+          </li>
+        </ul>
+        <p>We do NOT:</p>
+        <ul>
+          <li>Sell, rent, or trade your personal data or Google user data to any third parties.</li>
+          <li>Use your Google data for advertising, marketing, or targeting purposes.</li>
+          <li>
+            Store your Google Drive files or Google Classroom contents on our servers beyond what is
+            necessary to process your immediate requests.
+          </li>
+        </ul>
+
+        <h2>4. Data Retention and Storage</h2>
+        <p>We do not maintain a permanent database of your Google Classroom or Drive contents.</p>
+        <p>
+          Access tokens received via Google OAuth are stored encrypted and used solely to perform
+          actions on your behalf. They are refreshed as needed so you don't have to reconnect your
+          account every session.
+        </p>
+        <p>
+          We retain a record of the transfers you run (courses, dates, and per-item outcomes) so you
+          can review a job's history and resume an interrupted transfer. These records contain no
+          Google Drive file contents or Classroom material.
+        </p>
+        <p>
+          You may revoke Classroom Copier's access to your Google Account at any time via your
+          Google Account Third-Party Security Settings.
+        </p>
+
+        <h2>5. Third-Party Services</h2>
+        <p>
+          Classroom Copier runs using cloud hosting services (such as Render) to handle API requests
+          securely. These infrastructure providers process data in accordance with strict security
+          standards and only as necessary to run our application.
+        </p>
+
+        <h2>6. Security</h2>
+        <p>
+          We implement standard security measures to protect your information, including encrypted
+          transmission via HTTPS. However, no method of transmission over the internet is 100%
+          secure.
+        </p>
+
+        <h2>7. Changes to This Privacy Policy</h2>
+        <p>
+          We may update this Privacy Policy from time to time. Any changes will be posted on this
+          page with an updated revision date.
+        </p>
+
+        <h2>8. Contact Us</h2>
+        <p>
+          If you have any questions or concerns about this Privacy Policy or how your data is
+          handled, please contact us at:
+        </p>
+        <p>Email: davidcpickett@gmail.com</p>
+      </main>
+      <footer>
+        <a href="/">← Back to Classroom Copier</a>
+      </footer>
+    </div>
+  </body>
+</html>

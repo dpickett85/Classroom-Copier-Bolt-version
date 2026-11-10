@@ -119,6 +119,8 @@ p.screen-sub{ color:var(--ink-700); font-size:14.5px; margin:0 0 24px; max-width
 .wordmark .seal{ display:inline-block; width:10px;height:10px;border-radius:50%;background:var(--teal-700); margin-right:8px; }
 .signin-tag{ color:var(--ink-700); font-size:15px; max-width:44ch; margin:0 auto 32px; }
 .mock-note{ color:var(--ink-500); font-size:12.5px; margin-top:20px; font-family:var(--font-mono); }
+.signin-footer{ margin-top:36px; font-size:12.5px; }
+.signin-footer a{ color:var(--teal-700); font-weight:600; }
 
 /* Google's own sign-in button (03-ui-direction.md §2, §3.1).
    The ONE documented exception to the token palette in this stylesheet: these

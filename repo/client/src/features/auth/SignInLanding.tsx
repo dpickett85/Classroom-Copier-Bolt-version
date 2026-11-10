@@ -129,6 +129,10 @@ export function SignInLanding({
 
       <div className="mock-note">{WARMUP_NOTE}</div>
 
+      <p className="signin-footer">
+        <a href="/privacy-policy.html">Privacy Policy</a>
+      </p>
+
       {authError ? (
         // role="alert", not "status": this appears in response to the teacher's
         // own action and needs to interrupt, not wait for a quiet moment.
