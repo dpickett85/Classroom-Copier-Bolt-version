@@ -131,6 +131,8 @@ export function SignInLanding({
 
       <p className="signin-footer">
         <a href="/privacy-policy.html">Privacy Policy</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/terms-of-service.html">Terms of Service</a>
       </p>
 
       {authError ? (
