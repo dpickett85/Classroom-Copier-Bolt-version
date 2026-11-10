@@ -75,7 +75,7 @@ body{
   border-bottom:1px solid var(--line); background:var(--paper-0);
 }
 .logo-bar-img{
-  display:block; height:64px; width:auto; object-fit:contain; object-position:left center;
+  display:block; height:192px; width:auto; object-fit:contain; object-position:left center;
 }
 .screen{ padding:28px 32px; }
 .header-bar{
