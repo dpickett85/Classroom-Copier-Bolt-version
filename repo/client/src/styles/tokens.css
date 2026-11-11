@@ -43,7 +43,7 @@
 *{box-sizing:border-box;}
 
 body{
-  margin:0; background:#DEDEDE; color:var(--ink-900);
+  margin:0; background:#E8E8E8; color:var(--ink-900);
   font-family:var(--font-body); line-height:1.5;
   padding:32px 0 96px;
 }
