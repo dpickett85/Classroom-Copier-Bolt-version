@@ -21,7 +21,7 @@
       }
       * { box-sizing: border-box; }
       body {
-        margin: 0; background: var(--paper-1); color: var(--ink-900);
+        margin: 0; background: #DEDEDE; color: var(--ink-900);
         font-family: 'Public Sans', system-ui, sans-serif; line-height: 1.5;
       }
       .frame {
@@ -36,6 +36,8 @@
       .logo-strip {
         padding: 16px 40px 0; border-bottom: 1px solid var(--line);
       }
+      .logo-strip a { display: block; width: fit-content; }
+      .logo-strip a:hover img { opacity: .85; }
       .logo-strip img {
         display: block; height: 192px; width: auto;
       }
@@ -72,7 +74,9 @@
   <body>
     <div class="frame">
       <div class="logo-strip">
-        <img src="/Classroom_Copier_logo.jpg" alt="Classroom Copier" />
+        <a href="/" aria-label="Classroom Copier — back to home">
+          <img src="/Classroom_Copier_logo.jpg" alt="Classroom Copier" />
+        </a>
       </div>
       <header>
         <h1>Terms of Service for Classroom Copier</h1>

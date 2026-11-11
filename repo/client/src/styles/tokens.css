@@ -43,7 +43,7 @@
 *{box-sizing:border-box;}
 
 body{
-  margin:0; background:var(--paper-2); color:var(--ink-900);
+  margin:0; background:#DEDEDE; color:var(--ink-900);
   font-family:var(--font-body); line-height:1.5;
   padding:32px 0 96px;
 }
@@ -77,6 +77,9 @@ body{
 .logo-bar-img{
   display:block; height:192px; width:auto; object-fit:contain; object-position:left center;
 }
+.logo-bar a{ display:block; }
+.logo-bar a:hover .logo-bar-img{ opacity:.85; }
+.logo-bar a:focus-visible{ outline-offset:0; }
 .screen{ padding:28px 32px; }
 .header-bar{
   display:flex; align-items:center; justify-content:space-between;
