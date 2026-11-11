@@ -69,7 +69,7 @@ describe('contrast-ratio implementation', () => {
   })
 
   it('is order-independent', () => {
-    expect(contrastRatio('#16231F', '#FBF9F4')).toBeCloseTo(contrastRatio('#FBF9F4', '#16231F'), 10)
+    expect(contrastRatio('#16231F', '#FFFFFF')).toBeCloseTo(contrastRatio('#FFFFFF', '#16231F'), 10)
   })
 })
 
@@ -79,21 +79,21 @@ describe('contrast-ratio implementation', () => {
 
 /** Exactly the hexes published in `03-ui-direction.md` §2's table. */
 const UI_DIRECTION_TABLE: ReadonlyArray<readonly [string, string]> = [
-  ['--paper-0', '#FBF9F4'],
-  ['--paper-1', '#F2EEE3'],
-  ['--paper-2', '#EAE4D2'],
-  ['--line', '#D8D2C2'],
-  ['--line-strong', '#B9B29B'],
+  ['--paper-0', '#FFFFFF'],
+  ['--paper-1', '#ECECEC'],
+  ['--paper-2', '#DEDEDE'],
+  ['--line', '#DEDEDE'],
+  ['--line-strong', '#B0B0B0'],
   ['--ink-900', '#16231F'],
   ['--ink-700', '#3C4A45'],
   ['--ink-500', '#5B6B67'],
-  ['--teal-700', '#0F5C56'],
-  ['--teal-600', '#147A72'],
-  ['--teal-100', '#DCEEEB'],
+  ['--teal-700', '#2E7D32'],
+  ['--teal-600', '#388E3C'],
+  ['--teal-100', '#E8F5E9'],
   ['--amber-700', '#8A5A00'],
   ['--amber-100', '#FBEDD1'],
-  ['--green-700', '#1E7A42'],
-  ['--green-100', '#E1F3E7'],
+  ['--green-700', '#1B5E20'],
+  ['--green-100', '#E8F5E9'],
   ['--red-700', '#A22C2C'],
   ['--red-100', '#FBE4E4'],
   ['--slate-600', '#5B6B67'],
